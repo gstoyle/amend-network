@@ -1,0 +1,16 @@
+node_modules
+.git
+.next
+out
+coverage
+dist
+build
+.env
+.env.*
+!.env.example
+*.log
+infra
+specs
+.specify
+.cursor
+*.md

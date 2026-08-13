@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 40 20% 98%;
+  --foreground: 220 20% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 20% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 20% 12%;
+  --primary: 174 62% 24%;
+  --primary-foreground: 40 20% 98%;
+  --secondary: 40 14% 92%;
+  --secondary-foreground: 220 20% 12%;
+  --muted: 40 10% 94%;
+  --muted-foreground: 220 8% 40%;
+  --accent: 174 30% 90%;
+  --accent-foreground: 174 62% 18%;
+  --destructive: 0 72% 40%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 40 10% 86%;
+  --input: 40 10% 86%;
+  --ring: 174 62% 24%;
+  --radius: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: 220 16% 8%;
+    --foreground: 40 20% 96%;
+    --card: 220 14% 12%;
+    --card-foreground: 40 20% 96%;
+    --popover: 220 14% 12%;
+    --popover-foreground: 40 20% 96%;
+    --primary: 174 50% 42%;
+    --primary-foreground: 220 16% 8%;
+    --secondary: 220 10% 18%;
+    --secondary-foreground: 40 20% 96%;
+    --muted: 220 10% 18%;
+    --muted-foreground: 40 8% 70%;
+    --accent: 174 20% 18%;
+    --accent-foreground: 174 40% 80%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 10% 22%;
+    --input: 220 10% 22%;
+    --ring: 174 50% 42%;
+  }
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
