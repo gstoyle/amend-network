@@ -1,0 +1,16 @@
+﻿---
+description: TDD discipline and the permission matrix test suite
+globs:
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/*.spec.ts"
+alwaysApply: false
+---
+
+- Write the failing test first. If code exists without a test that failed before it, delete the code and start again.
+- Run the suite after each task, not at the end of the feature. A regression found five tasks later costs a bisect.
+- Every row of the PRD section 3 capability matrix is an assertion. Seven roles by twenty-one capabilities.
+- Run that matrix twice: once through the application, once directly against Postgres with the application bypassed, to prove RLS holds independently. The second run is `pnpm test:rls` and is not optional.
+- Every route handler has a test asserting it rejects an unauthorised role, not only that it accepts an authorised one.
+- Add an outbound-payload assertion for the analytics client that fails the build if any denylisted PII field appears in an event.
+- No mocking of the role check helper in tests that exist to verify the role check.

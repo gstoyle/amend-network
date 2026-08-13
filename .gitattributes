@@ -1,0 +1,5 @@
+﻿# Developed on Windows, deployed to a Linux VPS. Normalise to LF for
+# everything that ships, keep CRLF for local PowerShell scripts, and
+# stop git from printing an LF/CRLF advisory on every `git add`.
+* text=auto eol=lf
+*.ps1 text eol=crlf

@@ -1,0 +1,18 @@
+﻿---
+description: Accessibility and UI token rules for React components
+globs:
+  - "app/**/*.tsx"
+  - "components/**/*.tsx"
+alwaysApply: false
+---
+
+WCAG 2.1 AA is a launch requirement, not a polish item.
+
+- No hard-coded colour, font-size, radius, or spacing values. Use design tokens exposed as CSS custom properties via the Tailwind theme.
+- Contrast: 4.5:1 body text, 3:1 large text and interactive boundaries. Focus indicators 3:1 against adjacent colour.
+- Every interactive target >= 44x44 CSS px.
+- Semantic HTML: real landmarks, correct heading order, lists as lists, a label on every form control. No div-with-onClick.
+- Mobile-first: design at 360px, enhance upward. No horizontal scroll at 360px except explicitly containerised data tables.
+- Respect prefers-reduced-motion. No autoplay video. No animation over 5s without user control.
+- Server components by default. `use client` at leaf nodes only, to hold the authenticated shell under the 180KB gzip budget.
+- Self-hosted: there is no platform image optimisation. Use next/image with a configured local loader and check the LCP budget early rather than at the end.

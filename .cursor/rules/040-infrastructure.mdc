@@ -1,0 +1,23 @@
+﻿---
+description: Rules for provisioning, deployment, and backup scripts on the DreamHost VPS
+globs:
+  - "infra/**"
+  - "*.service"
+  - "Dockerfile*"
+  - ".github/workflows/**"
+alwaysApply: false
+---
+
+Target: DreamHost Self-Managed VPS, Ubuntu 24.04 LTS. Full root, no managed platform.
+
+- Everything is a script in infra/. Nothing is configured by hand through a control panel. Staging is only useful if it is reproducible from the same scripts as production.
+- Scripts are idempotent and safe to re-run. Check before you create.
+- SSH: key-only, root login disabled, password auth disabled, fail2ban enabled.
+- Firewall: deny by default. 80/443 from Cloudflare IP ranges only. 22 from an allowlist. The origin must not be reachable by IP.
+- TLS: certbot with a renewal hook that alerts on failure. A silent renewal failure is a defect, not an inconvenience.
+- The app runs under systemd with Restart=always, a non-root service user, and EnvironmentFile at 0600 owned by root. Not PM2.
+- Postgres: local socket or loopback only, never bound to a public interface. RLS enabled on content tables at migration time.
+- Backups: nightly pg_dump --format=custom pushed off-box to DreamObjects, plus WAL archiving. A backup that has never been restored is not a backup; the restore script lives beside the backup script and is exercised monthly.
+- Alerting on disk utilisation (threshold 70%), memory pressure, process health, and certificate expiry. A co-resident database on a full disk is an unrecoverable-until-manual outage.
+- Never echo a secret. Never write one to a log, a build artefact, or the repo working directory on the server.
+- Any change to firewall rules, SSH config, TLS, or backup jobs requires human approval before it is applied.

@@ -1,0 +1,17 @@
+﻿node_modules/
+.next/
+out/
+.env
+.env.*
+!.env.example
+*.local
+coverage/
+.DS_Store
+Thumbs.db
+
+# never commit these
+*.pem
+*.key
+id_ed25519*
+infra/**/*.secret
+infra/**/inventory.local*

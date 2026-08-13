@@ -1,0 +1,21 @@
+﻿---
+description: Security rules for auth, sessions, RBAC, and audit logging
+globs:
+  - "lib/auth/**/*.ts"
+  - "lib/audit/**/*.ts"
+  - "app/api/**/*.ts"
+  - "middleware.ts"
+alwaysApply: false
+---
+
+Do these, not the alternatives, because this platform serves users inside the correctional system:
+
+- Passwords: Argon2id. Minimum 12 chars, no composition rules (NIST SP 800-63B). bcrypt only if Argon2 is unavailable, and then cost >= 12.
+- Sessions: httpOnly, Secure, SameSite=Lax. 24h sliding, 30d absolute. Server-side session record required so logout and revoke actually invalidate.
+- Lockout: 10 failures in 15 min locks for 15 min and writes a `security` severity audit row. The response must not reveal whether the account exists.
+- Auth failure messages are identical for pending, denied, deactivated, and nonexistent. No state leakage.
+- Password reset: 60-minute single-use token. Completion invalidates all sessions for that user.
+- Every /admin route requires `mfa_satisfied` on the session, not just an admin role claim.
+- Every auditable action writes to the audit log synchronously, in the same transaction as the change.
+- CSRF protection on every state-changing request.
+- PII column encryption is application-layer AES-256-GCM with the key from the environment. There is no managed KMS here. Never invent one.

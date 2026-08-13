@@ -1,0 +1,13 @@
+﻿---
+description: Core project constraints for the Amend Member Network
+alwaysApply: true
+---
+
+- Requirements live in docs/prd/amend-prd.md and the active specs/ directory. Cite the section you are implementing against.
+- Role checks happen server-side, from the signed session, on every data path. Never from the client.
+- Content visibility is a text[] intersection against the user's roles, backed by Postgres RLS. Never a hard-coded role branch in a component.
+- No PII to PostHog. Opaque IDs and role labels only.
+- Audit log is append-only.
+- This runs on a self-managed VPS. There is no managed platform behind you: no vendor KMS, no vendor backups, no platform WAF, no auto-scaling. Do not assume a capability the infra/ directory does not provide.
+- Never hard-code a hostname, bucket, region, or connection string. Environment variables only.
+- Prefer extending an existing helper over creating a new file. If you create one, say why extension was not possible.
