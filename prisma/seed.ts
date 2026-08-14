@@ -134,6 +134,19 @@ async function seed(): Promise<void> {
       data: fixtures.map((row) => ({ id: randomUUID(), ...row })),
     });
   }
+
+  const affiliations: { label: string; active: boolean }[] = [
+    { label: "Test Agency A", active: true },
+    { label: "Test Agency B", active: true },
+    { label: "Test Agency Inactive", active: false },
+  ];
+  for (const affiliation of affiliations) {
+    await migrator.docAffiliation.upsert({
+      where: { label: affiliation.label },
+      update: { active: affiliation.active },
+      create: { id: randomUUID(), ...affiliation },
+    });
+  }
 }
 
 seed()

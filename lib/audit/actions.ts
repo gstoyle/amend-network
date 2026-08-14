@@ -10,6 +10,7 @@ export const AUDIT_ACTIONS = [
   "invitation_sent",
   "invitation_accepted",
   "invitation_expired",
+  "invitation_revoked",
   "registration_submitted",
   "registration_approved",
   "registration_denied",

@@ -5,7 +5,7 @@ import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
 import { generateTotp, verifyTotp } from "@/lib/auth/totp";
 import { decryptPii, encryptPii } from "@/lib/crypto/pii";
-import { withRls } from "@/lib/db/rls";
+import { bindRlsRoleSnapshot, withRls } from "@/lib/db/rls";
 
 export type MfaResult = { ok: true } | { ok: false; error: string };
 
@@ -43,15 +43,23 @@ export async function beginMfaEnrollment(input: MfaSessionInput): Promise<{
   }
 
   const totp = generateTotp({ label: input.userId });
-  await withRls({ userId: input.userId }, async (tx) => {
-    await tx.user.update({
-      where: { id: input.userId },
-      data: {
-        mfaSecretEncrypted: encryptPii(totp.secret),
-        mfaEnabled: false,
-      },
-    });
-  });
+  await withRls(
+    {
+      userId: input.userId,
+      programRole: claims.programRole,
+      adminRole: claims.adminRole,
+      status: claims.status,
+    },
+    async (tx) => {
+      await tx.user.update({
+        where: { id: input.userId },
+        data: {
+          mfaSecretEncrypted: encryptPii(totp.secret),
+          mfaEnabled: false,
+        },
+      });
+    },
+  );
 
   return { secret: totp.secret, otpauthUri: totp.otpauthUri };
 }
@@ -88,6 +96,7 @@ export async function completeMfaEnrollment(input: MfaCodeInput): Promise<MfaRes
       return { ok: false, error: AUTH_FAILURE_MESSAGE };
     }
 
+    await bindRlsRoleSnapshot(tx, user);
     await tx.user.update({
       where: { id: input.userId },
       data: { mfaEnabled: true },

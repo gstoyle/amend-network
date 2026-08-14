@@ -9,23 +9,88 @@ export type ResetEmailInput = {
   resetUrl: string;
 };
 
+export type LifecycleEmailKind =
+  | "invite"
+  | "self_registration_confirmation"
+  | "admin_pending_alert"
+  | "welcome"
+  | "set_password"
+  | "registration_denied"
+  | "invite_expiring_soon"
+  | "invite_expired";
+
+export type LifecycleEmailInput = {
+  kind: LifecycleEmailKind;
+  to: string;
+  vars?: Record<string, string>;
+};
+
 function messageText(resetUrl: string): string {
   return `Use this link to reset your password. It expires in 60 minutes.\n${resetUrl}`;
 }
 
-export async function sendResetEmail(input: ResetEmailInput): Promise<void> {
+function lifecycleCopy(kind: LifecycleEmailKind, vars: Record<string, string>): { subject: string; text: string } {
+  switch (kind) {
+    case "invite":
+      return {
+        subject: "You are invited to the Amend member network",
+        text: `You have 14 days to complete registration.\n${vars.link ?? ""}`,
+      };
+    case "self_registration_confirmation":
+      return {
+        subject: "We received your request",
+        text: "If this email is eligible, you will receive further instructions.",
+      };
+    case "admin_pending_alert":
+      return {
+        subject: "New pending registration",
+        text: "A new registration is waiting for review.",
+      };
+    case "welcome":
+      return {
+        subject: "You are in",
+        text: "Your membership is active. You can sign in with the password you set.",
+      };
+    case "set_password":
+      return {
+        subject: "Set your password",
+        text: `Use this link to set your password. It expires in 60 minutes.\n${vars.link ?? ""}`,
+      };
+    case "registration_denied":
+      return {
+        subject: "Registration update",
+        text: "We are unable to approve this request at this time.",
+      };
+    case "invite_expiring_soon":
+      return {
+        subject: "Invitation expiring soon",
+        text: `This invitation expires in 3 days.\n${vars.link ?? ""}`,
+      };
+    case "invite_expired":
+      return {
+        subject: "Invitation expired",
+        text: "An invitation expired unused.",
+      };
+    default: {
+      const _exhaustive: never = kind;
+      return _exhaustive;
+    }
+  }
+}
+
+async function sendMail(payload: { to: string; subject: string; text: string }): Promise<void> {
   const settings = env();
-  const payload = {
+  const message = {
     from: "Amend <noreply@local>",
-    to: input.to,
-    subject: "Password reset",
-    text: messageText(input.resetUrl),
+    to: payload.to,
+    subject: payload.subject,
+    text: payload.text,
   };
 
   switch (settings.EMAIL_TRANSPORT) {
     case "json": {
       const transporter = nodemailer.createTransport({ jsonTransport: true });
-      const info = await transporter.sendMail(payload);
+      const info = await transporter.sendMail(message);
       const dir = settings.EMAIL_JSON_DIR ?? ".tmp/mail";
       await mkdir(dir, { recursive: true });
       const body = typeof info.message === "string" ? info.message : JSON.stringify(info.message);
@@ -38,7 +103,7 @@ export async function sendResetEmail(input: ResetEmailInput): Promise<void> {
         port: settings.SMTP_PORT ?? 1025,
         secure: false,
       });
-      await transporter.sendMail(payload);
+      await transporter.sendMail(message);
       return;
     }
     default: {
@@ -46,4 +111,17 @@ export async function sendResetEmail(input: ResetEmailInput): Promise<void> {
       return _exhaustive;
     }
   }
+}
+
+export async function sendResetEmail(input: ResetEmailInput): Promise<void> {
+  await sendMail({
+    to: input.to,
+    subject: "Password reset",
+    text: messageText(input.resetUrl),
+  });
+}
+
+export async function sendLifecycleEmail(input: LifecycleEmailInput): Promise<void> {
+  const copy = lifecycleCopy(input.kind, input.vars ?? {});
+  await sendMail({ to: input.to, subject: copy.subject, text: copy.text });
 }

@@ -1,4 +1,8 @@
-import "dotenv/config";
+import { config } from "dotenv";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+config({ path: path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../.env") });
 
 process.env.PII_ENCRYPTION_KEY ??= "a".repeat(64);
 process.env.EMAIL_LOOKUP_KEY ??= "b".repeat(64);
@@ -9,3 +13,4 @@ process.env.DATABASE_URL_MIGRATE ??=
 process.env.SEED_PASSWORD ??= "seed-password-12";
 process.env.EMAIL_TRANSPORT ??= "json";
 process.env.EMAIL_JSON_DIR ??= ".tmp/mail";
+process.env.ADMIN_ALERT_EMAIL ??= "admins@example.com";

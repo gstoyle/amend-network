@@ -34,37 +34,90 @@ enum AuditSeverity {
   security
 }
 
+enum JoinSource {
+  self_registered
+  invited
+}
+
+enum InvitationStatus {
+  pending
+  accepted
+  expired
+  revoked
+}
+
 model Network {
-  id          String      @id @default(uuid()) @db.Uuid
-  name        String      @unique
-  programRole ProgramRole @map("program_role")
-  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  id          String       @id @default(uuid()) @db.Uuid
+  name        String       @unique
+  programRole ProgramRole  @map("program_role")
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
   users       User[]
+  invitations Invitation[]
 
   @@map("networks")
 }
 
+model DocAffiliation {
+  id        String   @id @default(uuid()) @db.Uuid
+  label     String   @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdBy String?  @map("created_by") @db.Uuid
+
+  @@map("doc_affiliations")
+}
+
 model User {
-  id                  String               @id @default(uuid()) @db.Uuid
-  emailLookup         Bytes                @unique @map("email_lookup")
-  emailEncrypted      Bytes                @map("email_encrypted")
-  passwordHash        String               @map("password_hash")
-  firstNameEncrypted  Bytes?               @map("first_name_encrypted")
-  lastNameEncrypted   Bytes?               @map("last_name_encrypted")
-  networkId           String?              @map("network_id") @db.Uuid
-  programRole         ProgramRole          @map("program_role")
-  adminRole           AdminRole            @map("admin_role")
-  status              UserStatus
-  mfaSecretEncrypted  Bytes?               @map("mfa_secret_encrypted")
-  mfaEnabled          Boolean              @default(false) @map("mfa_enabled")
-  lastLoginAt         DateTime?            @map("last_login_at") @db.Timestamptz(6)
-  createdAt           DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt           DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
-  network             Network?             @relation(fields: [networkId], references: [id])
-  sessions            Session[]
-  passwordResetTokens PasswordResetToken[]
+  id                        String               @id @default(uuid()) @db.Uuid
+  emailLookup               Bytes                @unique @map("email_lookup")
+  emailEncrypted            Bytes                @map("email_encrypted")
+  passwordHash              String               @map("password_hash")
+  firstNameEncrypted        Bytes?               @map("first_name_encrypted")
+  lastNameEncrypted         Bytes?               @map("last_name_encrypted")
+  titleEncrypted            Bytes?               @map("title_encrypted")
+  docAffiliationIdEncrypted Bytes?               @map("doc_affiliation_id_encrypted")
+  joinSource                JoinSource?          @map("join_source")
+  registrationIp            String?              @map("registration_ip") @db.Inet
+  denialReasonEncrypted     Bytes?               @map("denial_reason_encrypted")
+  networkId                 String?              @map("network_id") @db.Uuid
+  programRole               ProgramRole          @map("program_role")
+  adminRole                 AdminRole            @map("admin_role")
+  status                    UserStatus
+  mfaSecretEncrypted        Bytes?               @map("mfa_secret_encrypted")
+  mfaEnabled                Boolean              @default(false) @map("mfa_enabled")
+  lastLoginAt               DateTime?            @map("last_login_at") @db.Timestamptz(6)
+  createdAt                 DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                 DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  network                   Network?             @relation(fields: [networkId], references: [id])
+  sessions                  Session[]
+  passwordResetTokens       PasswordResetToken[]
 
   @@map("users")
+}
+
+model Invitation {
+  id                        String           @id @default(uuid()) @db.Uuid
+  emailLookup               Bytes            @map("email_lookup")
+  emailEncrypted            Bytes            @map("email_encrypted")
+  tokenHash                 Bytes            @unique @map("token_hash")
+  inviterId                 String           @map("inviter_id") @db.Uuid
+  networkId                 String           @map("network_id") @db.Uuid
+  firstNameEncrypted        Bytes            @map("first_name_encrypted")
+  lastNameEncrypted         Bytes            @map("last_name_encrypted")
+  titleEncrypted            Bytes?           @map("title_encrypted")
+  docAffiliationIdEncrypted Bytes?           @map("doc_affiliation_id_encrypted")
+  status                    InvitationStatus
+  expiresAt                 DateTime         @map("expires_at") @db.Timestamptz(6)
+  expiryReminderSentAt      DateTime?        @map("expiry_reminder_sent_at") @db.Timestamptz(6)
+  acceptedUserId            String?          @map("accepted_user_id") @db.Uuid
+  createdAt                 DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  acceptedAt                DateTime?        @map("accepted_at") @db.Timestamptz(6)
+  revokedAt                 DateTime?        @map("revoked_at") @db.Timestamptz(6)
+  network                   Network          @relation(fields: [networkId], references: [id])
+
+  @@index([emailLookup])
+  @@map("invitations")
 }
 
 model Session {

@@ -8,7 +8,14 @@ export type RlsContext = {
   programRole?: string;
   adminRole?: string;
   status?: string;
-  authMode?: "credential_lookup" | "session_lookup" | "throttle" | "password_reset" | "";
+  authMode?:
+    | "credential_lookup"
+    | "session_lookup"
+    | "throttle"
+    | "password_reset"
+    | "registration"
+    | "invite_lookup"
+    | "";
 };
 
 export async function withRls<T>(
@@ -24,4 +31,14 @@ export async function withRls<T>(
     await tx.$executeRaw`SELECT set_config('app.auth_mode', ${ctx.authMode ?? ""}, true)`;
     return fn(tx);
   });
+}
+
+/** Bind status/role GUCs to the loaded row so own-row UPDATE WITH CHECK can succeed. */
+export async function bindRlsRoleSnapshot(
+  tx: Prisma.TransactionClient,
+  user: { status: string; programRole: string; adminRole: string },
+): Promise<void> {
+  await tx.$executeRaw`SELECT set_config('app.status', ${user.status}, true)`;
+  await tx.$executeRaw`SELECT set_config('app.program_role', ${user.programRole}, true)`;
+  await tx.$executeRaw`SELECT set_config('app.admin_role', ${user.adminRole}, true)`;
 }

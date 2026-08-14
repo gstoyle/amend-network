@@ -1,23 +1,16 @@
-import { createHash, randomBytes } from "node:crypto";
 import { writeAudit } from "@/lib/audit/write";
 import { AUTH_FAILURE_MESSAGE } from "@/lib/auth/errors";
 import { hashPassword } from "@/lib/auth/password";
 import { sendResetEmail } from "@/lib/email/transport";
 import { decryptPii, hmacEmailLookup } from "@/lib/crypto/pii";
-import { withRls } from "@/lib/db/rls";
+import { hashToken, randomToken } from "@/lib/crypto/token";
+import { bindRlsRoleSnapshot, withRls } from "@/lib/db/rls";
 import { env } from "@/lib/env";
 
 const TOKEN_TTL_MS = 60 * 60 * 1000;
 
 export type ResetRequestResult = { ok: true; token?: string };
 export type ResetCompleteResult = { ok: true } | { ok: false; error: string };
-
-function hashToken(token: string): Uint8Array<ArrayBuffer> {
-  const digest = createHash("sha256").update(token).digest();
-  const copy = new Uint8Array(digest.byteLength);
-  copy.set(digest);
-  return copy;
-}
 
 function actorRole(user: { adminRole: string; programRole: string }): string {
   return user.adminRole !== "none" ? user.adminRole : user.programRole;
@@ -47,7 +40,7 @@ export async function requestPasswordReset(input: {
     return { ok: true };
   }
 
-  const token = randomBytes(32).toString("hex");
+  const token = randomToken();
   await withRls({ userId: user.id }, async (tx) => {
     await tx.passwordResetToken.create({
       data: {
@@ -97,6 +90,11 @@ export async function completePasswordReset(input: {
     return { ok: false, error: AUTH_FAILURE_MESSAGE };
   }
   await withRls({ userId: existing.userId }, async (tx) => {
+    const user = await tx.user.findUnique({ where: { id: existing.userId } });
+    if (!user) {
+      return;
+    }
+    await bindRlsRoleSnapshot(tx, user);
     await tx.user.update({
       where: { id: existing.userId },
       data: { passwordHash },
@@ -109,10 +107,9 @@ export async function completePasswordReset(input: {
       where: { userId: existing.userId, revokedAt: null },
       data: { revokedAt: new Date() },
     });
-    const user = await tx.user.findUnique({ where: { id: existing.userId } });
     await writeAudit(tx, {
       actorUserId: existing.userId,
-      actorRole: user ? actorRole(user) : "none",
+      actorRole: actorRole(user),
       action: "password_reset_completed",
       ip: input.ip,
       userAgent,

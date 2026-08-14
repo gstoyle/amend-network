@@ -18,6 +18,7 @@ const envSchema = z.object({
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().optional(),
   AUTH_URL: z.string().optional(),
+  ADMIN_ALERT_EMAIL: z.string().min(1).optional(),
   NODE_ENV: z.enum(["development", "test", "production"]).optional(),
 });
 
