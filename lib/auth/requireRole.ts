@@ -22,6 +22,10 @@ function asList<T>(value: T | T[]): T[] {
   return Array.isArray(value) ? value : [value];
 }
 
+export function isPendingSession(session: SessionClaims | null): boolean {
+  return session?.status === "pending";
+}
+
 export function requireRole(
   session: SessionClaims | null,
   options: RequireRoleOptions = {},

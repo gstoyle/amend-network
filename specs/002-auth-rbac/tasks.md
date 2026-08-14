@@ -150,15 +150,15 @@ Note: T046 keeps the session-cookie gate in `middleware.ts` (matcher now include
 
 ### Tests for User Story 4 ⚠️ fail first
 
-- [ ] T048 [P] [US4] Write failing same-transaction and append-only tests in `tests/integration/audit-writer.test.ts`
-- [ ] T049 [P] [US4] Write failing audit-read tests (app + RLS) in `tests/app/audit-read.test.ts` and `tests/rls/audit-read.test.ts`
-- [ ] T050 [P] [US4] Write failing metadata PII-denylist tests in `tests/unit/audit-metadata.test.ts`
+- [x] T048 [P] [US4] Write failing same-transaction and append-only tests in `tests/integration/audit-writer.test.ts`
+- [x] T049 [P] [US4] Write failing audit-read tests (app + RLS) in `tests/app/audit-read.test.ts` and `tests/rls/audit-read.test.ts`
+- [x] T050 [P] [US4] Write failing metadata PII-denylist tests in `tests/unit/audit-metadata.test.ts`
 
 ### Implementation for User Story 4
 
-- [ ] T051 [US4] Implement role-gated audit query (90d vs full) in `lib/audit/read.ts`
-- [ ] T052 [US4] Build paginated audit viewer (no export) in `app/(admin)/admin/audit-log/page.tsx`
-- [ ] T053 [US4] Extend unauthorized deny coverage for audit read in `tests/app/unauthorized-routes.test.ts`
+- [x] T051 [US4] Implement role-gated audit query (90d vs full) in `lib/audit/read.ts`
+- [x] T052 [US4] Build paginated audit viewer (no export) in `app/(admin)/admin/audit-log/page.tsx`
+- [x] T053 [US4] Extend unauthorized deny coverage for audit read in `tests/app/unauthorized-routes.test.ts`
 
 **Checkpoint**: FR-017–FR-020 covered. Writer already in Phase 2; this story proves it and adds read.
 
@@ -172,14 +172,15 @@ Note: T046 keeps the session-cookie gate in `middleware.ts` (matcher now include
 
 ### Tests for User Story 5 ⚠️ fail first
 
-- [ ] T054 [US5] Write failing lockout and enumeration tests in `tests/integration/lockout.test.ts`
+- [x] T054 [US5] Write failing lockout and enumeration tests in `tests/integration/lockout.test.ts`
 
 ### Implementation for User Story 5
 
-- [ ] T055 [US5] Implement throttle keyed by email HMAC in `lib/auth/throttle.ts`
-- [ ] T056 [US5] Call throttle from `lib/auth/credentials.ts` and emit security-severity audit on lock
+- [x] T055 [US5] Implement throttle keyed by email HMAC in `lib/auth/throttle.ts`
+- [x] T056 [US5] Call throttle from `lib/auth/credentials.ts` and emit security-severity audit on lock
 
-**Checkpoint**: FR-013 / SC-006.
+**Checkpoint**: FR-013 / SC-006. Lockout counts **password sign-in attempts only** (email HMAC identifier), not MFA challenge failures — see Notes.
+
 
 ---
 
@@ -191,13 +192,13 @@ Note: T046 keeps the session-cookie gate in `middleware.ts` (matcher now include
 
 ### Tests for User Story 6 ⚠️ fail first
 
-- [ ] T057 [US6] Write failing reset request/complete/unknown/expired tests in `tests/integration/password-reset.test.ts`
+- [x] T057 [US6] Write failing reset request/complete/unknown/expired tests in `tests/integration/password-reset.test.ts`
 
 ### Implementation for User Story 6
 
-- [ ] T058 [US6] Implement json/smtp Nodemailer transports (tokens never logged) in `lib/email/transport.ts`
-- [ ] T059 [US6] Implement request/complete (hash token, revoke all sessions, audit) in `lib/auth/password-reset.ts`
-- [ ] T060 [US6] Build forgot/reset pages in `app/(auth)/forgot-password/page.tsx` and `app/(auth)/reset-password/page.tsx`
+- [x] T058 [US6] Implement json/smtp Nodemailer transports (tokens never logged) in `lib/email/transport.ts`
+- [x] T059 [US6] Implement request/complete (hash token, revoke all sessions, audit) in `lib/auth/password-reset.ts`
+- [x] T060 [US6] Build forgot/reset pages in `app/(auth)/forgot-password/page.tsx` and `app/(auth)/reset-password/page.tsx`
 
 **Checkpoint**: FR-014 / SC-007.
 
@@ -211,12 +212,12 @@ Note: T046 keeps the session-cookie gate in `middleware.ts` (matcher now include
 
 ### Tests for User Story 7 ⚠️ fail first
 
-- [ ] T061 [US7] Write failing list-and-revoke tests in `tests/integration/sessions.test.ts`
+- [x] T061 [US7] Write failing list-and-revoke tests in `tests/integration/sessions.test.ts`
 
 ### Implementation for User Story 7
 
-- [ ] T062 [US7] Implement list/revoke (own rows only) in `lib/auth/session-actions.ts`
-- [ ] T063 [US7] Build active-sessions page in `app/(member)/app/profile/sessions/page.tsx`
+- [x] T062 [US7] Implement list/revoke (own rows only) in `lib/auth/session-actions.ts`
+- [x] T063 [US7] Build active-sessions page in `app/(member)/app/profile/sessions/page.tsx`
 
 **Checkpoint**: FR-005 / SC-005 for revoke.
 
@@ -230,12 +231,12 @@ Note: T046 keeps the session-cookie gate in `middleware.ts` (matcher now include
 
 ### Tests for User Story 8 ⚠️ fail first
 
-- [ ] T064 [US8] Write failing pending/denied/deactivated tests in `tests/integration/pending-status.test.ts`
+- [x] T064 [US8] Write failing pending/denied/deactivated tests in `tests/integration/pending-status.test.ts`
 
 ### Implementation for User Story 8
 
-- [ ] T065 [US8] Build holding page in `app/(member)/app/pending/page.tsx`
-- [ ] T066 [US8] Redirect pending sessions away from other `/app/*` routes in `middleware.ts` and `lib/auth/requireRole.ts`
+- [x] T065 [US8] Build holding page in `app/(member)/app/pending/page.tsx`
+- [x] T066 [US8] Redirect pending sessions away from other `/app/*` routes in `middleware.ts` and `lib/auth/requireRole.ts`
 
 **Checkpoint**: FR-015 / FR-016 / SC-011.
 
@@ -245,10 +246,10 @@ Note: T046 keeps the session-cookie gate in `middleware.ts` (matcher now include
 
 **Purpose**: A11y, secrets hygiene, full matrix fail-closed rows, quickstart proof.
 
-- [ ] T067 [P] Add axe-core coverage for login, pending, sessions, MFA, and admin pages in `tests/a11y/auth-pages.test.ts`
-- [ ] T068 [P] Assert logs never contain secrets, hashes, TOTP secrets, or reset tokens in `tests/unit/no-secrets-in-logs.test.ts`
-- [ ] T069 Fill remaining fail-closed PRD §3 rows in `tests/app/permission-matrix.test.ts` and `tests/rls/permission-matrix.test.ts`
-- [ ] T070 Run [quickstart.md](./quickstart.md) (`docker compose`, migrate, seed, `pnpm test`, `pnpm test:rls`, `pnpm test:a11y`, `pnpm typecheck`, `pnpm lint`)
+- [x] T067 [P] Add axe-core coverage for login, pending, sessions, MFA, and admin pages in `tests/a11y/auth-pages.test.ts`
+- [x] T068 [P] Assert logs never contain secrets, hashes, TOTP secrets, or reset tokens in `tests/unit/no-secrets-in-logs.test.ts`
+- [x] T069 Fill remaining fail-closed PRD §3 rows in `tests/app/permission-matrix.test.ts` and `tests/rls/permission-matrix.test.ts`
+- [x] T070 Run [quickstart.md](./quickstart.md) (`docker compose`, migrate, seed, `pnpm test`, `pnpm test:rls`, `pnpm test:a11y`, `pnpm typecheck`, `pnpm lint`)
 
 ---
 

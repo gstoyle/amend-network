@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { authConfig } from "@/auth.config";
 import { AUTH_FAILURE_MESSAGE } from "@/lib/auth/errors";
 import { requireRole } from "@/lib/auth/requireRole";
+import type { AdminRole } from "@/lib/auth/types";
 import { claimsFor } from "@/tests/helpers/prd-matrix";
 
 function authorizedFor(pathname: string, sessionId?: string): boolean {
@@ -52,5 +53,26 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
     expect(() => requireRole(claimsFor("lead"), { program: "pathways" })).toThrowError(
       AUTH_FAILURE_MESSAGE,
     );
+  });
+
+  it("audit-log read denies members, moderator, and admin without mfa_satisfied", () => {
+    expect(authorizedFor("/admin/audit-log")).toBe(false);
+    expect(authorizedFor("/admin/audit-log", "session-id")).toBe(true);
+
+    const auditRead = { admin: ["super_admin", "admin"] satisfies AdminRole[], mfa: true };
+    expect(() => requireRole(claimsFor("pathways"), auditRead)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(() => requireRole(claimsFor("lead"), auditRead)).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(() => requireRole(claimsFor("moderator"), auditRead)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(() => requireRole(claimsFor("admin"), auditRead)).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(
+      requireRole(
+        { ...claimsFor("admin")!, mfaSatisfied: true },
+        auditRead,
+      ).adminRole,
+    ).toBe("admin");
   });
 });

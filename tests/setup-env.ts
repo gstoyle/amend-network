@@ -8,3 +8,4 @@ process.env.DATABASE_URL_MIGRATE ??=
   "postgresql://amend_owner:test@127.0.0.1:5432/amend";
 process.env.SEED_PASSWORD ??= "seed-password-12";
 process.env.EMAIL_TRANSPORT ??= "json";
+process.env.EMAIL_JSON_DIR ??= ".tmp/mail";

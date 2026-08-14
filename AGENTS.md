@@ -6,6 +6,7 @@ running on infrastructure Amend operates. Read this before proposing any change.
 Requirements: `docs/prd/amend-prd.md` (v1.1).
 Current feature: the `spec.md` and `plan.md` in the active `specs/` directory.
 Hosting decision: `docs/decisions/ADR-0001-dreamhost-hosting.md`.
+Assumptions log: `docs/decisions/assumptions-log.md`.
 
 ## Stack
 

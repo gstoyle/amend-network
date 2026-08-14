@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
+import { AuthDeniedError, isPendingSession, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
 import { listVisibleRecords } from "@/lib/db/visibility";
 import { redirect } from "next/navigation";
@@ -7,6 +7,9 @@ import { redirect } from "next/navigation";
 export default async function MemberHomePage() {
   const session = await auth();
   const claims = session?.sessionId ? await loadSession(session.sessionId) : null;
+  if (isPendingSession(claims)) {
+    redirect("/app/pending");
+  }
   let authorized;
   try {
     authorized = requireRole(claims);

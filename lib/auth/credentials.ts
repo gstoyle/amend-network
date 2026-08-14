@@ -2,6 +2,11 @@ import { z } from "zod";
 import { writeAudit } from "@/lib/audit/write";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import { insertSession } from "@/lib/auth/session";
+import {
+  clearAuthThrottle,
+  isAuthLocked,
+  recordAuthFailure,
+} from "@/lib/auth/throttle";
 import type { AdminRole, ProgramRole, UserStatus } from "@/lib/auth/types";
 import { hmacEmailLookup } from "@/lib/crypto/pii";
 import { withRls } from "@/lib/db/rls";
@@ -64,6 +69,7 @@ export async function authorizeCredentials(
   const password = parsed.success ? parsed.data.password : "";
   const ip = sanitizeIp(input.ip);
   const userAgent = input.userAgent.slice(0, 512);
+  const identifierHash = hmacEmailLookup(email || "invalid");
 
   const user = await withRls({ authMode: "credential_lookup" }, async (tx) =>
     email
@@ -76,8 +82,12 @@ export async function authorizeCredentials(
     : await verifyDummy(password);
 
   const deniedStatus = user ? statusBlocksSignIn(user.status) : false;
+  const locked = await isAuthLocked(identifierHash);
 
-  if (!user || !passwordOk || deniedStatus) {
+  if (!user || !passwordOk || deniedStatus || locked) {
+    const throttle = locked
+      ? { locked: true, justLocked: false }
+      : await recordAuthFailure(identifierHash);
     await withRls({}, async (tx) => {
       await writeAudit(tx, {
         actorUserId: user?.id ?? null,
@@ -85,11 +95,13 @@ export async function authorizeCredentials(
         action: "login_failure",
         ip,
         userAgent,
-        severity: "warning",
+        severity: throttle.locked || throttle.justLocked ? "security" : "warning",
       });
     });
     return null;
   }
+
+  await clearAuthThrottle(identifierHash);
 
   return withRls({ userId: user.id }, async (tx) => {
     const session = await insertSession(tx, {

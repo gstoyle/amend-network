@@ -8,7 +8,7 @@ export type RlsContext = {
   programRole?: string;
   adminRole?: string;
   status?: string;
-  authMode?: "credential_lookup" | "session_lookup" | "";
+  authMode?: "credential_lookup" | "session_lookup" | "throttle" | "password_reset" | "";
 };
 
 export async function withRls<T>(

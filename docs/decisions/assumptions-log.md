@@ -11,166 +11,135 @@ so development can continue without silently guessing, and so every
 place in the codebase that depends on one of these can point back to a
 single dated decision instead of an implicit one buried in code.
 
-Each entry: what was assumed, why, what it unblocks, how it gets
-revisited, and how costly it is if the real answer differs.
-
 ---
 
 ## Q1 — Subdomain
 
-**Assumption:** `network.amend.us`.
+**Assumption:** `network.amend.us`. Low risk, already the working value
+throughout the PRD and ADR-0001.
 
-**Rationale:** Already the working value throughout the PRD and
-ADR-0001. Low risk to proceed on.
-
-**Unblocks:** DNS, TLS cert requests, email sender domain, branding.
-
-**Cost if wrong:** Low if caught early (DNS/TLS re-provisioning before
-launch). Disruptive if changed after go-live.
-
-**Revisit:** Confirm with Amend before Phase 0 DNS/TLS provisioning
-begins. Trivial to change now, expensive later.
+**Revisit:** Before Phase 0 DNS/TLS provisioning.
 
 ---
 
 ## Q3 — Network Name list
 
-**Assumption:** Pathways to Change and LEAD only for launch. No
-additional networks.
+**Assumption:** Pathways to Change and LEAD only for launch.
 
-**Rationale:** Stated MVP scope throughout the PRD. Architecture
-already supports adding networks post-launch without structural
-change (see PRD §4 decision criteria).
-
-**Unblocks:** Registration form's network dropdown, role model.
-
-**Cost if wrong:** Low. Adding a network later is additive, not a
-redesign.
-
-**Revisit:** Confirm before slice 2 (registration-invitation-approval)
-ships.
+**Revisit:** Before slice 2 ships.
 
 ---
 
 ## Q12 — Default directory visibility
 
-**Assumption:** Opt-in. Presented as a single clear toggle during the
-approval welcome flow.
+**Assumption:** Opt-in, per PRD §5.6's own compliance note. Lowest risk
+item in this log.
 
-**Rationale:** This is not really an assumption so much as
-implementing what PRD §5.6's own [COMPLIANCE NOTE] already specifies.
-Lowest-risk item in this log.
-
-**Unblocks:** Slice 6 (member directory).
-
-**Cost if wrong:** Low — this is the conservative default; an
-opt-out requirement later would be a config change, not a redesign.
-
-**Revisit:** PRD explicitly asks that the LEAD program lead confirm
-this default specifically, given the sensitivity of that cohort.
-Confirm before slice 6 ships, not just before launch.
+**Revisit:** PRD asks the LEAD program lead specifically confirm this.
+Before slice 6 ships.
 
 ---
 
 ## Q2 — DOC affiliation field definition
 
-**Assumption:** Free-text field only (agency/facility description, no
-controlled list, no DOC ID number). Encrypted at rest
-(application-layer AES-256-GCM per Constitution II). Hidden from the
-directory by default, not just opt-in like other fields.
+**Updated 2026-08-13.** Original assumption (free-text, no controlled
+list) superseded.
 
-**Rationale:** Deliberately the narrowest viable interpretation.
-Under-building here (missing a controlled-list feature, missing an ID
-field) is cheap to add later — an unused capability, not a liability.
-Over-building here (collecting an ID number field that shouldn't
-exist) is not cleanly reversible once it has held real data about
-real corrections-affiliated individuals. Given the correctional-system
-context, asymmetric risk justifies building narrow even though it may
-mean rework.
+**Current assumption:** Structured, admin-managed controlled list, not
+free text. A Super Admin or Admin maintains the list of valid DOC
+affiliation values (add/edit/deactivate entries), similar in shape to
+how Network Name is managed. Members select from this list at
+registration rather than typing free text.
 
-**Unblocks:** Slice 2 (registration) and slice 6 (directory), both of
-which depend on this field's shape.
+**This is a developer decision, not yet confirmed by Amend.** Treat as
+still open. The PRD explicitly asks for client sign-off on this field's
+definition — this entry records the working assumption, not a resolved
+answer.
 
-**Cost if wrong:** Moderate-to-high. This is the one item in this log
-where "modify once we have an MVP" doesn't fully apply if the real
-answer requires *more* collection than assumed — that's a schema and
-encryption-scope change touching data that may already be live.
+**What this adds vs. the original assumption:**
+- An admin UI/data model for managing the controlled list itself.
+- A migration from "free text column" to "foreign key against a list
+  table" if any work had already started against the narrower version.
+- Still encrypted at rest (Constitution II), still hidden from the
+  directory by default pending Q12-style confirmation for this field
+  specifically.
 
-**Revisit:** Do not treat this as settled by this log. Chase the real
-answer from Amend in parallel with development, not after. This is the
-single highest-priority open question for the project.
+**Cost if wrong:** Moderate. Structured-with-admin-management is a
+bigger lift than free text, so if Amend comes back wanting something
+simpler, that's wasted build, not just an unused column. Chase the real
+answer rather than let this sit as settled.
+
+**Unblocks:** Slice 2 (registration) and slice 6 (directory).
+
+**Revisit:** Still the highest-priority open question in the project.
+Confirm with Amend before slice 2's registration form work goes far
+enough that the list-management UI is expensive to change.
 
 ---
 
 ## Q13 — Data residency
 
-**Assumption:** US-based hosting is acceptable.
+**Assumption:** US-based hosting acceptable, matches ADR-0001.
 
-**Rationale:** Matches what ADR-0001 already assumes and what's
-already threaded through the stack (DreamHost, DreamObjects, PostHog
-US/EU-optional).
+**Cost if wrong:** High — not a config change, reopens the hosting
+decision entirely.
 
-**Unblocks:** Continuing infra work under the existing DreamHost
-decision.
-
-**Cost if wrong:** High, not low. Unlike most items here, an EU
-requirement doesn't get "modified" at MVP — it reopens the hosting
-decision in ADR-0001 entirely. Track this as an accepted risk being
-carried forward, not a neutral placeholder.
-
-**Revisit:** Before any production provisioning begins in `infra/`.
-Confirm explicitly with Amend given the DreamHost hosting decision was
-client-directed and would need to be client-reversed.
+**Revisit:** Before any production provisioning in `infra/`.
 
 ---
 
 ## Q20 — Executive sponsor's written acceptance of hosting risk transfer
 
-**Assumption:** None. This cannot be defaulted — it requires a specific
-person to sign something, not an engineering value to guess.
+**No assumption possible.** Requires the executive sponsor's signature,
+not an engineering default.
 
-**Status:** Development continues against ADR-0001's architecture,
-which is unaffected by whether this is signed yet. But this is not
-closed out by proceeding — it is a **launch gate**, not an MVP gate.
-
-**Unblocks:** Nothing engineering-wise. Blocks: comfortable go-live.
-
-**Revisit:** Before Phase 2 exit / production launch. Surface directly
-to the executive sponsor; do not let it arrive as a surprise at the
-end of the timeline.
+**Status:** Development continues under ADR-0001. This is a launch
+gate, not an MVP gate — surface it directly, don't let it arrive late.
 
 ---
 
-## Related open questions — same shape as Q20, not yet addressed here
+## Same shape as Q20 — organizational, not defaultable
 
-These are organizational answers, not engineering defaults, and don't
-belong in an assumptions log the same way the items above do. Listed
-here only so they aren't lost:
+- **Q17** — Named owner for OS patching, backups, incident response.
+- **Q18** — Warm standby VPS in budget, or single-node accepted.
+- **Q19** — Acceptable RTO/RPO for total database loss.
 
-- **Q17** — Named owner for OS patching, backup verification, and
-  incident response post-launch. Blocks operations runbook sign-off
-  (a Phase 2 exit criterion).
-- **Q18** — Warm standby VPS in budget, or single-node
-  restore-from-backup accepted as the recovery model.
-- **Q19** — Acceptable RTO/RPO for total database loss. Drives whether
-  streaming replication is needed before launch.
+---
+
+## Design decisions on ambiguous (not §11-listed) requirements
+
+Recorded here for the same reason as the §11 items — documented
+judgment calls on things the PRD doesn't spell out, not silent
+assumptions.
+
+**Lockout scope (auth-rbac slice, US5).** The 10-failures/15-minutes
+lockout counts password sign-in attempts only, keyed by email. Failed
+MFA/TOTP challenges are not counted toward the same lockout — they
+already require a valid session and already write their own
+`mfa_challenge_failed` audit event. PRD §5.1 doesn't specify either way;
+this is the narrower reading, chosen so repeated bad TOTP codes don't
+also lock a user out of password sign-in.
+
+**Accessibility testing method (auth-rbac slice, T067).** Axe-core ran
+against server-rendered HTML in jsdom, not a running browser instance.
+This is weaker than a full browser-based check (contrast and some
+ARIA-timing issues can pass in jsdom but fail in a real browser).
+Acceptable for this slice; flag for real browser-based a11y testing
+(e.g. Playwright + axe) before the Phase 2 pre-launch accessibility
+review.
 
 ---
 
 ## Still fully open, not yet assumed or addressed
 
-Q4 (brand asset delivery — check whether the mid-June 2026 target was
-actually met), Q5/Q16 (moderation policy owner and sign-off, blocks
-slice 8), Q6 (email provider), Q7/Q8 (funder/regulatory privacy
-commitments), Q9 (existing membership list vs net-new), Q10
-(multilingual), Q11 (Super Admin structure), Q14 (future SSO), Q15
-(budget ceiling).
+Q4 (brand asset delivery — confirm whether the mid-June 2026 target was
+met), Q5/Q16 (moderation policy, blocks slice 8), Q6 (email provider),
+Q7/Q8 (funder/regulatory privacy), Q9 (existing membership list),
+Q10 (multilingual), Q11 (Super Admin structure), Q14 (future SSO),
+Q15 (budget ceiling).
 
 ---
 
-**Log maintained by:** solo developer, per constitution governance
-(technical lead approval sufficient for recording assumptions; MAJOR
-changes if an assumption here is later contradicted by a real answer
-that requires rework of already-shipped code).
+**Log maintained by:** solo developer, per constitution governance.
 
 **Last updated:** 2026-08-13
