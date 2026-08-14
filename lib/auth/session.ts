@@ -1,4 +1,6 @@
 import { randomBytes, createHash } from "node:crypto";
+import type { Prisma } from "@prisma/client";
+import { writeAudit } from "@/lib/audit/write";
 import type { SessionClaims } from "@/lib/auth/types";
 import type { AdminRole, ProgramRole, UserStatus } from "@/lib/auth/types";
 import { withRls } from "@/lib/db/rls";
@@ -12,6 +14,22 @@ export const SESSION_COOKIE = {
   path: "/",
   secure: process.env.NODE_ENV === "production",
 };
+
+export function sessionCookieName(): string {
+  return process.env.NODE_ENV === "production"
+    ? "__Secure-authjs.session-token"
+    : "authjs.session-token";
+}
+
+/** Auth.js always stamps Expires from session.maxAge; strip it so the cookie dies on browser close. */
+export function asBrowserCloseSetCookie(header: string): string {
+  const name = sessionCookieName().toLowerCase();
+  const lower = header.toLowerCase();
+  if (!lower.startsWith(`${name}=`) && !lower.startsWith(`${name}.`)) {
+    return header;
+  }
+  return header.replace(/;\s*Max-Age=\d+/gi, "").replace(/;\s*Expires=[^;]*/gi, "");
+}
 
 function hashToken(token: string): Uint8Array<ArrayBuffer> {
   const digest = createHash("sha256").update(token).digest();
@@ -36,35 +54,26 @@ export type CreateSessionInput = {
   status: UserStatus;
 };
 
-export async function createSession(
+export async function insertSession(
+  tx: Prisma.TransactionClient,
   input: CreateSessionInput,
 ): Promise<{ sessionId: string; token: string; claims: SessionClaims }> {
   const token = randomBytes(32).toString("hex");
   const now = new Date();
   const exp = expiresAt(now, now);
 
-  const row = await withRls(
-    {
+  const row = await tx.session.create({
+    data: {
       userId: input.userId,
-      programRole: input.programRole,
-      adminRole: input.adminRole,
-      status: input.status,
-      authMode: "credential_check",
+      tokenHash: hashToken(token),
+      userAgent: input.userAgent,
+      ip: input.ip,
+      createdAt: now,
+      lastSeenAt: now,
+      expiresAt: exp,
+      mfaSatisfied: input.mfaSatisfied ?? false,
     },
-    async (tx) =>
-      tx.session.create({
-        data: {
-          userId: input.userId,
-          tokenHash: hashToken(token),
-          userAgent: input.userAgent,
-          ip: input.ip,
-          createdAt: now,
-          lastSeenAt: now,
-          expiresAt: exp,
-          mfaSatisfied: input.mfaSatisfied ?? false,
-        },
-      }),
-  );
+  });
 
   const claims: SessionClaims = {
     sessionId: row.id,
@@ -80,38 +89,42 @@ export async function createSession(
   return { sessionId: row.id, token, claims };
 }
 
+export async function createSession(
+  input: CreateSessionInput,
+): Promise<{ sessionId: string; token: string; claims: SessionClaims }> {
+  return withRls({ userId: input.userId }, (tx) => insertSession(tx, input));
+}
+
 export async function loadSession(sessionId: string): Promise<SessionClaims | null> {
   const now = new Date();
-  const loaded = await withRls({ authMode: "credential_check" }, async (tx) => {
-    const row = await tx.session.findUnique({
-      where: { id: sessionId },
-      include: { user: true },
-    });
-    if (!row || row.revokedAt || row.expiresAt <= now) {
-      return null;
-    }
-    const exp = expiresAt(row.createdAt, now);
-    await tx.session.update({
-      where: { id: row.id },
-      data: { lastSeenAt: now, expiresAt: exp },
-    });
-    return { row, exp };
-  });
-
-  if (!loaded) {
+  const sessionRow = await withRls({ authMode: "session_lookup" }, async (tx) =>
+    tx.session.findUnique({ where: { id: sessionId } }),
+  );
+  if (!sessionRow || sessionRow.revokedAt || sessionRow.expiresAt <= now) {
     return null;
   }
 
-  return {
-    sessionId: loaded.row.id,
-    userId: loaded.row.userId,
-    programRole: loaded.row.user.programRole,
-    adminRole: loaded.row.user.adminRole,
-    status: loaded.row.user.status,
-    mfaEnabled: loaded.row.user.mfaEnabled,
-    mfaSatisfied: loaded.row.mfaSatisfied,
-    expiresAt: loaded.exp.toISOString(),
-  };
+  return withRls({ userId: sessionRow.userId }, async (tx) => {
+    const user = await tx.user.findUnique({ where: { id: sessionRow.userId } });
+    if (!user) {
+      return null;
+    }
+    const exp = expiresAt(sessionRow.createdAt, now);
+    await tx.session.updateMany({
+      where: { id: sessionRow.id, userId: sessionRow.userId, revokedAt: null },
+      data: { lastSeenAt: now, expiresAt: exp },
+    });
+    return {
+      sessionId: sessionRow.id,
+      userId: sessionRow.userId,
+      programRole: user.programRole,
+      adminRole: user.adminRole,
+      status: user.status,
+      mfaEnabled: user.mfaEnabled,
+      mfaSatisfied: sessionRow.mfaSatisfied,
+      expiresAt: exp.toISOString(),
+    };
+  });
 }
 
 export async function revokeSession(sessionId: string, userId: string): Promise<void> {
@@ -124,10 +137,40 @@ export async function revokeSession(sessionId: string, userId: string): Promise<
 }
 
 export async function revokeAllSessions(userId: string): Promise<void> {
-  await withRls({ userId, authMode: "credential_check" }, async (tx) => {
+  await withRls({ userId }, async (tx) => {
     await tx.session.updateMany({
       where: { userId, revokedAt: null },
       data: { revokedAt: new Date() },
+    });
+  });
+}
+
+export async function logoutSession(input: {
+  sessionId: string;
+  userId: string;
+  ip: string;
+  userAgent: string;
+}): Promise<void> {
+  const userAgent = input.userAgent.slice(0, 512);
+  await withRls({ userId: input.userId }, async (tx) => {
+    await tx.session.updateMany({
+      where: { id: input.sessionId, userId: input.userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+    const user = await tx.user.findUnique({ where: { id: input.userId } });
+    await writeAudit(tx, {
+      actorUserId: input.userId,
+      actorRole: user
+        ? user.adminRole !== "none"
+          ? user.adminRole
+          : user.programRole
+        : "none",
+      action: "logout",
+      entityType: "session",
+      entityId: input.sessionId,
+      ip: input.ip,
+      userAgent,
+      severity: "info",
     });
   });
 }

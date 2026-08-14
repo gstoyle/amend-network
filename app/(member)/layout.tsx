@@ -1,14 +1,12 @@
 import type { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
+import { LogoutButton } from "@/components/logout-button";
 
 export default function MemberLayout({ children }: { children: ReactNode }) {
   return (
     <div>
       <header>
         <nav aria-label="Account">
-          <Button type="button" variant="ghost">
-            Log out
-          </Button>
+          <LogoutButton />
         </nav>
       </header>
       <main>{children}</main>

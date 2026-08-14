@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 process.env.PII_ENCRYPTION_KEY ??= "a".repeat(64);
 process.env.EMAIL_LOOKUP_KEY ??= "b".repeat(64);
 process.env.AUTH_SECRET ??= "test-auth-secret-at-least-32-chars!";

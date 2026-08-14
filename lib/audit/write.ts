@@ -47,18 +47,31 @@ export async function writeAudit(
     throw new Error("unknown audit action");
   }
   assertNoPiiMetadata(event.metadata);
-  await tx.auditLog.create({
-    data: {
-      actorUserId: event.actorUserId ?? null,
-      actorRole: event.actorRole,
-      action: event.action,
-      entityType: event.entityType ?? null,
-      entityId: event.entityId ?? null,
-      targetUserId: event.targetUserId ?? null,
-      ip: event.ip,
-      userAgent: event.userAgent,
-      metadata: event.metadata ?? {},
-      severity: event.severity,
-    },
-  });
+  // INSERT without RETURNING: FORCE RLS SELECT on audit_log is admin-only,
+  // and Prisma create() uses RETURNING which would fail for member logins.
+  await tx.$executeRaw`
+    INSERT INTO "audit_log" (
+      "actor_user_id",
+      "actor_role",
+      "action",
+      "entity_type",
+      "entity_id",
+      "target_user_id",
+      "ip",
+      "user_agent",
+      "metadata",
+      "severity"
+    ) VALUES (
+      ${event.actorUserId ?? null}::uuid,
+      ${event.actorRole},
+      ${event.action},
+      ${event.entityType ?? null},
+      ${event.entityId ?? null},
+      ${event.targetUserId ?? null}::uuid,
+      ${event.ip}::inet,
+      ${event.userAgent},
+      ${JSON.stringify(event.metadata ?? {})}::jsonb,
+      ${event.severity}::"AuditSeverity"
+    )
+  `;
 }

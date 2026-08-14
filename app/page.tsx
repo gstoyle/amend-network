@@ -1,7 +1,12 @@
-export default function HomePage() {
-  return (
-    <main>
-      <h1>Amend Member Network</h1>
-    </main>
-  );
+import { auth } from "@/auth";
+import { loadSession } from "@/lib/auth/session";
+import { redirect } from "next/navigation";
+
+export default async function HomePage() {
+  const session = await auth();
+  if (!session?.sessionId) {
+    redirect("/login");
+  }
+  const claims = await loadSession(session.sessionId);
+  redirect(claims ? "/app" : "/login");
 }

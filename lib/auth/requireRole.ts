@@ -15,6 +15,7 @@ export type RequireRoleOptions = {
   mfa?: boolean;
   clientProgramRole?: unknown;
   clientAdminRole?: unknown;
+  clientMfaSatisfied?: unknown;
 };
 
 function asList<T>(value: T | T[]): T[] {
@@ -27,6 +28,7 @@ export function requireRole(
 ): SessionClaims {
   void options.clientProgramRole;
   void options.clientAdminRole;
+  void options.clientMfaSatisfied;
 
   if (!session) {
     throw new AuthDeniedError();

@@ -75,19 +75,21 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`, `m
 
 ### Tests for User Story 1 ⚠️ fail first
 
-- [ ] T025 [P] [US1] Write failing integration tests for sign-in success, generic failure, and logout in `tests/integration/sign-in.test.ts`
-- [ ] T026 [P] [US1] Write failing tests for httpOnly/Secure/SameSite=Lax and no Max-Age in `tests/integration/session-cookie.test.ts`
+- [x] T025 [P] [US1] Write failing integration tests for sign-in success, generic failure, and logout in `tests/integration/sign-in.test.ts`
+- [x] T026 [P] [US1] Write failing tests for httpOnly/Secure/SameSite=Lax and no Max-Age in `tests/integration/session-cookie.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T027 [US1] Implement Credentials `authorize` (HMAC lookup, Argon2id, deny denied/deactivated/unknown with generic copy) in `lib/auth/credentials.ts`
-- [ ] T028 [US1] Build `/login` with no remember-me control in `app/(auth)/login/page.tsx` and `components/login-form.tsx`
-- [ ] T029 [US1] Build member home calling `requireRole` before data in `app/(member)/app/page.tsx`
-- [ ] T030 [US1] Implement log-out control and server action that revokes the session row in `components/logout-button.tsx` and `lib/auth/actions.ts`
-- [ ] T031 [US1] Emit `login_success`, `login_failure`, and `logout` in the same transaction as the change from `lib/auth/credentials.ts` and `lib/auth/actions.ts`
-- [ ] T032 [US1] Redirect `/` to `/app` or `/login` in `app/page.tsx`
+- [x] T027 [US1] Implement Credentials `authorize` (HMAC lookup, Argon2id, deny denied/deactivated/unknown with generic copy) in `lib/auth/credentials.ts`
+- [x] T028 [US1] Build `/login` with no remember-me control in `app/(auth)/login/page.tsx` and `components/login-form.tsx`
+- [x] T029 [US1] Build member home calling `requireRole` before data in `app/(member)/app/page.tsx`
+- [x] T030 [US1] Implement log-out control and server action that revokes the session row in `components/logout-button.tsx` and `lib/auth/actions.ts`
+- [x] T031 [US1] Emit `login_success`, `login_failure`, and `logout` in the same transaction as the change from `lib/auth/credentials.ts` and `lib/auth/actions.ts`
+- [x] T032 [US1] Redirect `/` to `/app` or `/login` in `app/page.tsx`
 
 **Checkpoint**: US1 independent test in spec.md passes. MVP demoable.
+
+**Amendment (post-US1 review, does not uncheck T001–T032):** Split the single `credential_check` GUC into `credential_lookup` (email user lookup only) and `session_lookup` (session row by id only). `createSession` / `revokeAllSessions` use `withRls({ userId })` own-row scope. `loadSession` is two-phase. Reset/throttle policies have no wide-open branch for any mode that exists today. Migration: `prisma/migrations/20260813220000_scope_auth_mode_gucs`.
 
 ---
 
@@ -99,16 +101,16 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`, `m
 
 ### Tests for User Story 2 ⚠️ fail first
 
-- [ ] T033 [P] [US2] Write failing app permission-matrix tests (`requireRole` not mocked) in `tests/app/permission-matrix.test.ts`
-- [ ] T034 [P] [US2] Write failing RLS matrix tests (GUCs only, no `requireRole`) in `tests/rls/permission-matrix.test.ts`
-- [ ] T035 [P] [US2] Write failing tests that client-supplied roles are ignored in `tests/integration/client-role.test.ts`
+- [x] T033 [P] [US2] Write failing app permission-matrix tests (`requireRole` not mocked) in `tests/app/permission-matrix.test.ts`
+- [x] T034 [P] [US2] Write failing RLS matrix tests (GUCs only, no `requireRole`) in `tests/rls/permission-matrix.test.ts`
+- [x] T035 [P] [US2] Write failing tests that client-supplied roles are ignored in `tests/integration/client-role.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T036 [US2] Implement visibility filter helper (query WHERE **and** RLS) in `lib/db/visibility.ts`
-- [ ] T037 [US2] Load fixture records through `lib/db/visibility.ts` on `app/(member)/app/page.tsx`
-- [ ] T038 [US2] Run RLS tests as `amend_app` via `pnpm test:rls` in `package.json` and `tests/rls/vitest.rls.config.ts`
-- [ ] T039 [US2] Add unauthorized-role deny tests for each handler delivered so far in `tests/app/unauthorized-routes.test.ts`
+- [x] T036 [US2] Implement visibility filter helper (query WHERE **and** RLS) in `lib/db/visibility.ts`
+- [x] T037 [US2] Load fixture records through `lib/db/visibility.ts` on `app/(member)/app/page.tsx`
+- [x] T038 [US2] Run RLS tests as `amend_app` via `pnpm test:rls` in `package.json` and `tests/rls/vitest.rls.config.ts`
+- [x] T039 [US2] Add unauthorized-role deny tests for each handler delivered so far in `tests/app/unauthorized-routes.test.ts`
 
 **Checkpoint**: SC-002 / SC-003 style assertions green on both matrix runs.
 
@@ -122,19 +124,21 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`, `m
 
 ### Tests for User Story 3 ⚠️ fail first
 
-- [ ] T040 [P] [US3] Write failing enroll/challenge tests in `tests/integration/mfa.test.ts`
-- [ ] T041 [P] [US3] Write failing `/admin` deny-without-`mfa_satisfied` tests in `tests/app/admin-mfa.test.ts`
+- [x] T040 [P] [US3] Write failing enroll/challenge tests in `tests/integration/mfa.test.ts`
+- [x] T041 [P] [US3] Write failing `/admin` deny-without-`mfa_satisfied` tests in `tests/app/admin-mfa.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T042 [US3] Implement TOTP generate/verify (`otpauth`) in `lib/auth/totp.ts`
-- [ ] T043 [US3] Build enrollment UI and actions in `app/(auth)/mfa/enroll/page.tsx` and `lib/auth/mfa-actions.ts`
-- [ ] T044 [US3] Build challenge UI in `app/(auth)/mfa/challenge/page.tsx`
-- [ ] T045 [US3] Build admin placeholder with `requireRole({ admin: [...], mfa: true })` in `app/(admin)/admin/page.tsx`
-- [ ] T046 [US3] Redirect `/admin/*` to enroll or challenge unless `mfa_satisfied` in `middleware.ts`
-- [ ] T047 [US3] Emit `mfa_enrolled` and `mfa_challenge_failed` from `lib/auth/mfa-actions.ts`
+- [x] T042 [US3] Implement TOTP generate/verify (`otpauth`) in `lib/auth/totp.ts`
+- [x] T043 [US3] Build enrollment UI and actions in `app/(auth)/mfa/enroll/page.tsx` and `lib/auth/mfa-actions.ts`
+- [x] T044 [US3] Build challenge UI in `app/(auth)/mfa/challenge/page.tsx`
+- [x] T045 [US3] Build admin placeholder with `requireRole({ admin: [...], mfa: true })` in `app/(admin)/admin/page.tsx`
+- [x] T046 [US3] Redirect `/admin/*` to enroll or challenge unless `mfa_satisfied` in `middleware.ts`
+- [x] T047 [US3] Emit `mfa_enrolled` and `mfa_challenge_failed` from `lib/auth/mfa-actions.ts`
 
 **Checkpoint**: Admin area unreachable without MFA; member routes unchanged.
+
+Note: T046 keeps the session-cookie gate in `middleware.ts` (matcher now includes `/admin` and `/app`). The enroll/challenge redirect runs in `app/(admin)/layout.tsx` after `loadSession` because Edge middleware cannot import Prisma; the JWT still carries only `sessionId`. `mfa_satisfied` is read from the session row, never from the client.
 
 ---
 
