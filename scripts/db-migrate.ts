@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { spawn } from "node:child_process";
 
 const migrateUrl = process.env.DATABASE_URL_MIGRATE;
