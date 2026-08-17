@@ -18,6 +18,7 @@ function isBuilt(capability: Capability): boolean {
     case "log_in":
     case "view_dashboard":
     case "view_audit_log":
+    case "approve_deny_registrations":
       return true;
     case "view_shared_resources":
     case "view_role_specific_resources":
@@ -33,7 +34,6 @@ function isBuilt(capability: Capability): boolean {
     case "moderate_forum":
     case "view_announcements":
     case "create_manage_announcements":
-    case "approve_deny_registrations":
     case "assign_change_roles":
     case "view_analytics":
     case "change_system_configuration":
@@ -85,7 +85,32 @@ async function rlsCanReadAudit(role: MatrixRole): Promise<boolean> {
   return rows.length > 0;
 }
 
-function rlsVerdict(role: MatrixRole, capability: Capability, auditVisible: boolean): MatrixVerdict {
+async function rlsCanSeePending(role: MatrixRole): Promise<boolean> {
+  const pending = await migrator.user.findFirst({ where: { status: "pending" } });
+  if (!pending) {
+    return false;
+  }
+  const session = claimsFor(role);
+  const rows = await withRls(
+    session
+      ? {
+          userId: session.userId,
+          programRole: session.programRole,
+          adminRole: session.adminRole,
+          status: session.status,
+        }
+      : {},
+    (tx) => tx.user.findMany({ where: { id: pending.id } }),
+  );
+  return rows.length > 0;
+}
+
+function rlsVerdict(
+  role: MatrixRole,
+  capability: Capability,
+  auditVisible: boolean,
+  pendingVisible: boolean,
+): MatrixVerdict {
   switch (capability) {
     case "log_in":
       return role === "invited" ? "deny" : "allow";
@@ -93,6 +118,8 @@ function rlsVerdict(role: MatrixRole, capability: Capability, auditVisible: bool
       return role === "invited" || role === "pending" ? "deny" : "allow";
     case "view_audit_log":
       return auditVisible ? "allow" : "deny";
+    case "approve_deny_registrations":
+      return pendingVisible ? "allow" : "deny";
     case "view_shared_resources":
     case "view_role_specific_resources":
     case "download_resources":
@@ -107,7 +134,6 @@ function rlsVerdict(role: MatrixRole, capability: Capability, auditVisible: bool
     case "moderate_forum":
     case "view_announcements":
     case "create_manage_announcements":
-    case "approve_deny_registrations":
     case "assign_change_roles":
     case "view_analytics":
     case "change_system_configuration":
@@ -142,13 +168,15 @@ describe("RLS permission matrix (GUCs only, no requireRole)", () => {
         });
       }
       const auditVisible = capability === "view_audit_log" ? await rlsCanReadAudit(role) : false;
+      const pendingVisible =
+        capability === "approve_deny_registrations" ? await rlsCanSeePending(role) : false;
       const expected = PRD_MATRIX[capability][role];
       if (!isBuilt(capability)) {
         expect(["deny", "fail-closed"]).toContain(expected);
         expect(expected).not.toBe("allow");
         return;
       }
-      const actual = rlsVerdict(role, capability, auditVisible);
+      const actual = rlsVerdict(role, capability, auditVisible, pendingVisible);
       expect(actual).toBe(expected);
     },
   );

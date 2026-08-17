@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { requireRole } from "@/lib/auth/requireRole";
 import { listVisibleRecords } from "@/lib/db/visibility";
+import { listPendingRegistrations } from "@/lib/registration/approve";
 import {
   CAPABILITIES,
   EXPECTED_VISIBLE_TITLES,
@@ -17,6 +18,7 @@ function isBuilt(_capability: Capability): boolean {
     case "log_in":
     case "view_dashboard":
     case "view_audit_log":
+    case "approve_deny_registrations":
       return true;
     case "view_shared_resources":
     case "view_role_specific_resources":
@@ -32,7 +34,6 @@ function isBuilt(_capability: Capability): boolean {
     case "moderate_forum":
     case "view_announcements":
     case "create_manage_announcements":
-    case "approve_deny_registrations":
     case "assign_change_roles":
     case "view_analytics":
     case "change_system_configuration":
@@ -44,7 +45,7 @@ function isBuilt(_capability: Capability): boolean {
   }
 }
 
-function appAllows(role: MatrixRole, capability: Capability): boolean {
+async function appAllows(role: MatrixRole, capability: Capability): Promise<boolean> {
   const session = claimsFor(role);
   switch (capability) {
     case "log_in":
@@ -65,6 +66,14 @@ function appAllows(role: MatrixRole, capability: Capability): boolean {
         return false;
       }
     }
+    case "approve_deny_registrations": {
+      try {
+        await listPendingRegistrations(session ? { ...session, mfaSatisfied: true } : null);
+        return true;
+      } catch {
+        return false;
+      }
+    }
     case "view_shared_resources":
     case "view_role_specific_resources":
     case "download_resources":
@@ -79,7 +88,6 @@ function appAllows(role: MatrixRole, capability: Capability): boolean {
     case "moderate_forum":
     case "view_announcements":
     case "create_manage_announcements":
-    case "approve_deny_registrations":
     case "assign_change_roles":
     case "view_analytics":
     case "change_system_configuration":
@@ -91,11 +99,12 @@ function appAllows(role: MatrixRole, capability: Capability): boolean {
   }
 }
 
-function actualVerdict(role: MatrixRole, capability: Capability): MatrixVerdict {
+async function actualVerdict(role: MatrixRole, capability: Capability): Promise<MatrixVerdict> {
+  const allowed = await appAllows(role, capability);
   if (!isBuilt(capability)) {
-    return appAllows(role, capability) ? "allow" : "fail-closed";
+    return allowed ? "allow" : "fail-closed";
   }
-  return appAllows(role, capability) ? "allow" : "deny";
+  return allowed ? "allow" : "deny";
 }
 
 describe("app permission matrix (FR-025, requireRole not mocked)", () => {
@@ -104,11 +113,11 @@ describe("app permission matrix (FR-025, requireRole not mocked)", () => {
     async (role, capability) => {
       const expected = PRD_MATRIX[capability][role];
       if (!isBuilt(capability)) {
-        expect(appAllows(role, capability)).toBe(false);
+        expect(await appAllows(role, capability)).toBe(false);
         expect(["deny", "fail-closed"]).toContain(expected);
         return;
       }
-      expect(actualVerdict(role, capability)).toBe(expected);
+      expect(await actualVerdict(role, capability)).toBe(expected);
     },
   );
 

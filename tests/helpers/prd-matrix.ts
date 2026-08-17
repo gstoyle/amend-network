@@ -191,8 +191,8 @@ export const PRD_MATRIX: Record<Capability, Record<MatrixRole, MatrixVerdict>> =
     invited: D,
   },
   approve_deny_registrations: {
-    super_admin: FC,
-    admin: FC,
+    super_admin: A,
+    admin: A,
     moderator: D,
     pathways: D,
     lead: D,

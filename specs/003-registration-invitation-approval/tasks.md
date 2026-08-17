@@ -62,15 +62,15 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 1 ⚠️ fail first
 
-- [ ] T012 [P] [US1] Write failing add/edit/deactivate and public-active-list tests in `tests/integration/doc-affiliations.test.ts`
-- [ ] T013 [P] [US1] Write failing unauthorized deny for affiliations (Moderator, Pathways, LEAD, Pending) in `tests/app/unauthorized-routes.test.ts`
+- [x] T012 [P] [US1] Write failing add/edit/deactivate and public-active-list tests in `tests/integration/doc-affiliations.test.ts`
+- [x] T013 [P] [US1] Write failing unauthorized deny for affiliations (Moderator, Pathways, LEAD, Pending) in `tests/app/unauthorized-routes.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T014 [US1] Implement list/add/edit/deactivate (encrypt nothing on the list table; emit `system_setting_changed`) in `lib/registration/doc-affiliations.ts`
-- [ ] T015 [US1] Build presentational affiliation form (no role logic) in `components/doc-affiliation-form.tsx`
-- [ ] T016 [US1] Build `/admin/users/affiliations` with `requireRole({ admin: ["admin", "super_admin"], mfa: true })` in `app/(admin)/admin/users/affiliations/page.tsx`
-- [ ] T017 [US1] Build GET `/register` with active DOC dropdown only (no free text; submit comes in US2) in `app/(auth)/register/page.tsx`
+- [x] T014 [US1] Implement list/add/edit/deactivate (encrypt nothing on the list table; emit `system_setting_changed`) in `lib/registration/doc-affiliations.ts`
+- [x] T015 [US1] Build presentational affiliation form (no role logic) in `components/doc-affiliation-form.tsx`
+- [x] T016 [US1] Build `/admin/users/affiliations` with `requireRole({ admin: ["admin", "super_admin"], mfa: true })` in `app/(admin)/admin/users/affiliations/page.tsx`
+- [x] T017 [US1] Build GET `/register` with active DOC dropdown only (no free text; submit comes in US2) in `app/(auth)/register/page.tsx`
 
 **Checkpoint**: Spec US1 independent test passes. MVP demoable (vocabulary + public dropdown).
 
@@ -84,15 +84,15 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 2 ⚠️ fail first
 
-- [ ] T018 [P] [US2] Write failing new-email / duplicate-email / validation tests in `tests/integration/register.test.ts`
-- [ ] T019 [P] [US2] Write failing tests that visitor copy is identical for new vs existing accounts in `tests/unit/register-copy.test.ts`
+- [x] T018 [P] [US2] Write failing new-email / duplicate-email / validation tests in `tests/integration/register.test.ts`
+- [x] T019 [P] [US2] Write failing tests that visitor copy is identical for new vs existing accounts in `tests/unit/register-copy.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T020 [US2] Implement self-register (`auth_mode=registration`, HMAC uniqueness, encrypt title + affiliation id, `join_source=self_registered`, `registration_submitted` only for new users) in `lib/registration/register.ts`
-- [ ] T021 [US2] Complete register submit UI (password ≥ 12, network dropdown, CSRF) in `components/register-form.tsx` and `app/(auth)/register/page.tsx`
-- [ ] T022 [US2] Show Sign in + Request access when unauthenticated in `app/page.tsx` (authenticated still redirects to `/app` or `/app/pending`)
-- [ ] T023 [US2] Send applicant confirmation and `ADMIN_ALERT_EMAIL` pending alert (no DOC in analytics; no second confirmation on duplicates) in `lib/email/transport.ts` via `lib/registration/register.ts`
+- [x] T020 [US2] Implement self-register (`auth_mode=registration`, HMAC uniqueness, encrypt title + affiliation id, `join_source=self_registered`, `registration_submitted` only for new users) in `lib/registration/register.ts`
+- [x] T021 [US2] Complete register submit UI (password ≥ 12, network dropdown, CSRF) in `components/register-form.tsx` and `app/(auth)/register/page.tsx`
+- [x] T022 [US2] Show Sign in + Request access when unauthenticated in `app/page.tsx` (authenticated still redirects to `/app` or `/app/pending`)
+- [x] T023 [US2] Send applicant confirmation and `ADMIN_ALERT_EMAIL` pending alert (no DOC in analytics; no second confirmation on duplicates) in `lib/email/transport.ts` via `lib/registration/register.ts`
 
 **Checkpoint**: Spec US2 independent test passes. FR-001–FR-004.
 
@@ -106,16 +106,16 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 3 ⚠️ fail first
 
-- [ ] T024 [P] [US3] Write failing approve/deny/concurrent-second-decision tests in `tests/integration/approve.test.ts`
-- [ ] T025 [P] [US3] Mark `approve_deny_registrations` built (A for Admin/Super Admin) in `tests/helpers/prd-matrix.ts`, `tests/app/permission-matrix.test.ts`, and `tests/rls/permission-matrix.test.ts`
-- [ ] T026 [P] [US3] Write failing unauthorized deny for `/admin/users/pending` in `tests/app/unauthorized-routes.test.ts`
+- [x] T024 [P] [US3] Write failing approve/deny/concurrent-second-decision tests in `tests/integration/approve.test.ts`
+- [x] T025 [P] [US3] Mark `approve_deny_registrations` built (A for Admin/Super Admin) in `tests/helpers/prd-matrix.ts`, `tests/app/permission-matrix.test.ts`, and `tests/rls/permission-matrix.test.ts`
+- [x] T026 [P] [US3] Write failing unauthorized deny for `/admin/users/pending` in `tests/app/unauthorized-routes.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T027 [US3] Implement approve/deny (conditional `status=pending` update, `role_assigned` + `registration_approved`/`registration_denied`, encrypt deny reason, never put reason in audit metadata) in `lib/registration/approve.ts`
-- [ ] T028 [US3] Build pending queue UI (oldest-first, network filter, IP or “unavailable”) in `app/(admin)/admin/users/pending/page.tsx` and `components/pending-queue.tsx`
-- [ ] T029 [US3] Send welcome or set-password-on-approve, and polite denial with no reason, from `lib/registration/approve.ts` using `lib/email/transport.ts`
-- [ ] T030 [US3] Link pending / invite / affiliations from `app/(admin)/admin/page.tsx`
+- [x] T027 [US3] Implement approve/deny (conditional `status=pending` update, `role_assigned` + `registration_approved`/`registration_denied`, encrypt deny reason, never put reason in audit metadata) in `lib/registration/approve.ts`
+- [x] T028 [US3] Build pending queue UI (oldest-first, network filter, IP or “unavailable”) in `app/(admin)/admin/users/pending/page.tsx` and `components/pending-queue.tsx`
+- [x] T029 [US3] Send welcome or set-password-on-approve, and polite denial with no reason, from `lib/registration/approve.ts` using `lib/email/transport.ts`
+- [x] T030 [US3] Link pending / invite / affiliations from `app/(admin)/admin/page.tsx`
 
 **Checkpoint**: Spec US3 independent test passes. Matrix approve/deny is A not FC.
 
