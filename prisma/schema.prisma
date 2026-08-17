@@ -176,6 +176,27 @@ model AuditLog {
   @@map("audit_log")
 }
 
+model Resource {
+  id                  String    @id @default(uuid()) @db.Uuid
+  title               String
+  previewText         String    @map("preview_text")
+  thumbnailObjectKey  String    @map("thumbnail_object_key")
+  sourceLabel         String    @map("source_label")
+  tags                String[]
+  fileObjectKey       String    @map("file_object_key")
+  fileSizeBytes       BigInt    @map("file_size_bytes")
+  fileMimeType        String    @map("file_mime_type")
+  visibility          String[]
+  downloadCount       Int       @default(0) @map("download_count")
+  uploadedBy          String    @map("uploaded_by") @db.Uuid
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt           DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  @@index([visibility], type: Gin)
+  @@map("resources")
+}
+
 model VisibilityRecord {
   id         String   @id @default(uuid()) @db.Uuid
   title      String

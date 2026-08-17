@@ -4,6 +4,7 @@ import { hashPassword } from "@/lib/auth/password";
 import { encryptPii, hmacEmailLookup } from "@/lib/crypto/pii";
 import { migrator } from "@/lib/db/migrator";
 import { env } from "@/lib/env";
+import { putObject } from "@/lib/storage/client";
 
 type SeedUser = {
   email: string;
@@ -76,6 +77,84 @@ const SEED_USERS: SeedUser[] = [
   },
 ];
 
+const MINIMAL_PDF = Buffer.from(
+  "%PDF-1.1\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Count 1/Kids[3 0 R]>>endobj\n3 0 obj<</Type/Page/MediaBox[0 0 72 72]/Parent 2 0 R>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n",
+  "utf8",
+);
+
+const MINIMAL_PNG = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+  "base64",
+);
+
+async function seedResources(): Promise<void> {
+  const admin = await migrator.user.findUnique({
+    where: { emailLookup: hmacEmailLookup("admin@local") },
+  });
+  if (!admin) {
+    throw new Error("seed admin@local is required before resources");
+  }
+
+  const resourceFixtures: {
+    title: string;
+    visibility: string[];
+    withdrawn: boolean;
+  }[] = [
+    { title: "Seed shared PDF", visibility: ["all_authenticated"], withdrawn: false },
+    { title: "Seed Pathways PDF", visibility: ["pathways"], withdrawn: false },
+    { title: "Seed LEAD PDF", visibility: ["lead"], withdrawn: false },
+    { title: "Seed both-program PDF", visibility: ["pathways", "lead"], withdrawn: false },
+    { title: "Seed withdrawn PDF", visibility: ["all_authenticated"], withdrawn: true },
+  ];
+
+  let storageOk = true;
+  for (const fixture of resourceFixtures) {
+    const existing = await migrator.resource.findFirst({ where: { title: fixture.title } });
+    if (existing) {
+      if (storageOk) {
+        try {
+          await putObject(existing.fileObjectKey, MINIMAL_PDF, "application/pdf");
+          await putObject(existing.thumbnailObjectKey, MINIMAL_PNG, "image/png");
+        } catch (error: unknown) {
+          storageOk = false;
+          const message = error instanceof Error ? error.message : "unknown storage error";
+          console.warn(`MinIO seed upload failed for existing ${fixture.title}. ${message}`);
+        }
+      }
+      continue;
+    }
+    const id = randomUUID();
+    const fileKey = `resources/${id}/file.pdf`;
+    const thumbKey = `resources/${id}/thumb.png`;
+    if (storageOk) {
+      try {
+        await putObject(fileKey, MINIMAL_PDF, "application/pdf");
+        await putObject(thumbKey, MINIMAL_PNG, "image/png");
+      } catch (error: unknown) {
+        storageOk = false;
+        const message = error instanceof Error ? error.message : "unknown storage error";
+        console.warn(`MinIO seed upload failed; inserting resource rows without objects. ${message}`);
+      }
+    }
+    await migrator.resource.create({
+      data: {
+        id,
+        title: fixture.title,
+        previewText: `Preview for ${fixture.title}`,
+        thumbnailObjectKey: thumbKey,
+        sourceLabel: "Amend",
+        tags: [],
+        fileObjectKey: fileKey,
+        fileSizeBytes: BigInt(MINIMAL_PDF.length),
+        fileMimeType: "application/pdf",
+        visibility: fixture.visibility,
+        uploadedBy: admin.id,
+        deletedAt: fixture.withdrawn ? new Date() : null,
+      },
+    });
+  }
+}
+
 async function seed(): Promise<void> {
   const passwordHash = await hashPassword(env().SEED_PASSWORD);
   const mfaSecret = env().SEED_MFA_SECRET
@@ -147,6 +226,8 @@ async function seed(): Promise<void> {
       create: { id: randomUUID(), ...affiliation },
     });
   }
+
+  await seedResources();
 }
 
 seed()

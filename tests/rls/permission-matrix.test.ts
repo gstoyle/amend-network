@@ -19,11 +19,11 @@ function isBuilt(capability: Capability): boolean {
     case "view_dashboard":
     case "view_audit_log":
     case "approve_deny_registrations":
-      return true;
+    case "upload_edit_delete_resources":
     case "view_shared_resources":
     case "view_role_specific_resources":
     case "download_resources":
-    case "upload_edit_delete_resources":
+      return true;
     case "view_events":
     case "rsvp_events":
     case "create_edit_delete_events":
@@ -85,6 +85,73 @@ async function rlsCanReadAudit(role: MatrixRole): Promise<boolean> {
   return rows.length > 0;
 }
 
+async function rlsCanInsertResource(role: MatrixRole): Promise<boolean> {
+  const session = claimsFor(role);
+  const id = randomUUID();
+  try {
+    await withRls(
+      {
+        userId: session?.userId,
+        programRole: session?.programRole ?? "none",
+        adminRole: session?.adminRole ?? "none",
+        status: session?.status ?? "",
+      },
+      (tx) =>
+        tx.$executeRaw`
+          INSERT INTO resources (
+            id, title, preview_text, thumbnail_object_key, source_label, tags,
+            file_object_key, file_size_bytes, file_mime_type, visibility,
+            download_count, uploaded_by, created_at, updated_at
+          ) VALUES (
+            ${id}::uuid, ${`matrix-insert-${id}`}, 'p', 't', 'Amend', ARRAY[]::text[],
+            'f', 1, 'application/pdf', '{all_authenticated}', 0, ${id}::uuid,
+            CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+          )
+        `,
+    );
+    await migrator.$executeRaw`DELETE FROM resources WHERE id = ${id}::uuid`;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function rlsCanSeeLiveResource(role: MatrixRole, visibility: string[]): Promise<boolean> {
+  const session = claimsFor(role);
+  const id = randomUUID();
+  const visibilityLiteral = `{${visibility.join(",")}}`;
+  await migrator.$executeRaw`
+    INSERT INTO resources (
+      id, title, preview_text, thumbnail_object_key, source_label, tags,
+      file_object_key, file_size_bytes, file_mime_type, visibility,
+      download_count, uploaded_by, created_at, updated_at
+    ) VALUES (
+      ${id}::uuid, ${`matrix-see-${id}`}, 'p', 't', 'Amend', ARRAY[]::text[],
+      'f', 1, 'application/pdf', ${visibilityLiteral}::text[], 0, ${id}::uuid,
+      CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+    )
+  `;
+  try {
+    const rows = await withRls(
+      session
+        ? {
+            userId: session.userId,
+            programRole: session.programRole,
+            adminRole: session.adminRole,
+            status: session.status,
+          }
+        : {},
+      (tx) =>
+        tx.$queryRaw<{ id: string }[]>`
+          SELECT id FROM resources WHERE id = ${id}::uuid
+        `,
+    );
+    return rows.length > 0;
+  } finally {
+    await migrator.$executeRaw`DELETE FROM resources WHERE id = ${id}::uuid`;
+  }
+}
+
 async function rlsCanSeePending(role: MatrixRole): Promise<boolean> {
   const pending = await migrator.user.findFirst({ where: { status: "pending" } });
   if (!pending) {
@@ -110,6 +177,9 @@ function rlsVerdict(
   capability: Capability,
   auditVisible: boolean,
   pendingVisible: boolean,
+  insertAllowed: boolean,
+  sharedVisible: boolean,
+  roleSpecificVisible: boolean,
 ): MatrixVerdict {
   switch (capability) {
     case "log_in":
@@ -120,10 +190,14 @@ function rlsVerdict(
       return auditVisible ? "allow" : "deny";
     case "approve_deny_registrations":
       return pendingVisible ? "allow" : "deny";
-    case "view_shared_resources":
-    case "view_role_specific_resources":
-    case "download_resources":
     case "upload_edit_delete_resources":
+      return insertAllowed ? "allow" : "deny";
+    case "view_shared_resources":
+      return sharedVisible ? "allow" : "deny";
+    case "view_role_specific_resources":
+      return roleSpecificVisible ? "allow" : "deny";
+    case "download_resources":
+      return sharedVisible ? "allow" : "deny";
     case "view_events":
     case "rsvp_events":
     case "create_edit_delete_events":
@@ -170,13 +244,31 @@ describe("RLS permission matrix (GUCs only, no requireRole)", () => {
       const auditVisible = capability === "view_audit_log" ? await rlsCanReadAudit(role) : false;
       const pendingVisible =
         capability === "approve_deny_registrations" ? await rlsCanSeePending(role) : false;
+      const insertAllowed =
+        capability === "upload_edit_delete_resources" ? await rlsCanInsertResource(role) : false;
+      const sharedVisible =
+        capability === "view_shared_resources" || capability === "download_resources"
+          ? await rlsCanSeeLiveResource(role, ["all_authenticated"])
+          : false;
+      const roleSpecificVisible =
+        capability === "view_role_specific_resources"
+          ? await rlsCanSeeLiveResource(role, role === "lead" ? ["lead"] : ["pathways"])
+          : false;
       const expected = PRD_MATRIX[capability][role];
       if (!isBuilt(capability)) {
         expect(["deny", "fail-closed"]).toContain(expected);
         expect(expected).not.toBe("allow");
         return;
       }
-      const actual = rlsVerdict(role, capability, auditVisible, pendingVisible);
+      const actual = rlsVerdict(
+        role,
+        capability,
+        auditVisible,
+        pendingVisible,
+        insertAllowed,
+        sharedVisible,
+        roleSpecificVisible,
+      );
       expect(actual).toBe(expected);
     },
   );

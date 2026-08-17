@@ -15,6 +15,7 @@ export type RlsContext = {
     | "password_reset"
     | "registration"
     | "invite_lookup"
+    | "resource_download"
     | "";
 };
 

@@ -31,6 +31,9 @@ export default async function AdminPage() {
         <Link className="text-foreground underline" href="/admin/users/affiliations">
           DOC affiliations
         </Link>
+        <Link className="text-foreground underline" href="/admin/resources">
+          Resources
+        </Link>
       </nav>
     </div>
   );

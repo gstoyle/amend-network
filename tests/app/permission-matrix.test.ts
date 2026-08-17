@@ -5,6 +5,9 @@ import { listVisibleRecords } from "@/lib/db/visibility";
 import { listPendingRegistrations } from "@/lib/registration/approve";
 import { addDocAffiliation } from "@/lib/registration/doc-affiliations";
 import { listInvitations, reissueInvite, revokeInvite } from "@/lib/registration/invite";
+import { grantDownload } from "@/lib/resources/download";
+import { listResources } from "@/lib/resources/list";
+import { mintIngestSlots } from "@/lib/resources/publish";
 import {
   CAPABILITIES,
   EXPECTED_VISIBLE_TITLES,
@@ -22,11 +25,11 @@ function isBuilt(_capability: Capability): boolean {
     case "view_dashboard":
     case "view_audit_log":
     case "approve_deny_registrations":
-      return true;
+    case "upload_edit_delete_resources":
     case "view_shared_resources":
     case "view_role_specific_resources":
     case "download_resources":
-    case "upload_edit_delete_resources":
+      return true;
     case "view_events":
     case "rsvp_events":
     case "create_edit_delete_events":
@@ -77,10 +80,34 @@ async function appAllows(role: MatrixRole, capability: Capability): Promise<bool
         return false;
       }
     }
+    case "upload_edit_delete_resources": {
+      try {
+        await mintIngestSlots(session ? { ...session, mfaSatisfied: true } : null);
+        return true;
+      } catch {
+        return false;
+      }
+    }
     case "view_shared_resources":
-    case "view_role_specific_resources":
-    case "download_resources":
-    case "upload_edit_delete_resources":
+    case "view_role_specific_resources": {
+      try {
+        await listResources(session);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+    case "download_resources": {
+      try {
+        await grantDownload(session, "00000000-0000-4000-8000-000000000099", {
+          ip: "127.0.0.1",
+          userAgent: "vitest-matrix-download",
+        });
+        return true;
+      } catch {
+        return false;
+      }
+    }
     case "view_events":
     case "rsvp_events":
     case "create_edit_delete_events":
