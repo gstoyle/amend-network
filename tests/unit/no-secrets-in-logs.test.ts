@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { sendResetEmail } from "@/lib/email/transport";
+import { sendLifecycleEmail, sendResetEmail } from "@/lib/email/transport";
 import { env } from "@/lib/env";
 
 const SECRET_PATTERNS = [
@@ -10,6 +10,7 @@ const SECRET_PATTERNS = [
   /SEED_PASSWORD/,
   /PII_ENCRYPTION_KEY/,
   /AUTH_SECRET/,
+  /\$argon2/,
 ];
 
 function walkTs(dir: string): string[] {
@@ -57,5 +58,21 @@ describe("logs never contain secrets (T068)", () => {
       }
     }
     expect(env().EMAIL_TRANSPORT).toBe("json");
+  });
+
+  it("does not console.log invite tokens, password hashes, or DOC plaintext when sending mail", async () => {
+    const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const token = "invite-token-must-not-appear-in-logs";
+    const hash = "$argon2id$v=19$m=19456,t=2,p=1$not-a-real-hash";
+    await sendLifecycleEmail({
+      kind: "invite",
+      to: "invitee@example.com",
+      vars: { link: `http://127.0.0.1:3000/invite/${token}`, text: `You have 14 days.\nhttp://127.0.0.1:3000/invite/${token}` },
+    });
+    const printed = [...log.mock.calls, ...error.mock.calls].flat().join(" ");
+    expect(printed).not.toContain(token);
+    expect(printed).not.toContain(hash);
+    expect(printed).not.toContain("Test Agency A");
   });
 });

@@ -34,7 +34,7 @@ function lifecycleCopy(kind: LifecycleEmailKind, vars: Record<string, string>): 
     case "invite":
       return {
         subject: "You are invited to the Amend member network",
-        text: `You have 14 days to complete registration.\n${vars.link ?? ""}`,
+        text: vars.text ?? `You have 14 days to complete registration.\n${vars.link ?? ""}`,
       };
     case "self_registration_confirmation":
       return {

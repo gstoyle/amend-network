@@ -295,4 +295,77 @@ describe("join-flow RLS (GUCs only, no requireRole)", () => {
       ),
     ).rejects.toSatisfy(isRlsDenied);
   });
+
+  it("pathways and pending cannot SELECT invitations or INSERT affiliations", async () => {
+    const pathways = await seedUser("pathways@local");
+    const pending = await seedUser("pending@local");
+    const pathwaysSeen = await withRls(
+      {
+        userId: pathways.id,
+        programRole: pathways.programRole,
+        adminRole: pathways.adminRole,
+        status: pathways.status,
+      },
+      async (tx) => tx.invitation.findMany(),
+    );
+    const pendingSeen = await withRls(
+      {
+        userId: pending.id,
+        programRole: pending.programRole,
+        adminRole: pending.adminRole,
+        status: pending.status,
+      },
+      async (tx) => tx.invitation.findMany(),
+    );
+    expect(pathwaysSeen).toHaveLength(0);
+    expect(pendingSeen).toHaveLength(0);
+    await expect(
+      withRls(
+        {
+          userId: pathways.id,
+          programRole: pathways.programRole,
+          adminRole: pathways.adminRole,
+          status: pathways.status,
+        },
+        async (tx) => {
+          await tx.docAffiliation.create({
+            data: { label: `${MARKER}-path`, active: true },
+          });
+        },
+      ),
+    ).rejects.toSatisfy(isRlsDenied);
+  });
+
+  it("empty GUCs cannot expire invitations (sweep operator GUC is required)", async () => {
+    const admin = await seedUser("admin@local");
+    const network = await migrator.network.findFirst({ where: { name: "Pathways to Change" } });
+    if (!network) {
+      throw new Error("Pathways network required");
+    }
+    const invitationId = randomUUID();
+    createdInvitationIds.push(invitationId);
+    await migrator.invitation.create({
+      data: {
+        id: invitationId,
+        emailLookup: hmacEmailLookup(`${MARKER}-guc@example.com`),
+        emailEncrypted: encryptPii(`${MARKER}-guc@example.com`),
+        tokenHash: Buffer.from(randomUUID().replaceAll("-", ""), "hex"),
+        inviterId: admin.id,
+        networkId: network.id,
+        firstNameEncrypted: encryptPii("Guc"),
+        lastNameEncrypted: encryptPii("Check"),
+        status: "pending",
+        expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+      },
+    });
+    const visible = await withRls({}, async (tx) => tx.invitation.findMany({ where: { id: invitationId } }));
+    expect(visible).toHaveLength(0);
+    await withRls({}, async (tx) => {
+      await tx.invitation.updateMany({
+        where: { id: invitationId },
+        data: { status: "expired" },
+      });
+    });
+    expect((await migrator.invitation.findUnique({ where: { id: invitationId } }))?.status).toBe("pending");
+  });
 });

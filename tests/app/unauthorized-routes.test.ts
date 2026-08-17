@@ -5,6 +5,7 @@ import { requireRole } from "@/lib/auth/requireRole";
 import type { AdminRole } from "@/lib/auth/types";
 import { listPendingRegistrations } from "@/lib/registration/approve";
 import { addDocAffiliation } from "@/lib/registration/doc-affiliations";
+import { sendManualInvite } from "@/lib/registration/invite";
 import { claimsFor } from "@/tests/helpers/prd-matrix";
 
 function authorizedFor(pathname: string, sessionId?: string): boolean {
@@ -141,6 +142,44 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
           clientMfaSatisfied: true,
         }),
       ).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    }
+  });
+
+  it("invite send denies Moderator, Pathways, LEAD, and Pending (FR-021)", async () => {
+    expect(authorizedFor("/admin/users/invite")).toBe(false);
+    expect(authorizedFor("/admin/users/invite", "session-id")).toBe(true);
+
+    const inviteAccess = { admin: ["admin", "super_admin"] satisfies AdminRole[], mfa: true };
+    expect(() => requireRole(claimsFor("moderator"), inviteAccess)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(() => requireRole(claimsFor("pathways"), inviteAccess)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(() => requireRole(claimsFor("lead"), inviteAccess)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(() => requireRole(claimsFor("pending"), inviteAccess)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(
+      requireRole({ ...claimsFor("admin")!, mfaSatisfied: true }, inviteAccess).adminRole,
+    ).toBe("admin");
+
+    const input = {
+      email: "unauthorized-invite@example.com",
+      firstName: "No",
+      lastName: "Access",
+      networkId: "00000000-0000-4000-8000-000000000099",
+      ip: "127.0.0.1",
+      userAgent: "vitest-invite-deny",
+      clientAdminRole: "admin" as const,
+      clientMfaSatisfied: true,
+    };
+    for (const role of ["moderator", "pathways", "lead", "pending"] as const) {
+      await expect(sendManualInvite(claimsFor(role), input)).rejects.toThrowError(
+        AUTH_FAILURE_MESSAGE,
+      );
     }
   });
 });

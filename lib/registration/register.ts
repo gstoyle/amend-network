@@ -53,7 +53,7 @@ export function registrationVisitorCopy(outcome?: RegistrationOutcome): string {
   return VISITOR_COPY;
 }
 
-function isLaunchNetworkName(name: string): boolean {
+export function isLaunchNetworkName(name: string): boolean {
   return LAUNCH_NETWORK_NAMES.some((allowed) => allowed.toLowerCase() === name.trim().toLowerCase());
 }
 

@@ -230,4 +230,29 @@ describe("RLS permission matrix (GUCs only, no requireRole)", () => {
     expect(adminRows.map((row) => row.id.toString())).toContain(recent.id.toString());
     expect(adminRows.map((row) => row.id.toString())).not.toContain(old.id.toString());
   });
+
+  it("pathways GUC cannot SELECT invitations; admin GUC can", async () => {
+    const pathways = claimsFor("pathways")!;
+    const admin = claimsFor("admin")!;
+    const memberRows = await withRls(
+      {
+        userId: pathways.userId,
+        programRole: pathways.programRole,
+        adminRole: pathways.adminRole,
+        status: pathways.status,
+      },
+      (tx) => tx.invitation.findMany({ take: 1 }),
+    );
+    const adminRows = await withRls(
+      {
+        userId: admin.userId,
+        programRole: admin.programRole,
+        adminRole: admin.adminRole,
+        status: admin.status,
+      },
+      (tx) => tx.invitation.findMany({ take: 1 }),
+    );
+    expect(memberRows).toHaveLength(0);
+    expect(Array.isArray(adminRows)).toBe(true);
+  });
 });

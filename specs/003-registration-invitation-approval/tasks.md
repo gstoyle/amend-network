@@ -129,18 +129,18 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 4 ⚠️ fail first
 
-- [ ] T031 [P] [US4] Write failing CSV header/row/limit/duplicate tests in `tests/unit/csv.test.ts`
-- [ ] T032 [P] [US4] Write failing manual + mixed-CSV send tests in `tests/integration/invite-send.test.ts`
-- [ ] T033 [P] [US4] Write failing complete / consumed / expired-shaped / signed-in-refuse tests in `tests/integration/invite-complete.test.ts`
-- [ ] T034 [P] [US4] Write failing unauthorized deny for `/admin/users/invite` in `tests/app/unauthorized-routes.test.ts`
+- [x] T031 [P] [US4] Write failing CSV header/row/limit/duplicate tests in `tests/unit/csv.test.ts`
+- [x] T032 [P] [US4] Write failing manual + mixed-CSV send tests in `tests/integration/invite-send.test.ts`
+- [x] T033 [P] [US4] Write failing complete / consumed / expired-shaped / signed-in-refuse tests in `tests/integration/invite-complete.test.ts`
+- [x] T034 [P] [US4] Write failing unauthorized deny for `/admin/users/invite` in `tests/app/unauthorized-routes.test.ts`
 
 ### Implementation for User Story 4
 
-- [ ] T035 [US4] Implement RFC4180 parse + validation (exact headers, active DOC label, launch networks, pending-invite uniqueness) in `lib/registration/csv.ts`
-- [ ] T036 [US4] Implement send (hashed token, 14-day expiry, `invitation_sent`, `bulk_invite_sent` if ≥ 2) and complete (`invite_lookup`, active user, `invitation_accepted` + `role_assigned`) in `lib/registration/invite.ts`
-- [ ] T037 [US4] Build admin invite UI (manual + CSV error report) in `app/(admin)/admin/users/invite/page.tsx` and `components/invite-form.tsx`
-- [ ] T038 [US4] Build `/invite/[token]` (pre-fill, email locked, refuse if session exists) in `app/(auth)/invite/[token]/page.tsx` and `components/invite-complete-form.tsx`
-- [ ] T039 [US4] Send invite email with `${AUTH_URL}/invite/${token}` and 14-day copy from `lib/registration/invite.ts` via `lib/email/transport.ts`
+- [x] T035 [US4] Implement RFC4180 parse + validation (exact headers, active DOC label, launch networks, pending-invite uniqueness) in `lib/registration/csv.ts`
+- [x] T036 [US4] Implement send (hashed token, 14-day expiry, `invitation_sent`, `bulk_invite_sent` if ≥ 2) and complete (`invite_lookup`, active user, `invitation_accepted` + `role_assigned`) in `lib/registration/invite.ts`
+- [x] T037 [US4] Build admin invite UI (manual + CSV error report) in `app/(admin)/admin/users/invite/page.tsx` and `components/invite-form.tsx`
+- [x] T038 [US4] Build `/invite/[token]` (pre-fill, email locked, refuse if session exists) in `app/(auth)/invite/[token]/page.tsx` and `components/invite-complete-form.tsx`
+- [x] T039 [US4] Send invite email with `${AUTH_URL}/invite/${token}` and 14-day copy from `lib/registration/invite.ts` via `lib/email/transport.ts`
 
 **Checkpoint**: Spec US4 independent test passes. FR-005–FR-009, FR-023.
 
@@ -154,14 +154,14 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 5 ⚠️ fail first
 
-- [ ] T040 [US5] Write failing sweep / reminder / revoke / re-issue tests (inject `now`) in `tests/integration/invite-lifecycle.test.ts`
+- [x] T040 [US5] Write failing sweep / reminder / revoke / re-issue tests (inject `now`) in `tests/integration/invite-lifecycle.test.ts`
 
 ### Implementation for User Story 5
 
-- [ ] T041 [US5] Implement `runInvitationSweep(now)` (expire + remind; `invitation_expired`) in `lib/registration/sweep.ts`
-- [ ] T042 [US5] Implement revoke (`invitation_revoked`) and re-issue (new row + `invitation_sent`) in `lib/registration/invite.ts`
-- [ ] T043 [US5] Add outstanding-invite list, revoke, and re-issue controls in `app/(admin)/admin/users/invite/page.tsx`
-- [ ] T044 [US5] Send expiring-soon and expired-unused notices from `lib/registration/sweep.ts` via `lib/email/transport.ts`
+- [x] T041 [US5] Implement `runInvitationSweep(now)` (expire + remind; `invitation_expired`) in `lib/registration/sweep.ts`
+- [x] T042 [US5] Implement revoke (`invitation_revoked`) and re-issue (new row + `invitation_sent`) in `lib/registration/invite.ts`
+- [x] T043 [US5] Add outstanding-invite list, revoke, and re-issue controls in `app/(admin)/admin/users/invite/page.tsx`
+- [x] T044 [US5] Send expiring-soon and expired-unused notices from `lib/registration/sweep.ts` via `lib/email/transport.ts`
 
 **Checkpoint**: Spec US5 independent test passes. FR-016. Production cron wiring stays out of scope.
 
@@ -171,11 +171,11 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 **Purpose**: A11y, secrets hygiene, extra matrix/RLS asserts, quickstart proof.
 
-- [ ] T045 [P] Add axe-core coverage for `/register`, `/invite/[token]`, pending, invite, and affiliations in `tests/a11y/join-pages.test.ts`
-- [ ] T046 [P] Assert logs never contain raw invite tokens, password hashes, or DOC plaintext in `tests/unit/no-secrets-in-logs.test.ts`
-- [ ] T047 [P] Assert new audit metadata keys stay off the PII denylist in `tests/unit/audit-metadata.test.ts`
-- [ ] T048 Extend extra invite/DOC deny assertions (app + RLS) in `tests/app/permission-matrix.test.ts` and `tests/rls/join-policies.test.ts`
-- [ ] T049 Run [quickstart.md](./quickstart.md) (`pnpm db:migrate`, `pnpm db:seed`, `pnpm test`, `pnpm test:rls`, `pnpm test:a11y`, `pnpm typecheck`, `pnpm lint`)
+- [x] T045 [P] Add axe-core coverage for `/register`, `/invite/[token]`, pending, invite, and affiliations in `tests/a11y/join-pages.test.ts`
+- [x] T046 [P] Assert logs never contain raw invite tokens, password hashes, or DOC plaintext in `tests/unit/no-secrets-in-logs.test.ts`
+- [x] T047 [P] Assert new audit metadata keys stay off the PII denylist in `tests/unit/audit-metadata.test.ts`
+- [x] T048 Extend extra invite/DOC deny assertions (app + RLS) in `tests/app/permission-matrix.test.ts` and `tests/rls/join-policies.test.ts`
+- [x] T049 Run [quickstart.md](./quickstart.md) (`pnpm db:migrate`, `pnpm db:seed`, `pnpm test`, `pnpm test:rls`, `pnpm test:a11y`, `pnpm typecheck`, `pnpm lint`)
 
 ---
 

@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { AUTH_FAILURE_MESSAGE } from "@/lib/auth/errors";
 import { requireRole } from "@/lib/auth/requireRole";
 import { listVisibleRecords } from "@/lib/db/visibility";
 import { listPendingRegistrations } from "@/lib/registration/approve";
+import { addDocAffiliation } from "@/lib/registration/doc-affiliations";
+import { listInvitations, reissueInvite, revokeInvite } from "@/lib/registration/invite";
 import {
   CAPABILITIES,
   EXPECTED_VISIBLE_TITLES,
@@ -135,5 +138,31 @@ describe("app permission matrix (FR-025, requireRole not mocked)", () => {
     }
     const rows = await listVisibleRecords(session);
     expect(rows.map((row) => row.title).sort()).toEqual([...EXPECTED_VISIBLE_TITLES[role]].sort());
+  });
+
+  it("invite list/revoke/re-issue and DOC add deny Moderator, Pathways, LEAD, and Pending", async () => {
+    const invitationId = "00000000-0000-4000-8000-000000000099";
+    const write = {
+      invitationId,
+      ip: "127.0.0.1",
+      userAgent: "vitest-matrix-invite-deny",
+      clientAdminRole: "admin" as const,
+      clientMfaSatisfied: true,
+    };
+    for (const role of ["moderator", "pathways", "lead", "pending"] as const) {
+      await expect(listInvitations(claimsFor(role), write)).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+      await expect(revokeInvite(claimsFor(role), write)).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+      await expect(reissueInvite(claimsFor(role), write)).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+      await expect(
+        addDocAffiliation(claimsFor(role), { label: "should-not-create", ...write }),
+      ).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    }
+  });
+
+  it("admin without mfa_satisfied is denied invite list; with mfa_satisfied is allowed", async () => {
+    await expect(listInvitations(claimsFor("admin"))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    await expect(
+      listInvitations({ ...claimsFor("admin")!, mfaSatisfied: true }),
+    ).resolves.toEqual(expect.any(Array));
   });
 });

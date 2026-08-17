@@ -11,7 +11,18 @@ const BASE = {
 };
 
 describe("audit metadata PII denylist (FR-018)", () => {
-  it.each(["email", "name", "first_name", "last_name", "password", "token", "secret", "mfa"])(
+  it.each([
+    "email",
+    "name",
+    "first_name",
+    "last_name",
+    "password",
+    "token",
+    "secret",
+    "mfa",
+    "doc",
+    "doc_affiliation",
+  ])(
     "rejects metadata key %s",
     async (key) => {
       await expect(
@@ -31,6 +42,17 @@ describe("audit metadata PII denylist (FR-018)", () => {
         writeAudit(tx, {
           ...BASE,
           metadata: { unknown: true, reason: "generic" },
+        }),
+      ),
+    ).resolves.toBeUndefined();
+  });
+
+  it("accepts non-PII join-slice metadata keys", async () => {
+    await expect(
+      withRls({}, (tx) =>
+        writeAudit(tx, {
+          ...BASE,
+          metadata: { count: 2, program_role: "pathways", setting: "doc_affiliation", op: "add", has_reason: true },
         }),
       ),
     ).resolves.toBeUndefined();
