@@ -128,6 +128,24 @@ Acceptable for this slice; flag for real browser-based a11y testing
 (e.g. Playwright + axe) before the Phase 2 pre-launch accessibility
 review.
 
+**CTA click uniqueness (announcements slice, 2026-08-17).** Tracking is
+unique-per-user-per-announcement, not unique-per-button. A user who
+clicks both primary and secondary CTAs on one banner produces **one**
+analytics event (whichever they clicked first). The `slot` value on
+`announcement_cta_clicks` records only which button was first, not a
+per-button breakdown. Repeat clicks still redirect if the banner is
+eligible; they do not insert a second row or emit a second unique
+event. There is no audit row for CTA clicks (impressions/clicks are
+analytics, not audit). If per-button CTR is ever needed, the primary
+key on `announcement_cta_clicks` must change from
+`(user_id, announcement_id)` to include `slot`.
+
+Basis: PRD v1.1 §2 Banner CTA CTR — “Unique CTA clicks ÷ unique
+impressions, per active announcement” — read with spec SC-009 (unique
+CTA click does not increase on repeat click for the same member and
+announcement). That is a unique-member reading of the §2 CTR
+definition, not unique-per-button.
+
 ---
 
 ## Still fully open, not yet assumed or addressed
@@ -142,4 +160,4 @@ Q15 (budget ceiling).
 
 **Log maintained by:** solo developer, per constitution governance.
 
-**Last updated:** 2026-08-13
+**Last updated:** 2026-08-17

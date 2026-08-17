@@ -155,6 +155,237 @@ async function seedResources(): Promise<void> {
   }
 }
 
+async function seedAnnouncements(): Promise<void> {
+  const admin = await migrator.user.findUnique({
+    where: { emailLookup: hmacEmailLookup("admin@local") },
+  });
+  if (!admin) {
+    throw new Error("seed admin@local is required before announcements");
+  }
+
+  const now = Date.now();
+  const fixtures: {
+    headline: string;
+    visibility: string[];
+    activatesAt: Date;
+    expiresAt: Date;
+    deletedAt: Date | null;
+  }[] = [
+    {
+      headline: "Seed shared banner",
+      visibility: ["all_authenticated"],
+      activatesAt: new Date(now - 60_000),
+      expiresAt: new Date(now + 7 * 24 * 60 * 60_000),
+      deletedAt: null,
+    },
+    {
+      headline: "Seed Pathways banner A",
+      visibility: ["pathways"],
+      activatesAt: new Date(now - 3 * 60_000),
+      expiresAt: new Date(now + 7 * 24 * 60 * 60_000),
+      deletedAt: null,
+    },
+    {
+      headline: "Seed Pathways banner B",
+      visibility: ["pathways"],
+      activatesAt: new Date(now - 2 * 60_000),
+      expiresAt: new Date(now + 7 * 24 * 60 * 60_000),
+      deletedAt: null,
+    },
+    {
+      headline: "Seed Pathways banner C",
+      visibility: ["pathways"],
+      activatesAt: new Date(now - 1 * 60_000),
+      expiresAt: new Date(now + 7 * 24 * 60 * 60_000),
+      deletedAt: null,
+    },
+    {
+      headline: "Seed LEAD banner",
+      visibility: ["lead"],
+      activatesAt: new Date(now - 60_000),
+      expiresAt: new Date(now + 7 * 24 * 60 * 60_000),
+      deletedAt: null,
+    },
+    {
+      headline: "Seed both-program banner",
+      visibility: ["pathways", "lead"],
+      activatesAt: new Date(now - 60_000),
+      expiresAt: new Date(now + 7 * 24 * 60 * 60_000),
+      deletedAt: null,
+    },
+    {
+      headline: "Seed scheduled banner",
+      visibility: ["all_authenticated"],
+      activatesAt: new Date(now + 7 * 24 * 60 * 60_000),
+      expiresAt: new Date(now + 14 * 24 * 60 * 60_000),
+      deletedAt: null,
+    },
+    {
+      headline: "Seed expired banner",
+      visibility: ["all_authenticated"],
+      activatesAt: new Date(now - 14 * 24 * 60 * 60_000),
+      expiresAt: new Date(now - 7 * 24 * 60 * 60_000),
+      deletedAt: null,
+    },
+    {
+      headline: "Seed withdrawn banner",
+      visibility: ["all_authenticated"],
+      activatesAt: new Date(now - 60_000),
+      expiresAt: new Date(now + 7 * 24 * 60 * 60_000),
+      deletedAt: new Date(),
+    },
+  ];
+
+  for (const fixture of fixtures) {
+    const existing = await migrator.announcement.findFirst({
+      where: { headline: fixture.headline },
+    });
+    if (existing) {
+      continue;
+    }
+    await migrator.announcement.create({
+      data: {
+        headline: fixture.headline,
+        body: `Body for ${fixture.headline}`,
+        visibility: fixture.visibility,
+        activatesAt: fixture.activatesAt,
+        expiresAt: fixture.expiresAt,
+        createdBy: admin.id,
+        deletedAt: fixture.deletedAt,
+      },
+    });
+  }
+}
+
+async function seedEvents(): Promise<void> {
+  const admin = await migrator.user.findUnique({
+    where: { emailLookup: hmacEmailLookup("admin@local") },
+  });
+  if (!admin) {
+    throw new Error("seed admin@local is required before events");
+  }
+
+  const now = Date.now();
+  const fixtures: {
+    title: string;
+    visibility: string[];
+    startsAt: Date;
+    endsAt: Date;
+    cancelledAt: Date | null;
+    isVirtual: boolean;
+    joinUrl: string | null;
+    capacity: number | null;
+  }[] = [
+    {
+      title: "Seed shared event",
+      visibility: ["all_authenticated"],
+      startsAt: new Date(now + 2 * 24 * 60 * 60_000),
+      endsAt: new Date(now + 2 * 24 * 60 * 60_000 + 60 * 60_000),
+      cancelledAt: null,
+      isVirtual: false,
+      joinUrl: null,
+      capacity: null,
+    },
+    {
+      title: "Seed Pathways event",
+      visibility: ["pathways"],
+      startsAt: new Date(now + 3 * 24 * 60 * 60_000),
+      endsAt: new Date(now + 3 * 24 * 60 * 60_000 + 60 * 60_000),
+      cancelledAt: null,
+      isVirtual: false,
+      joinUrl: null,
+      capacity: null,
+    },
+    {
+      title: "Seed LEAD event",
+      visibility: ["lead"],
+      startsAt: new Date(now + 4 * 24 * 60 * 60_000),
+      endsAt: new Date(now + 4 * 24 * 60 * 60_000 + 60 * 60_000),
+      cancelledAt: null,
+      isVirtual: false,
+      joinUrl: null,
+      capacity: null,
+    },
+    {
+      title: "Seed both-program event",
+      visibility: ["pathways", "lead"],
+      startsAt: new Date(now + 5 * 24 * 60 * 60_000),
+      endsAt: new Date(now + 5 * 24 * 60 * 60_000 + 60 * 60_000),
+      cancelledAt: null,
+      isVirtual: false,
+      joinUrl: null,
+      capacity: null,
+    },
+    {
+      title: "Seed cancelled event",
+      visibility: ["all_authenticated"],
+      startsAt: new Date(now + 6 * 24 * 60 * 60_000),
+      endsAt: new Date(now + 6 * 24 * 60 * 60_000 + 60 * 60_000),
+      cancelledAt: new Date(),
+      isVirtual: false,
+      joinUrl: null,
+      capacity: null,
+    },
+    {
+      title: "Seed virtual outside reveal",
+      visibility: ["all_authenticated"],
+      startsAt: new Date(now + 90 * 60_000),
+      endsAt: new Date(now + 150 * 60_000),
+      cancelledAt: null,
+      isVirtual: true,
+      joinUrl: "https://meet.example.test/outside",
+      capacity: null,
+    },
+    {
+      title: "Seed virtual inside reveal",
+      visibility: ["all_authenticated"],
+      startsAt: new Date(now - 30 * 60_000),
+      endsAt: new Date(now + 90 * 60_000),
+      cancelledAt: null,
+      isVirtual: true,
+      joinUrl: "https://meet.example.test/inside",
+      capacity: null,
+    },
+    {
+      title: "Seed capacity-1 event",
+      visibility: ["all_authenticated"],
+      startsAt: new Date(now + 7 * 24 * 60 * 60_000),
+      endsAt: new Date(now + 7 * 24 * 60 * 60_000 + 60 * 60_000),
+      cancelledAt: null,
+      isVirtual: false,
+      joinUrl: null,
+      capacity: 1,
+    },
+  ];
+
+  for (const fixture of fixtures) {
+    const existing = await migrator.event.findFirst({
+      where: { title: fixture.title },
+    });
+    if (existing) {
+      continue;
+    }
+    const created = await migrator.event.create({
+      data: {
+        title: fixture.title,
+        description: `Body for ${fixture.title}`,
+        startsAt: fixture.startsAt,
+        endsAt: fixture.endsAt,
+        visibility: fixture.visibility,
+        isVirtual: fixture.isVirtual,
+        capacity: fixture.capacity,
+        createdBy: admin.id,
+        cancelledAt: fixture.cancelledAt,
+      },
+    });
+    if (fixture.joinUrl) {
+      await migrator.eventJoinLink.create({
+        data: { eventId: created.id, url: fixture.joinUrl },
+      });
+    }
+  }
+}
+
 async function seed(): Promise<void> {
   const passwordHash = await hashPassword(env().SEED_PASSWORD);
   const mfaSecret = env().SEED_MFA_SECRET
@@ -228,6 +459,8 @@ async function seed(): Promise<void> {
   }
 
   await seedResources();
+  await seedAnnouncements();
+  await seedEvents();
 }
 
 seed()

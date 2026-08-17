@@ -1,3 +1,4 @@
+import { track } from "@/lib/analytics/track";
 import type { Prisma } from "@prisma/client";
 import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
@@ -29,6 +30,8 @@ export type MemberResource = {
   tags: string[];
   updatedAt: Date;
   thumbnailHref: string;
+  fileMimeType: string;
+  playbackHref: string | null;
 };
 
 function authorizeMember(
@@ -103,7 +106,9 @@ function toMemberResource(row: {
   sourceLabel: string;
   tags: string[];
   updatedAt: Date;
+  fileMimeType: string;
 }): MemberResource {
+  const isVideo = row.fileMimeType === "video/mp4";
   return {
     id: row.id,
     title: row.title,
@@ -112,6 +117,8 @@ function toMemberResource(row: {
     tags: row.tags,
     updatedAt: row.updatedAt,
     thumbnailHref: `/app/resources/${row.id}/thumbnail`,
+    fileMimeType: row.fileMimeType,
+    playbackHref: isVideo ? `/app/resources/${row.id}/file` : null,
   };
 }
 
@@ -167,6 +174,7 @@ async function loadLiveVisible(
           tags: true,
           updatedAt: true,
           thumbnailObjectKey: true,
+          fileMimeType: true,
         },
       }),
   );
@@ -189,7 +197,15 @@ export async function getResource(
   const claims = authorizeMember(session, options);
   const rows = await loadLiveVisible(claims, { id });
   const row = rows[0];
-  return row ? toMemberResource(row) : null;
+  if (!row) {
+    return null;
+  }
+  track("resource_viewed", {
+    distinctId: claims.userId,
+    programRole: claims.programRole,
+    adminRole: claims.adminRole,
+  });
+  return toMemberResource(row);
 }
 
 export async function grantThumbnail(

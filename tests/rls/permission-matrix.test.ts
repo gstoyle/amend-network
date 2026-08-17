@@ -23,6 +23,8 @@ function isBuilt(capability: Capability): boolean {
     case "view_shared_resources":
     case "view_role_specific_resources":
     case "download_resources":
+    case "view_announcements":
+    case "create_manage_announcements":
       return true;
     case "view_events":
     case "rsvp_events":
@@ -32,8 +34,6 @@ function isBuilt(capability: Capability): boolean {
     case "view_forum":
     case "post_forum":
     case "moderate_forum":
-    case "view_announcements":
-    case "create_manage_announcements":
     case "assign_change_roles":
     case "view_analytics":
     case "change_system_configuration":
@@ -152,6 +152,70 @@ async function rlsCanSeeLiveResource(role: MatrixRole, visibility: string[]): Pr
   }
 }
 
+async function rlsCanSeeLiveAnnouncement(role: MatrixRole): Promise<boolean> {
+  const session = claimsFor(role);
+  const id = randomUUID();
+  await migrator.$executeRaw`
+    INSERT INTO announcements (
+      id, headline, body, activates_at, expires_at, visibility, dismissible,
+      created_by, created_at, updated_at
+    ) VALUES (
+      ${id}::uuid, ${`matrix-ann-${id}`}, 'b',
+      CURRENT_TIMESTAMP - interval '1 minute', CURRENT_TIMESTAMP + interval '1 hour',
+      '{all_authenticated}', true, ${id}::uuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+    )
+  `;
+  try {
+    const rows = await withRls(
+      session
+        ? {
+            userId: session.userId,
+            programRole: session.programRole,
+            adminRole: session.adminRole,
+            status: session.status,
+          }
+        : {},
+      (tx) =>
+        tx.$queryRaw<{ id: string }[]>`
+          SELECT id FROM announcements WHERE id = ${id}::uuid
+        `,
+    );
+    return rows.length > 0;
+  } finally {
+    await migrator.$executeRaw`DELETE FROM announcements WHERE id = ${id}::uuid`;
+  }
+}
+
+async function rlsCanInsertAnnouncement(role: MatrixRole): Promise<boolean> {
+  const session = claimsFor(role);
+  const id = randomUUID();
+  try {
+    await withRls(
+      {
+        userId: session?.userId,
+        programRole: session?.programRole ?? "none",
+        adminRole: session?.adminRole ?? "none",
+        status: session?.status ?? "",
+      },
+      (tx) =>
+        tx.$executeRaw`
+          INSERT INTO announcements (
+            id, headline, body, activates_at, expires_at, visibility, dismissible,
+            created_by, created_at, updated_at
+          ) VALUES (
+            ${id}::uuid, ${`matrix-ins-${id}`}, 'b',
+            CURRENT_TIMESTAMP - interval '1 minute', CURRENT_TIMESTAMP + interval '1 hour',
+            '{all_authenticated}', true, ${id}::uuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+          )
+        `,
+    );
+    await migrator.$executeRaw`DELETE FROM announcements WHERE id = ${id}::uuid`;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function rlsCanSeePending(role: MatrixRole): Promise<boolean> {
   const pending = await migrator.user.findFirst({ where: { status: "pending" } });
   if (!pending) {
@@ -198,6 +262,10 @@ function rlsVerdict(
       return roleSpecificVisible ? "allow" : "deny";
     case "download_resources":
       return sharedVisible ? "allow" : "deny";
+    case "view_announcements":
+      return sharedVisible ? "allow" : "deny";
+    case "create_manage_announcements":
+      return insertAllowed ? "allow" : "deny";
     case "view_events":
     case "rsvp_events":
     case "create_edit_delete_events":
@@ -206,8 +274,6 @@ function rlsVerdict(
     case "view_forum":
     case "post_forum":
     case "moderate_forum":
-    case "view_announcements":
-    case "create_manage_announcements":
     case "assign_change_roles":
     case "view_analytics":
     case "change_system_configuration":
@@ -245,11 +311,17 @@ describe("RLS permission matrix (GUCs only, no requireRole)", () => {
       const pendingVisible =
         capability === "approve_deny_registrations" ? await rlsCanSeePending(role) : false;
       const insertAllowed =
-        capability === "upload_edit_delete_resources" ? await rlsCanInsertResource(role) : false;
+        capability === "upload_edit_delete_resources"
+          ? await rlsCanInsertResource(role)
+          : capability === "create_manage_announcements"
+            ? await rlsCanInsertAnnouncement(role)
+            : false;
       const sharedVisible =
         capability === "view_shared_resources" || capability === "download_resources"
           ? await rlsCanSeeLiveResource(role, ["all_authenticated"])
-          : false;
+          : capability === "view_announcements"
+            ? await rlsCanSeeLiveAnnouncement(role)
+            : false;
       const roleSpecificVisible =
         capability === "view_role_specific_resources"
           ? await rlsCanSeeLiveResource(role, role === "lead" ? ["lead"] : ["pathways"])

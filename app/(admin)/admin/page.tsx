@@ -34,6 +34,9 @@ export default async function AdminPage() {
         <Link className="text-foreground underline" href="/admin/resources">
           Resources
         </Link>
+        <Link className="text-foreground underline" href="/admin/announcements">
+          Announcements
+        </Link>
       </nav>
     </div>
   );

@@ -34,7 +34,11 @@ export default async function AdminResourcesPage() {
       <ul className="flex flex-col gap-3">
         {items.map((item) => (
           <li className="text-foreground" key={item.id}>
-            <p className="font-medium">{item.title}</p>
+            <p className="font-medium">
+              <Link className="underline" href={`/admin/resources/${item.id}`}>
+                {item.title}
+              </Link>
+            </p>
             <p className="text-sm">
               {item.sourceLabel} · {item.visibility.join(", ")}
               {item.deletedAt ? " · withdrawn" : ""}

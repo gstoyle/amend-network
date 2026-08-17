@@ -1,3 +1,4 @@
+import { track } from "@/lib/analytics/track";
 import { writeAudit } from "@/lib/audit/write";
 import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
@@ -117,6 +118,11 @@ export async function grantDownload(
   if (!granted) {
     return null;
   }
+  track("resource_downloaded", {
+    distinctId: claims.userId,
+    programRole: claims.programRole,
+    adminRole: claims.adminRole,
+  });
   return presignGet(granted, FILE_EXPIRES_SECONDS);
 }
 

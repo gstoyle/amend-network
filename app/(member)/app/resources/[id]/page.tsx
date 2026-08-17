@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { ResourceVideo } from "@/components/resource-video";
 import { AuthDeniedError, isPendingSession, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
 import { getResource } from "@/lib/resources/list";
@@ -52,11 +53,15 @@ export default async function MemberResourceDetailPage({
         </ul>
       ) : null}
       <p>Last updated {lastUpdated}</p>
-      <p>
-        <a className="underline" href={`/app/resources/${resource.id}/download`}>
-          Download
-        </a>
-      </p>
+      {resource.fileMimeType === "video/mp4" && resource.playbackHref ? (
+        <ResourceVideo src={resource.playbackHref} />
+      ) : (
+        <p>
+          <a className="underline" href={`/app/resources/${resource.id}/download`}>
+            Download
+          </a>
+        </p>
+      )}
     </div>
   );
 }

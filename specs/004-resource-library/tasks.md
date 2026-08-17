@@ -168,12 +168,12 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 6 ⚠️ fail first
 
-- [ ] T036 [P] [US6] Write failing edit/replace/visibility-tighten tests in `tests/integration/resource-edit.test.ts`
+- [x] T036 [P] [US6] Write failing edit/replace/visibility-tighten tests in `tests/integration/resource-edit.test.ts`
 
 ### Implementation for User Story 6
 
-- [ ] T037 [US6] Implement metadata update and file/thumb replace (scan, promote, delete old live keys on success only) in `lib/resources/edit.ts`
-- [ ] T038 [US6] Build `/admin/resources/[id]` edit UI in `app/(admin)/admin/resources/[id]/page.tsx` using `components/resource-form.tsx`
+- [x] T037 [US6] Implement metadata update and file/thumb replace (scan, promote, delete old live keys on success only) in `lib/resources/edit.ts`
+- [x] T038 [US6] Build `/admin/resources/[id]` edit UI in `app/(admin)/admin/resources/[id]/page.tsx` using `components/resource-form.tsx`
 
 **Checkpoint**: Spec US6 independent test passes. FR-016.
 
@@ -187,12 +187,12 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 7 ⚠️ fail first
 
-- [ ] T039 [P] [US7] Write failing withdraw/withholding/retain-object tests in `tests/integration/resource-soft-delete.test.ts`
+- [x] T039 [P] [US7] Write failing withdraw/withholding/retain-object tests in `tests/integration/resource-soft-delete.test.ts`
 
 ### Implementation for User Story 7
 
-- [ ] T040 [US7] Implement soft-delete (`deleted_at`, objects kept, `resource_deleted`) in `lib/resources/edit.ts`
-- [ ] T041 [US7] Add withdraw control on `app/(admin)/admin/resources/[id]/page.tsx` and withdrawn state on `app/(admin)/admin/resources/page.tsx`
+- [x] T040 [US7] Implement soft-delete (`deleted_at`, objects kept, `resource_deleted`) in `lib/resources/edit.ts`
+- [x] T041 [US7] Add withdraw control on `app/(admin)/admin/resources/[id]/page.tsx` and withdrawn state on `app/(admin)/admin/resources/page.tsx`
 
 **Checkpoint**: Spec US7 independent test passes. FR-017.
 
@@ -206,11 +206,11 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 8 ⚠️ fail first
 
-- [ ] T042 [P] [US8] Write failing in-page play vs withhold vs non-video tests in `tests/integration/resource-video.test.ts`
+- [x] T042 [P] [US8] Write failing in-page play vs withhold vs non-video tests in `tests/integration/resource-video.test.ts`
 
 ### Implementation for User Story 8
 
-- [ ] T043 [US8] Add presentational player in `components/resource-video.tsx` and render it from `app/(member)/app/resources/[id]/page.tsx` when `file_mime_type` is `video/mp4` using `app/(member)/app/resources/[id]/file/route.ts`
+- [x] T043 [US8] Add presentational player in `components/resource-video.tsx` and render it from `app/(member)/app/resources/[id]/page.tsx` when `file_mime_type` is `video/mp4` using `app/(member)/app/resources/[id]/file/route.ts`
 
 **Checkpoint**: Spec US8 independent test passes. FR-019.
 
@@ -220,11 +220,11 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 **Purpose**: Nav, analytics opacity, a11y, quickstart.
 
-- [ ] T044 [P] Add axe coverage for `/app/resources`, `/app/resources/[id]`, `/admin/resources*` in `tests/a11y/`
-- [ ] T045 [P] Add Resources to member nav in `app/(member)/layout.tsx` (and existing nav component if that is where links live)
-- [ ] T046 [P] Link Resources from `app/(admin)/admin/page.tsx`
-- [ ] T047 [P] Add no-op-unless-keyed tracker in `lib/analytics/track.ts` and emit opaque `resource_viewed` / `resource_downloaded` (ids + role labels only) from `lib/resources/list.ts` and `lib/resources/download.ts`
-- [ ] T048 Run [quickstart.md](./quickstart.md) locally (`pnpm test`, `pnpm test:rls`, `pnpm test:a11y`, `pnpm typecheck`, `pnpm lint`)
+- [x] T044 [P] Add axe coverage for `/app/resources`, `/app/resources/[id]`, `/admin/resources*` in `tests/a11y/`
+- [x] T045 [P] Add Resources to member nav in `app/(member)/layout.tsx` (and existing nav component if that is where links live)
+- [x] T046 [P] Link Resources from `app/(admin)/admin/page.tsx`
+- [x] T047 [P] Add no-op-unless-keyed tracker in `lib/analytics/track.ts` and emit opaque `resource_viewed` / `resource_downloaded` (ids + role labels only) from `lib/resources/list.ts` and `lib/resources/download.ts`
+- [x] T048 Run [quickstart.md](./quickstart.md) locally (`pnpm test`, `pnpm test:rls`, `pnpm test:a11y`, `pnpm typecheck`, `pnpm lint`)
 
 ---
 

@@ -6,6 +6,7 @@ import type { AdminRole } from "@/lib/auth/types";
 import { listPendingRegistrations } from "@/lib/registration/approve";
 import { addDocAffiliation } from "@/lib/registration/doc-affiliations";
 import { sendManualInvite } from "@/lib/registration/invite";
+import { listAdminAnnouncements, createAnnouncement } from "@/lib/announcements/publish";
 import { listAdminResources, mintIngestSlots } from "@/lib/resources/publish";
 import { claimsFor } from "@/tests/helpers/prd-matrix";
 
@@ -187,8 +188,10 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
   it("admin resources denies Moderator, Pathways, LEAD, and Pending (US1)", async () => {
     expect(authorizedFor("/admin/resources")).toBe(false);
     expect(authorizedFor("/admin/resources/new")).toBe(false);
+    expect(authorizedFor("/admin/resources/any-id")).toBe(false);
     expect(authorizedFor("/admin/resources", "session-id")).toBe(true);
     expect(authorizedFor("/admin/resources/new", "session-id")).toBe(true);
+    expect(authorizedFor("/admin/resources/any-id", "session-id")).toBe(true);
 
     const resourcesAccess = { admin: ["admin", "super_admin"] satisfies AdminRole[], mfa: true };
     expect(() => requireRole(claimsFor("moderator"), resourcesAccess)).toThrowError(
@@ -213,6 +216,53 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
     for (const role of ["moderator", "pathways", "lead", "pending"] as const) {
       await expect(mintIngestSlots(claimsFor(role))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
       await expect(listAdminResources(claimsFor(role))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    }
+  });
+
+  it("admin announcements denies Moderator, Pathways, LEAD, and Pending (US1)", async () => {
+    expect(authorizedFor("/admin/announcements")).toBe(false);
+    expect(authorizedFor("/admin/announcements/new")).toBe(false);
+    expect(authorizedFor("/admin/announcements/any-id")).toBe(false);
+    expect(authorizedFor("/admin/announcements", "session-id")).toBe(true);
+    expect(authorizedFor("/admin/announcements/new", "session-id")).toBe(true);
+    expect(authorizedFor("/admin/announcements/any-id", "session-id")).toBe(true);
+
+    const announcementsAccess = { admin: ["admin", "super_admin"] satisfies AdminRole[], mfa: true };
+    expect(() => requireRole(claimsFor("moderator"), announcementsAccess)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(() => requireRole(claimsFor("pathways"), announcementsAccess)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(() => requireRole(claimsFor("lead"), announcementsAccess)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(() => requireRole(claimsFor("pending"), announcementsAccess)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(() => requireRole(claimsFor("admin"), announcementsAccess)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(
+      requireRole({ ...claimsFor("admin")!, mfaSatisfied: true }, announcementsAccess).adminRole,
+    ).toBe("admin");
+
+    const createInput = {
+      headline: "unauthorized",
+      body: "body",
+      visibility: ["all_authenticated"],
+      activatesAt: new Date(),
+      expiresAt: new Date(Date.now() + 60_000),
+      ip: "127.0.0.1",
+      userAgent: "vitest-announcement-deny",
+    };
+    for (const role of ["moderator", "pathways", "lead", "pending"] as const) {
+      await expect(createAnnouncement(claimsFor(role), createInput)).rejects.toThrowError(
+        AUTH_FAILURE_MESSAGE,
+      );
+      await expect(listAdminAnnouncements(claimsFor(role))).rejects.toThrowError(
+        AUTH_FAILURE_MESSAGE,
+      );
     }
   });
 

@@ -5,6 +5,8 @@ import { listVisibleRecords } from "@/lib/db/visibility";
 import { listPendingRegistrations } from "@/lib/registration/approve";
 import { addDocAffiliation } from "@/lib/registration/doc-affiliations";
 import { listInvitations, reissueInvite, revokeInvite } from "@/lib/registration/invite";
+import { createAnnouncement } from "@/lib/announcements/publish";
+import { listEligibleBanners } from "@/lib/announcements/list";
 import { grantDownload } from "@/lib/resources/download";
 import { listResources } from "@/lib/resources/list";
 import { mintIngestSlots } from "@/lib/resources/publish";
@@ -29,6 +31,8 @@ function isBuilt(_capability: Capability): boolean {
     case "view_shared_resources":
     case "view_role_specific_resources":
     case "download_resources":
+    case "view_announcements":
+    case "create_manage_announcements":
       return true;
     case "view_events":
     case "rsvp_events":
@@ -38,8 +42,6 @@ function isBuilt(_capability: Capability): boolean {
     case "view_forum":
     case "post_forum":
     case "moderate_forum":
-    case "view_announcements":
-    case "create_manage_announcements":
     case "assign_change_roles":
     case "view_analytics":
     case "change_system_configuration":
@@ -108,6 +110,30 @@ async function appAllows(role: MatrixRole, capability: Capability): Promise<bool
         return false;
       }
     }
+    case "view_announcements": {
+      try {
+        await listEligibleBanners(session);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+    case "create_manage_announcements": {
+      try {
+        await createAnnouncement(session ? { ...session, mfaSatisfied: true } : null, {
+          headline: "matrix",
+          body: "body",
+          visibility: ["all_authenticated"],
+          activatesAt: new Date(),
+          expiresAt: new Date(Date.now() - 1000),
+          ip: "127.0.0.1",
+          userAgent: "vitest-matrix-announcement",
+        });
+        return true;
+      } catch {
+        return false;
+      }
+    }
     case "view_events":
     case "rsvp_events":
     case "create_edit_delete_events":
@@ -116,8 +142,6 @@ async function appAllows(role: MatrixRole, capability: Capability): Promise<bool
     case "view_forum":
     case "post_forum":
     case "moderate_forum":
-    case "view_announcements":
-    case "create_manage_announcements":
     case "assign_change_roles":
     case "view_analytics":
     case "change_system_configuration":
