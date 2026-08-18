@@ -25,10 +25,10 @@ function isBuilt(capability: Capability): boolean {
     case "download_resources":
     case "view_announcements":
     case "create_manage_announcements":
-      return true;
+    case "create_edit_delete_events":
     case "view_events":
     case "rsvp_events":
-    case "create_edit_delete_events":
+      return true;
     case "view_directory":
     case "appear_in_directory":
     case "view_forum":
@@ -152,6 +152,79 @@ async function rlsCanSeeLiveResource(role: MatrixRole, visibility: string[]): Pr
   }
 }
 
+async function rlsCanSeeUncancelledEvent(role: MatrixRole): Promise<boolean> {
+  const session = claimsFor(role);
+  const id = randomUUID();
+  await migrator.$executeRaw`
+    INSERT INTO events (
+      id, title, description, starts_at, ends_at, is_virtual, visibility,
+      created_by, created_at, updated_at
+    ) VALUES (
+      ${id}::uuid, ${`matrix-evt-see-${id}`}, 'b',
+      CURRENT_TIMESTAMP + interval '2 hours', CURRENT_TIMESTAMP + interval '3 hours',
+      false, '{all_authenticated}', ${id}::uuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+    )
+  `;
+  try {
+    const rows = await withRls(
+      session
+        ? {
+            userId: session.userId,
+            programRole: session.programRole,
+            adminRole: session.adminRole,
+            status: session.status,
+          }
+        : {},
+      (tx) =>
+        tx.$queryRaw<{ id: string }[]>`
+          SELECT id FROM events WHERE id = ${id}::uuid
+        `,
+    );
+    return rows.length > 0;
+  } finally {
+    await migrator.$executeRaw`DELETE FROM events WHERE id = ${id}::uuid`;
+  }
+}
+
+async function rlsCanRsvpEvent(role: MatrixRole): Promise<boolean> {
+  const session = claimsFor(role);
+  const eventId = randomUUID();
+  const userId = session?.userId ?? randomUUID();
+  await migrator.$executeRaw`
+    INSERT INTO events (
+      id, title, description, starts_at, ends_at, is_virtual, visibility,
+      created_by, created_at, updated_at
+    ) VALUES (
+      ${eventId}::uuid, ${`matrix-evt-rsvp-${eventId}`}, 'b',
+      CURRENT_TIMESTAMP + interval '2 hours', CURRENT_TIMESTAMP + interval '3 hours',
+      false, '{all_authenticated}', ${eventId}::uuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+    )
+  `;
+  try {
+    await withRls(
+      session
+        ? {
+            userId: session.userId,
+            programRole: session.programRole,
+            adminRole: session.adminRole,
+            status: session.status,
+          }
+        : {},
+      (tx) =>
+        tx.$executeRaw`
+          INSERT INTO event_rsvps (user_id, event_id, status, created_at, updated_at)
+          VALUES (${userId}::uuid, ${eventId}::uuid, 'yes', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        `,
+    );
+    return true;
+  } catch {
+    return false;
+  } finally {
+    await migrator.$executeRaw`DELETE FROM event_rsvps WHERE event_id = ${eventId}::uuid`;
+    await migrator.$executeRaw`DELETE FROM events WHERE id = ${eventId}::uuid`;
+  }
+}
+
 async function rlsCanSeeLiveAnnouncement(role: MatrixRole): Promise<boolean> {
   const session = claimsFor(role);
   const id = randomUUID();
@@ -216,6 +289,36 @@ async function rlsCanInsertAnnouncement(role: MatrixRole): Promise<boolean> {
   }
 }
 
+async function rlsCanInsertEvent(role: MatrixRole): Promise<boolean> {
+  const session = claimsFor(role);
+  const id = randomUUID();
+  try {
+    await withRls(
+      {
+        userId: session?.userId,
+        programRole: session?.programRole ?? "none",
+        adminRole: session?.adminRole ?? "none",
+        status: session?.status ?? "",
+      },
+      (tx) =>
+        tx.$executeRaw`
+          INSERT INTO events (
+            id, title, description, starts_at, ends_at, is_virtual, visibility,
+            created_by, created_at, updated_at
+          ) VALUES (
+            ${id}::uuid, ${`matrix-evt-${id}`}, 'b',
+            CURRENT_TIMESTAMP + interval '2 hours', CURRENT_TIMESTAMP + interval '3 hours',
+            false, '{all_authenticated}', ${id}::uuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+          )
+        `,
+    );
+    await migrator.$executeRaw`DELETE FROM events WHERE id = ${id}::uuid`;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function rlsCanSeePending(role: MatrixRole): Promise<boolean> {
   const pending = await migrator.user.findFirst({ where: { status: "pending" } });
   if (!pending) {
@@ -244,6 +347,7 @@ function rlsVerdict(
   insertAllowed: boolean,
   sharedVisible: boolean,
   roleSpecificVisible: boolean,
+  rsvpAllowed: boolean,
 ): MatrixVerdict {
   switch (capability) {
     case "log_in":
@@ -266,9 +370,12 @@ function rlsVerdict(
       return sharedVisible ? "allow" : "deny";
     case "create_manage_announcements":
       return insertAllowed ? "allow" : "deny";
-    case "view_events":
-    case "rsvp_events":
     case "create_edit_delete_events":
+      return insertAllowed ? "allow" : "deny";
+    case "view_events":
+      return sharedVisible ? "allow" : "deny";
+    case "rsvp_events":
+      return rsvpAllowed ? "allow" : "deny";
     case "view_directory":
     case "appear_in_directory":
     case "view_forum":
@@ -315,17 +422,22 @@ describe("RLS permission matrix (GUCs only, no requireRole)", () => {
           ? await rlsCanInsertResource(role)
           : capability === "create_manage_announcements"
             ? await rlsCanInsertAnnouncement(role)
-            : false;
+            : capability === "create_edit_delete_events"
+              ? await rlsCanInsertEvent(role)
+              : false;
       const sharedVisible =
         capability === "view_shared_resources" || capability === "download_resources"
           ? await rlsCanSeeLiveResource(role, ["all_authenticated"])
           : capability === "view_announcements"
             ? await rlsCanSeeLiveAnnouncement(role)
-            : false;
+            : capability === "view_events"
+              ? await rlsCanSeeUncancelledEvent(role)
+              : false;
       const roleSpecificVisible =
         capability === "view_role_specific_resources"
           ? await rlsCanSeeLiveResource(role, role === "lead" ? ["lead"] : ["pathways"])
           : false;
+      const rsvpAllowed = capability === "rsvp_events" ? await rlsCanRsvpEvent(role) : false;
       const expected = PRD_MATRIX[capability][role];
       if (!isBuilt(capability)) {
         expect(["deny", "fail-closed"]).toContain(expected);
@@ -340,6 +452,7 @@ describe("RLS permission matrix (GUCs only, no requireRole)", () => {
         insertAllowed,
         sharedVisible,
         roleSpecificVisible,
+        rsvpAllowed,
       );
       expect(actual).toBe(expected);
     },

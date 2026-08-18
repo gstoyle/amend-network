@@ -65,17 +65,17 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 1 ⚠️ fail first
 
-- [ ] T009 [P] [US1] Write failing create success/validation tests in `tests/integration/event-publish.test.ts`
-- [ ] T010 [P] [US1] Write failing unauthorized deny for `/admin/events*` (Pathways, LEAD, Pending) and MFA-required staff in `tests/app/unauthorized-routes.test.ts`. Moderator must be **allowed** (unlike announcements).
-- [ ] T011 [P] [US1] Mark `create_edit_delete_events` built in `tests/helpers/prd-matrix.ts`, `tests/app/permission-matrix.test.ts`, and `tests/rls/permission-matrix.test.ts`
+- [x] T009 [P] [US1] Write failing create success/validation tests in `tests/integration/event-publish.test.ts`
+- [x] T010 [P] [US1] Write failing unauthorized deny for `/admin/events*` (Pathways, LEAD, Pending) and MFA-required staff in `tests/app/unauthorized-routes.test.ts`. Moderator must be **allowed** (unlike announcements).
+- [x] T011 [P] [US1] Mark `create_edit_delete_events` built in `tests/helpers/prd-matrix.ts`, `tests/app/permission-matrix.test.ts`, and `tests/rls/permission-matrix.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T012 [US1] Implement markdown allowlist + URL/window/length validation in `lib/events/validate.ts`
-- [ ] T013 [US1] Implement create (INSERT event + optional `event_join_links` + `event_created` same transaction) in `lib/events/publish.ts`
-- [ ] T014 [US1] Build presentational form (no role logic) in `components/event-form.tsx`
-- [ ] T015 [US1] Build `/admin/events` and `/admin/events/new` with `requireRole({ admin: ["admin", "super_admin", "moderator"], mfa: true })` in `app/(admin)/admin/events/page.tsx` and `app/(admin)/admin/events/new/page.tsx`
-- [ ] T016 [US1] Add Events link on `app/(admin)/admin/page.tsx`
+- [x] T012 [US1] Implement markdown allowlist + URL/window/length validation in `lib/events/validate.ts`
+- [x] T013 [US1] Implement create (INSERT event + optional `event_join_links` + `event_created` same transaction) in `lib/events/publish.ts`
+- [x] T014 [US1] Build presentational form (no role logic) in `components/event-form.tsx`
+- [x] T015 [US1] Build `/admin/events` and `/admin/events/new` with `requireRole({ admin: ["admin", "super_admin", "moderator"], mfa: true })` in `app/(admin)/admin/events/page.tsx` and `app/(admin)/admin/events/new/page.tsx`
+- [x] T016 [US1] Add Events link on `app/(admin)/admin/page.tsx`
 
 **Checkpoint**: Spec US1 independent test passes.
 
@@ -89,15 +89,15 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 2 ⚠️ fail first
 
-- [ ] T017 [P] [US2] Write failing calendar/home/detail visibility tests in `tests/integration/event-calendar.test.ts`
-- [ ] T018 [P] [US2] Mark `view_events` built in `tests/helpers/prd-matrix.ts`, `tests/app/permission-matrix.test.ts`, and `tests/rls/permission-matrix.test.ts`
+- [x] T017 [P] [US2] Write failing calendar/home/detail visibility tests in `tests/integration/event-calendar.test.ts`
+- [x] T018 [P] [US2] Mark `view_events` built in `tests/helpers/prd-matrix.ts`, `tests/app/permission-matrix.test.ts`, and `tests/rls/permission-matrix.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T019 [US2] Implement visibility-filtered list (cancelled omitted for members) in `lib/events/list.ts`
-- [ ] T020 [US2] Build month/list toggle leaf (no role logic) in `components/event-calendar.tsx` and page `app/(member)/app/events/page.tsx`
-- [ ] T021 [US2] Build detail page (omit join URL until US7) in `app/(member)/app/events/[id]/page.tsx`
-- [ ] T022 [US2] Show upcoming visible events on `app/(member)/app/page.tsx`
+- [x] T019 [US2] Implement visibility-filtered list (cancelled omitted for members) in `lib/events/list.ts`
+- [x] T020 [US2] Build month/list toggle leaf (no role logic) in `components/event-calendar.tsx` and page `app/(member)/app/events/page.tsx`
+- [x] T021 [US2] Build detail page (omit join URL until US7) in `app/(member)/app/events/[id]/page.tsx`
+- [x] T022 [US2] Show upcoming visible events on `app/(member)/app/page.tsx`
 
 **Checkpoint**: Spec US2 independent test passes.
 
@@ -111,16 +111,16 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 3 ⚠️ fail first
 
-- [ ] T023 [P] [US3] Write failing RSVP / waitlist / withhold / change-answer tests in `tests/integration/event-rsvp.test.ts` (helper path; does **not** replace T003)
-- [ ] T024 [P] [US3] Mark `rsvp_events` built in `tests/helpers/prd-matrix.ts`, `tests/app/permission-matrix.test.ts`, and `tests/rls/permission-matrix.test.ts`
-- [ ] T025 [P] [US3] Write failing unauthorized RSVP POST cases in `tests/app/unauthorized-routes.test.ts`
+- [x] T023 [P] [US3] Write failing RSVP / waitlist / withhold / change-answer tests in `tests/integration/event-rsvp.test.ts` (helper path; does **not** replace T003)
+- [x] T024 [P] [US3] Mark `rsvp_events` built in `tests/helpers/prd-matrix.ts`, `tests/app/permission-matrix.test.ts`, and `tests/rls/permission-matrix.test.ts`
+- [x] T025 [P] [US3] Write failing unauthorized RSVP POST cases in `tests/app/unauthorized-routes.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T026 [US3] Extend `lib/analytics/track.ts` with `event_viewed` / `event_rsvp`, allowlisted `eventId` / `rsvpStatus` (`yes|no|maybe|waitlist`), and denylist `description` / `location` / `virtualLink`
-- [ ] T027 [US3] Implement RSVP upsert (row lock, waitlist, call `event_promote_oldest_waitlist`, `event_rsvp` audit, `track`) in `lib/events/rsvp.ts`
-- [ ] T028 [US3] Implement POST `/app/events/[id]/rsvp` in `app/(member)/app/events/[id]/rsvp/route.ts`
-- [ ] T029 [US3] Build RSVP leaf (no role logic) in `components/event-rsvp.tsx` and wire it on `app/(member)/app/events/[id]/page.tsx`; record `event_viewed` on successful detail load
+- [x] T026 [US3] Extend `lib/analytics/track.ts` with `event_viewed` / `event_rsvp`, allowlisted `eventId` / `rsvpStatus` (`yes|no|maybe|waitlist`), and denylist `description` / `location` / `virtualLink`
+- [x] T027 [US3] Implement RSVP upsert (row lock, waitlist, call `event_promote_oldest_waitlist`, `event_rsvp` audit, `track`) in `lib/events/rsvp.ts`
+- [x] T028 [US3] Implement POST `/app/events/[id]/rsvp` in `app/(member)/app/events/[id]/rsvp/route.ts`
+- [x] T029 [US3] Build RSVP leaf (no role logic) in `components/event-rsvp.tsx` and wire it on `app/(member)/app/events/[id]/page.tsx`; record `event_viewed` on successful detail load
 
 **Checkpoint**: Spec US3 independent test passes. T003 still required and green.
 

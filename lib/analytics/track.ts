@@ -4,7 +4,11 @@ export type AnalyticsEventName =
   | "resource_viewed"
   | "resource_downloaded"
   | "announcement_impression"
-  | "announcement_cta_click";
+  | "announcement_cta_click"
+  | "event_viewed"
+  | "event_rsvp";
+
+export type AnalyticsRsvpStatus = "yes" | "no" | "maybe" | "waitlist";
 
 export type AnalyticsPayload = {
   distinctId: string;
@@ -12,6 +16,8 @@ export type AnalyticsPayload = {
   adminRole: string;
   announcementId?: string;
   ctaSlot?: "primary" | "secondary";
+  eventId?: string;
+  rsvpStatus?: AnalyticsRsvpStatus;
 };
 
 const ALLOWED_KEYS = new Set([
@@ -20,6 +26,8 @@ const ALLOWED_KEYS = new Set([
   "adminRole",
   "announcementId",
   "ctaSlot",
+  "eventId",
+  "rsvpStatus",
 ]);
 const BLOCKED_KEYS = new Set([
   "email",
@@ -32,6 +40,9 @@ const BLOCKED_KEYS = new Set([
   "tags",
   "fileObjectKey",
   "thumbnailObjectKey",
+  "description",
+  "location",
+  "virtualLink",
 ]);
 
 export function track(event: AnalyticsEventName, payload: AnalyticsPayload): void {
@@ -49,6 +60,8 @@ export function track(event: AnalyticsEventName, payload: AnalyticsPayload): voi
     case "resource_downloaded":
     case "announcement_impression":
     case "announcement_cta_click":
+    case "event_viewed":
+    case "event_rsvp":
       return;
     default: {
       const exhaustive: never = event;

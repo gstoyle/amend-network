@@ -7,6 +7,9 @@ import { addDocAffiliation } from "@/lib/registration/doc-affiliations";
 import { listInvitations, reissueInvite, revokeInvite } from "@/lib/registration/invite";
 import { createAnnouncement } from "@/lib/announcements/publish";
 import { listEligibleBanners } from "@/lib/announcements/list";
+import { createEvent } from "@/lib/events/publish";
+import { listVisibleEvents } from "@/lib/events/list";
+import { setEventRsvp } from "@/lib/events/rsvp";
 import { grantDownload } from "@/lib/resources/download";
 import { listResources } from "@/lib/resources/list";
 import { mintIngestSlots } from "@/lib/resources/publish";
@@ -33,10 +36,10 @@ function isBuilt(_capability: Capability): boolean {
     case "download_resources":
     case "view_announcements":
     case "create_manage_announcements":
-      return true;
+    case "create_edit_delete_events":
     case "view_events":
     case "rsvp_events":
-    case "create_edit_delete_events":
+      return true;
     case "view_directory":
     case "appear_in_directory":
     case "view_forum":
@@ -134,9 +137,41 @@ async function appAllows(role: MatrixRole, capability: Capability): Promise<bool
         return false;
       }
     }
-    case "view_events":
-    case "rsvp_events":
-    case "create_edit_delete_events":
+    case "create_edit_delete_events": {
+      try {
+        await createEvent(session ? { ...session, mfaSatisfied: true } : null, {
+          title: "matrix",
+          description: "body",
+          visibility: ["all_authenticated"],
+          startsAt: new Date(Date.now() + 60_000),
+          endsAt: new Date(),
+          ip: "127.0.0.1",
+          userAgent: "vitest-matrix-event",
+        });
+        return true;
+      } catch {
+        return false;
+      }
+    }
+    case "view_events": {
+      try {
+        await listVisibleEvents(session);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+    case "rsvp_events": {
+      try {
+        await setEventRsvp(session, "00000000-0000-4000-8000-000000000099", "yes", {
+          ip: "127.0.0.1",
+          userAgent: "vitest-matrix-rsvp",
+        });
+        return true;
+      } catch {
+        return false;
+      }
+    }
     case "view_directory":
     case "appear_in_directory":
     case "view_forum":

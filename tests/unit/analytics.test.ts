@@ -57,4 +57,50 @@ describe("analytics tracker (T047 / FR-021)", () => {
       } as never),
     ).toThrowError(/analytics payload/);
   });
+
+  it("accepts event viewed and RSVP payloads and rejects description, location, and virtualLink", () => {
+    expect(() =>
+      track("event_viewed", {
+        distinctId: "00000000-0000-4000-8000-000000000001",
+        programRole: "pathways",
+        adminRole: "none",
+        eventId: "00000000-0000-4000-8000-000000000002",
+      }),
+    ).not.toThrow();
+    expect(() =>
+      track("event_rsvp", {
+        distinctId: "00000000-0000-4000-8000-000000000001",
+        programRole: "pathways",
+        adminRole: "none",
+        eventId: "00000000-0000-4000-8000-000000000002",
+        rsvpStatus: "waitlist",
+      }),
+    ).not.toThrow();
+    expect(() =>
+      track("event_rsvp", {
+        distinctId: "00000000-0000-4000-8000-000000000001",
+        programRole: "pathways",
+        adminRole: "none",
+        eventId: "00000000-0000-4000-8000-000000000002",
+        rsvpStatus: "yes",
+        description: "secret",
+      } as never),
+    ).toThrowError(/analytics payload/);
+    expect(() =>
+      track("event_viewed", {
+        distinctId: "00000000-0000-4000-8000-000000000001",
+        programRole: "pathways",
+        adminRole: "none",
+        location: "123 Main",
+      } as never),
+    ).toThrowError(/analytics payload/);
+    expect(() =>
+      track("event_rsvp", {
+        distinctId: "00000000-0000-4000-8000-000000000001",
+        programRole: "pathways",
+        adminRole: "none",
+        virtualLink: "https://meet.example.test/secret",
+      } as never),
+    ).toThrowError(/analytics payload/);
+  });
 });

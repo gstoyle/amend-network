@@ -7,6 +7,8 @@ import { listPendingRegistrations } from "@/lib/registration/approve";
 import { addDocAffiliation } from "@/lib/registration/doc-affiliations";
 import { sendManualInvite } from "@/lib/registration/invite";
 import { listAdminAnnouncements, createAnnouncement } from "@/lib/announcements/publish";
+import { createEvent, listAdminEvents } from "@/lib/events/publish";
+import { setEventRsvp } from "@/lib/events/rsvp";
 import { listAdminResources, mintIngestSlots } from "@/lib/resources/publish";
 import { claimsFor } from "@/tests/helpers/prd-matrix";
 
@@ -264,6 +266,68 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
         AUTH_FAILURE_MESSAGE,
       );
     }
+  });
+
+  it("admin events denies Pathways, LEAD, and Pending; Moderator is allowed (unlike announcements)", async () => {
+    expect(authorizedFor("/admin/events")).toBe(false);
+    expect(authorizedFor("/admin/events/new")).toBe(false);
+    expect(authorizedFor("/admin/events/any-id")).toBe(false);
+    expect(authorizedFor("/admin/events", "session-id")).toBe(true);
+    expect(authorizedFor("/admin/events/new", "session-id")).toBe(true);
+    expect(authorizedFor("/admin/events/any-id", "session-id")).toBe(true);
+
+    const eventsAccess = {
+      admin: ["admin", "super_admin", "moderator"] satisfies AdminRole[],
+      mfa: true,
+    };
+    const announcementsAccess = { admin: ["admin", "super_admin"] satisfies AdminRole[], mfa: true };
+    expect(eventsAccess.admin).not.toEqual(announcementsAccess.admin);
+
+    expect(() => requireRole(claimsFor("pathways"), eventsAccess)).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(() => requireRole(claimsFor("lead"), eventsAccess)).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(() => requireRole(claimsFor("pending"), eventsAccess)).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(() => requireRole(claimsFor("admin"), eventsAccess)).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(
+      requireRole({ ...claimsFor("admin")!, mfaSatisfied: true }, eventsAccess).adminRole,
+    ).toBe("admin");
+    expect(
+      requireRole({ ...claimsFor("moderator")!, mfaSatisfied: true }, eventsAccess).adminRole,
+    ).toBe("moderator");
+    expect(() =>
+      requireRole({ ...claimsFor("moderator")!, mfaSatisfied: true }, announcementsAccess),
+    ).toThrowError(AUTH_FAILURE_MESSAGE);
+
+    const createInput = {
+      title: "unauthorized-should-not-insert",
+      description: "body",
+      visibility: ["all_authenticated"],
+      startsAt: new Date(Date.now() + 60_000),
+      endsAt: new Date(Date.now() + 120_000),
+      ip: "127.0.0.1",
+      userAgent: "vitest-event-deny",
+    };
+    for (const role of ["pathways", "lead", "pending"] as const) {
+      await expect(createEvent(claimsFor(role), createInput)).rejects.toThrowError(
+        AUTH_FAILURE_MESSAGE,
+      );
+      await expect(listAdminEvents(claimsFor(role))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    }
+    await expect(listAdminEvents(claimsFor("moderator"))).resolves.toEqual(expect.any(Array));
+  });
+
+  it("member event RSVP denies missing session, pending, and other-cohort events (US3)", async () => {
+    expect(authorizedFor("/app/events/any-id/rsvp")).toBe(false);
+    expect(authorizedFor("/app/events/any-id/rsvp", "session-id")).toBe(true);
+    expect(() => requireRole(null)).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(() => requireRole(claimsFor("pending"))).toThrowError(AUTH_FAILURE_MESSAGE);
+
+    const ctx = { ip: "127.0.0.1", userAgent: "vitest-rsvp-deny" };
+    await expect(setEventRsvp(null, "00000000-0000-4000-8000-000000000099", "yes", ctx)).rejects.toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    await expect(
+      setEventRsvp(claimsFor("pending"), "00000000-0000-4000-8000-000000000099", "yes", ctx),
+    ).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
   });
 
   it("member resource library denies a missing session at layer 1 (US2)", () => {
