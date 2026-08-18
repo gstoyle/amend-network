@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { DirectoryPrivacyPrompt } from "@/components/directory-privacy-prompt";
 import { EventLocalTime } from "@/components/event-calendar";
 import { AuthDeniedError, isPendingSession, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
 import { listVisibleRecords } from "@/lib/db/visibility";
+import { loadDirectoryPrivacy } from "@/lib/directory/privacy";
 import { listUpcomingEvents } from "@/lib/events/list";
 
 export default async function MemberHomePage() {
@@ -25,10 +27,12 @@ export default async function MemberHomePage() {
 
   const records = await listVisibleRecords(authorized);
   const upcoming = await listUpcomingEvents(authorized);
+  const privacy = await loadDirectoryPrivacy(authorized);
 
   return (
     <div className="flex flex-col gap-4 p-6">
       <h1 className="text-2xl font-medium text-foreground">Home</h1>
+      {privacy.privacySetAt ? null : <DirectoryPrivacyPrompt />}
       <p className="text-foreground">You are signed in.</p>
       <p>
         <Link className="text-foreground underline" href="/app/resources">

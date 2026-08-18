@@ -386,6 +386,153 @@ async function seedEvents(): Promise<void> {
   }
 }
 
+async function seedDirectory(): Promise<void> {
+  const pathwaysNet = await migrator.network.findUnique({ where: { name: "Pathways to Change" } });
+  const leadNet = await migrator.network.findUnique({ where: { name: "LEAD" } });
+  const agency = await migrator.docAffiliation.findUnique({ where: { label: "Test Agency A" } });
+  if (!pathwaysNet || !leadNet || !agency) {
+    throw new Error("networks and Test Agency A are required before directory seed");
+  }
+  const agencyId = agency.id;
+
+  const passwordHash = await hashPassword(env().SEED_PASSWORD);
+
+  async function upsertMember(input: {
+    email: string;
+    programRole: ProgramRole;
+    networkId: string;
+    directoryVisible: boolean;
+    directoryShowTitle: boolean;
+    directoryShowDocAffiliation: boolean;
+    directoryShowEmail: boolean;
+    title?: string;
+  }): Promise<{ id: string }> {
+    const emailLookup = hmacEmailLookup(input.email);
+    const existing = await migrator.user.findUnique({ where: { emailLookup } });
+    const data = {
+      emailLookup,
+      emailEncrypted: encryptPii(input.email),
+      passwordHash,
+      firstNameEncrypted: encryptPii("Directory"),
+      lastNameEncrypted: encryptPii(input.email.split("@")[0] ?? "member"),
+      titleEncrypted: input.title ? encryptPii(input.title) : encryptPii("Member"),
+      docAffiliationIdEncrypted: encryptPii(agencyId),
+      networkId: input.networkId,
+      programRole: input.programRole,
+      adminRole: AdminRole.none,
+      status: UserStatus.active,
+      mfaEnabled: false,
+      directoryVisible: input.directoryVisible,
+      directoryShowTitle: input.directoryShowTitle,
+      directoryShowDocAffiliation: input.directoryShowDocAffiliation,
+      directoryShowEmail: input.directoryShowEmail,
+      directoryPrivacySetAt: new Date(),
+    };
+    if (existing) {
+      return migrator.user.update({ where: { id: existing.id }, data });
+    }
+    return migrator.user.create({ data: { id: randomUUID(), ...data } });
+  }
+
+  const titleOn = await upsertMember({
+    email: "dir-pathways-title@local",
+    programRole: ProgramRole.pathways,
+    networkId: pathwaysNet.id,
+    directoryVisible: true,
+    directoryShowTitle: true,
+    directoryShowDocAffiliation: false,
+    directoryShowEmail: false,
+    title: "Coach",
+  });
+  const hidden = await upsertMember({
+    email: "dir-pathways-hidden@local",
+    programRole: ProgramRole.pathways,
+    networkId: pathwaysNet.id,
+    directoryVisible: true,
+    directoryShowTitle: false,
+    directoryShowDocAffiliation: false,
+    directoryShowEmail: false,
+  });
+  const unlisted = await upsertMember({
+    email: "dir-pathways-unlisted@local",
+    programRole: ProgramRole.pathways,
+    networkId: pathwaysNet.id,
+    directoryVisible: false,
+    directoryShowTitle: false,
+    directoryShowDocAffiliation: false,
+    directoryShowEmail: false,
+  });
+  const leadDoc = await upsertMember({
+    email: "dir-lead-doc@local",
+    programRole: ProgramRole.lead,
+    networkId: leadNet.id,
+    directoryVisible: true,
+    directoryShowTitle: false,
+    directoryShowDocAffiliation: true,
+    directoryShowEmail: false,
+  });
+
+  async function syncListing(
+    user: { id: string },
+    programRole: ProgramRole,
+    networkId: string,
+    listed: boolean,
+  ): Promise<void> {
+    if (!listed) {
+      await migrator.directoryShownTitle.deleteMany({ where: { userId: user.id } });
+      await migrator.directoryShownDoc.deleteMany({ where: { userId: user.id } });
+      await migrator.directoryShownEmail.deleteMany({ where: { userId: user.id } });
+      await migrator.directoryListing.deleteMany({ where: { userId: user.id } });
+      return;
+    }
+    const names = await migrator.user.findUniqueOrThrow({
+      where: { id: user.id },
+      select: { firstNameEncrypted: true, lastNameEncrypted: true },
+    });
+    await migrator.directoryListing.upsert({
+      where: { userId: user.id },
+      create: {
+        userId: user.id,
+        programRole,
+        networkId,
+        firstNameEncrypted: names.firstNameEncrypted ?? encryptPii("Directory"),
+        lastNameEncrypted: names.lastNameEncrypted ?? encryptPii("Member"),
+      },
+      update: {
+        programRole,
+        networkId,
+        firstNameEncrypted: names.firstNameEncrypted ?? encryptPii("Directory"),
+        lastNameEncrypted: names.lastNameEncrypted ?? encryptPii("Member"),
+      },
+    });
+  }
+
+  await syncListing(titleOn, ProgramRole.pathways, pathwaysNet.id, true);
+  await syncListing(hidden, ProgramRole.pathways, pathwaysNet.id, true);
+  await syncListing(unlisted, ProgramRole.pathways, pathwaysNet.id, false);
+  await syncListing(leadDoc, ProgramRole.lead, leadNet.id, true);
+
+  await migrator.directoryShownTitle.upsert({
+    where: { userId: titleOn.id },
+    create: { userId: titleOn.id, titleEncrypted: encryptPii("Coach") },
+    update: { titleEncrypted: encryptPii("Coach") },
+  });
+  await migrator.directoryShownTitle.deleteMany({
+    where: { userId: { in: [hidden.id, unlisted.id, leadDoc.id] } },
+  });
+  await migrator.directoryShownDoc.upsert({
+    where: { userId: leadDoc.id },
+    create: { userId: leadDoc.id, docAffiliationIdEncrypted: encryptPii(agencyId) },
+    update: { docAffiliationIdEncrypted: encryptPii(agencyId) },
+  });
+  await migrator.directoryShownDoc.deleteMany({
+    where: { userId: { in: [titleOn.id, hidden.id, unlisted.id] } },
+  });
+  await migrator.directoryShownEmail.deleteMany({
+    where: { userId: { in: [titleOn.id, hidden.id, unlisted.id, leadDoc.id] } },
+  });
+}
+
 async function seed(): Promise<void> {
   const passwordHash = await hashPassword(env().SEED_PASSWORD);
   const mfaSecret = env().SEED_MFA_SECRET
@@ -461,6 +608,7 @@ async function seed(): Promise<void> {
   await seedResources();
   await seedAnnouncements();
   await seedEvents();
+  await seedDirectory();
 }
 
 seed()

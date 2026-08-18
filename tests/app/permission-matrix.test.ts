@@ -39,9 +39,9 @@ function isBuilt(_capability: Capability): boolean {
     case "create_edit_delete_events":
     case "view_events":
     case "rsvp_events":
+    case "appear_in_directory":
       return true;
     case "view_directory":
-    case "appear_in_directory":
     case "view_forum":
     case "post_forum":
     case "moderate_forum":
@@ -172,8 +172,15 @@ async function appAllows(role: MatrixRole, capability: Capability): Promise<bool
         return false;
       }
     }
+    case "appear_in_directory": {
+      try {
+        requireRole(session, { program: ["pathways", "lead"] });
+        return true;
+      } catch {
+        return false;
+      }
+    }
     case "view_directory":
-    case "appear_in_directory":
     case "view_forum":
     case "post_forum":
     case "moderate_forum":

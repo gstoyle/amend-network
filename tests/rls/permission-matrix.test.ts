@@ -28,9 +28,9 @@ function isBuilt(capability: Capability): boolean {
     case "create_edit_delete_events":
     case "view_events":
     case "rsvp_events":
+    case "appear_in_directory":
       return true;
     case "view_directory":
-    case "appear_in_directory":
     case "view_forum":
     case "post_forum":
     case "moderate_forum":
@@ -339,6 +339,44 @@ async function rlsCanSeePending(role: MatrixRole): Promise<boolean> {
   return rows.length > 0;
 }
 
+async function rlsCanInsertDirectoryListing(role: MatrixRole): Promise<boolean> {
+  const session = claimsFor(role);
+  const userId = session?.userId ?? randomUUID();
+  const programRole = session?.programRole ?? "none";
+  try {
+    await withRls(
+      {
+        userId,
+        programRole,
+        adminRole: session?.adminRole ?? "none",
+        status: session?.status ?? "",
+      },
+      (tx) =>
+        tx.$executeRaw`
+          INSERT INTO directory_listings (
+            user_id, program_role, network_id,
+            first_name_encrypted, last_name_encrypted, created_at, updated_at
+          ) VALUES (
+            ${userId}::uuid,
+            ${programRole}::"ProgramRole",
+            ${randomUUID()}::uuid,
+            ${Buffer.from("x")},
+            ${Buffer.from("y")},
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+          )
+        `,
+    );
+    await migrator.$executeRaw`DELETE FROM directory_listings WHERE user_id = ${userId}::uuid`;
+    return true;
+  } catch {
+    await migrator.$executeRaw`DELETE FROM directory_listings WHERE user_id = ${userId}::uuid`.catch(
+      () => undefined,
+    );
+    return false;
+  }
+}
+
 function rlsVerdict(
   role: MatrixRole,
   capability: Capability,
@@ -348,6 +386,7 @@ function rlsVerdict(
   sharedVisible: boolean,
   roleSpecificVisible: boolean,
   rsvpAllowed: boolean,
+  appearAllowed: boolean,
 ): MatrixVerdict {
   switch (capability) {
     case "log_in":
@@ -376,8 +415,9 @@ function rlsVerdict(
       return sharedVisible ? "allow" : "deny";
     case "rsvp_events":
       return rsvpAllowed ? "allow" : "deny";
-    case "view_directory":
     case "appear_in_directory":
+      return appearAllowed ? "allow" : "deny";
+    case "view_directory":
     case "view_forum":
     case "post_forum":
     case "moderate_forum":
@@ -438,6 +478,8 @@ describe("RLS permission matrix (GUCs only, no requireRole)", () => {
           ? await rlsCanSeeLiveResource(role, role === "lead" ? ["lead"] : ["pathways"])
           : false;
       const rsvpAllowed = capability === "rsvp_events" ? await rlsCanRsvpEvent(role) : false;
+      const appearAllowed =
+        capability === "appear_in_directory" ? await rlsCanInsertDirectoryListing(role) : false;
       const expected = PRD_MATRIX[capability][role];
       if (!isBuilt(capability)) {
         expect(["deny", "fail-closed"]).toContain(expected);
@@ -453,6 +495,7 @@ describe("RLS permission matrix (GUCs only, no requireRole)", () => {
         sharedVisible,
         roleSpecificVisible,
         rsvpAllowed,
+        appearAllowed,
       );
       expect(actual).toBe(expected);
     },

@@ -50,6 +50,12 @@ export default async function MemberLayout({ children }: { children: ReactNode }
           >
             Events
           </Link>
+          <Link
+            className="inline-flex min-h-touch items-center text-foreground underline"
+            href="/app/profile/privacy"
+          >
+            Privacy
+          </Link>
         </nav>
         <nav aria-label="Account">
           <LogoutButton />

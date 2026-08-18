@@ -85,15 +85,64 @@ model User {
   adminRole                 AdminRole            @map("admin_role")
   status                    UserStatus
   mfaSecretEncrypted        Bytes?               @map("mfa_secret_encrypted")
-  mfaEnabled                Boolean              @default(false) @map("mfa_enabled")
-  lastLoginAt               DateTime?            @map("last_login_at") @db.Timestamptz(6)
-  createdAt                 DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt                 DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
-  network                   Network?             @relation(fields: [networkId], references: [id])
-  sessions                  Session[]
-  passwordResetTokens       PasswordResetToken[]
+  mfaEnabled                    Boolean              @default(false) @map("mfa_enabled")
+  directoryVisible              Boolean              @default(false) @map("directory_visible")
+  directoryShowTitle            Boolean              @default(false) @map("directory_show_title")
+  directoryShowDocAffiliation   Boolean              @default(false) @map("directory_show_doc_affiliation")
+  directoryShowEmail            Boolean              @default(false) @map("directory_show_email")
+  directoryPrivacySetAt         DateTime?            @map("directory_privacy_set_at") @db.Timestamptz(6)
+  lastLoginAt                   DateTime?            @map("last_login_at") @db.Timestamptz(6)
+  createdAt                     DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                     DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  network                       Network?             @relation(fields: [networkId], references: [id])
+  sessions                      Session[]
+  passwordResetTokens           PasswordResetToken[]
 
   @@map("users")
+}
+
+model DirectoryListing {
+  userId               String      @id @map("user_id") @db.Uuid
+  programRole          ProgramRole @map("program_role")
+  networkId            String      @map("network_id") @db.Uuid
+  firstNameEncrypted   Bytes       @map("first_name_encrypted")
+  lastNameEncrypted    Bytes       @map("last_name_encrypted")
+  createdAt            DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("directory_listings")
+}
+
+model DirectoryShownTitle {
+  userId          String   @id @map("user_id") @db.Uuid
+  titleEncrypted  Bytes    @map("title_encrypted")
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("directory_shown_titles")
+}
+
+model DirectoryShownDoc {
+  userId                      String   @id @map("user_id") @db.Uuid
+  docAffiliationIdEncrypted   Bytes    @map("doc_affiliation_id_encrypted")
+  updatedAt                   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("directory_shown_docs")
+}
+
+model DirectoryShownEmail {
+  userId          String   @id @map("user_id") @db.Uuid
+  emailEncrypted  Bytes    @map("email_encrypted")
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("directory_shown_emails")
+}
+
+model DirectorySearchThrottle {
+  userId           String   @id @map("user_id") @db.Uuid
+  windowStartedAt  DateTime @map("window_started_at") @db.Timestamptz(6)
+  searchCount      Int      @map("search_count")
+
+  @@map("directory_search_throttle")
 }
 
 model Invitation {

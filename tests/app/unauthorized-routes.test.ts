@@ -11,6 +11,7 @@ import { cancelEvent } from "@/lib/events/cancel";
 import { updateEvent } from "@/lib/events/edit";
 import { createEvent, listAdminEvents } from "@/lib/events/publish";
 import { setEventRsvp } from "@/lib/events/rsvp";
+import { saveDirectoryPrivacy } from "@/lib/directory/privacy";
 import { listAdminResources, mintIngestSlots } from "@/lib/resources/publish";
 import { claimsFor } from "@/tests/helpers/prd-matrix";
 
@@ -339,6 +340,31 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
     await expect(
       setEventRsvp(claimsFor("pending"), "00000000-0000-4000-8000-000000000099", "yes", ctx),
     ).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+  });
+
+  it("directory privacy denies pending, invited, and signed-out (US1)", async () => {
+    expect(authorizedFor("/app/profile/privacy")).toBe(false);
+    expect(authorizedFor("/app/profile/privacy", "session-id")).toBe(true);
+    expect(() => requireRole(null)).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(() => requireRole(claimsFor("pending"))).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(() => requireRole(claimsFor("invited"))).toThrowError(AUTH_FAILURE_MESSAGE);
+
+    const input = {
+      listing: true,
+      showTitle: false,
+      showDocAffiliation: false,
+      showEmail: false,
+    };
+    const ctx = { ip: "127.0.0.1", userAgent: "vitest-privacy-deny" };
+    await expect(saveDirectoryPrivacy(null, input, ctx)).rejects.toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    await expect(saveDirectoryPrivacy(claimsFor("pending"), input, ctx)).rejects.toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    await expect(saveDirectoryPrivacy(claimsFor("invited"), input, ctx)).rejects.toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
   });
 
   it("member resource library denies a missing session at layer 1 (US2)", () => {

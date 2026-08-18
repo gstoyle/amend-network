@@ -15,6 +15,8 @@ const eslintConfig = [
       "coverage/**",
       "dist/**",
       "build/**",
+      ".env*",
+      "*.log",
       "docker/**",
       "infra/**",
       "specs/**",
