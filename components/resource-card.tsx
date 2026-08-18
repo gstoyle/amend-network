@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { cardClassName } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export type ResourceCardData = {
   id: string;
@@ -11,7 +13,7 @@ export type ResourceCardData = {
 
 export function ResourceCard({ resource }: { resource: ResourceCardData }) {
   return (
-    <article className="flex flex-col gap-2 text-foreground">
+    <article className={cn(cardClassName, "flex flex-col gap-2 p-4")}>
       <Link className="flex flex-col gap-2" href={`/app/resources/${resource.id}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img alt="" className="max-h-40 w-auto" src={resource.thumbnailHref} />

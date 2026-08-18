@@ -15,6 +15,7 @@ import { saveDirectoryPrivacy } from "@/lib/directory/privacy";
 import { listDirectory } from "@/lib/directory/list";
 import { getDirectoryProfile } from "@/lib/directory/profile";
 import { listAdminResources, mintIngestSlots } from "@/lib/resources/publish";
+import { loadAdminAnalytics } from "@/lib/admin-analytics/load";
 import { claimsFor } from "@/tests/helpers/prd-matrix";
 
 function authorizedFor(pathname: string, sessionId?: string): boolean {
@@ -86,6 +87,52 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
         auditRead,
       ).adminRole,
     ).toBe("admin");
+  });
+
+  it("analytics denies Moderator, Pathways, LEAD, pending, signed-out, and Admin without mfa_satisfied (US1)", async () => {
+    expect(authorizedFor("/admin/analytics")).toBe(false);
+    expect(authorizedFor("/admin/analytics", "session-id")).toBe(true);
+
+    const analyticsAccess = { admin: ["admin", "super_admin"] satisfies AdminRole[], mfa: true };
+    expect(() => requireRole(claimsFor("moderator"), analyticsAccess)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(() => requireRole(claimsFor("pathways"), analyticsAccess)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(() => requireRole(claimsFor("lead"), analyticsAccess)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(() => requireRole(claimsFor("pending"), analyticsAccess)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(() => requireRole(null, analyticsAccess)).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(() => requireRole(claimsFor("admin"), analyticsAccess)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(
+      requireRole({ ...claimsFor("admin")!, mfaSatisfied: true }, analyticsAccess).adminRole,
+    ).toBe("admin");
+
+    await expect(loadAdminAnalytics(null, null)).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    await expect(loadAdminAnalytics(claimsFor("moderator"), null)).rejects.toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    await expect(loadAdminAnalytics(claimsFor("pathways"), null)).rejects.toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    await expect(loadAdminAnalytics(claimsFor("lead"), null)).rejects.toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    await expect(loadAdminAnalytics(claimsFor("pending"), null)).rejects.toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    await expect(loadAdminAnalytics(claimsFor("admin"), null)).rejects.toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    await expect(
+      loadAdminAnalytics(claimsFor("pathways"), null, { clientAdminRole: "super_admin" }),
+    ).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
   });
 
   it("affiliations management denies Moderator, Pathways, LEAD, and Pending (FR-021)", async () => {

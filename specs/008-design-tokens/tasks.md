@@ -28,7 +28,7 @@ Repository-root Next.js app per plan.md (`app/`, `components/`, `tests/`).
 
 **Purpose**: No new packages. Confirm mockup stays out of the Next app.
 
-- [ ] T001 Verify `tsconfig.json` `exclude` and `eslint.config.mjs` ignores still cover `mockup/**`, and `package.json` gains **no** new dependencies (Geist comes from `next/font/google` already in Next 15)
+- [x] T001 Verify `tsconfig.json` `exclude` and `eslint.config.mjs` ignores still cover `mockup/**`, and `package.json` gains **no** new dependencies (Geist comes from `next/font/google` already in Next 15)
 
 ---
 
@@ -40,14 +40,14 @@ Repository-root Next.js app per plan.md (`app/`, `components/`, `tests/`).
 
 ### Tests (fail first)
 
-- [ ] T002 Write failing tests in `tests/unit/design-tokens.test.ts` that (1) `app/tokens.css` defines every custom property in [contracts/token-manifest.md](./contracts/token-manifest.md); (2) light `--primary` is mockup `--evergreen-700` (`#1f4d3f`) and light `--background` is `--stone-100` (`#f4f1eb`); (3) contrast pairs in [contracts/contrast.md](./contracts/contrast.md) meet the stated ratios in light and dark; (4) `tailwind.config.ts` maps listed colors to `var(--*)` and does **not** wrap them in `hsl()`; (5) `components/ui/*.tsx` contain no hex / `rgb(` / `hsl(` literals. Assert the cases in those contracts. This task MUST stay standalone.
+- [x] T002 Write failing tests in `tests/unit/design-tokens.test.ts` that (1) `app/tokens.css` defines every custom property in [contracts/token-manifest.md](./contracts/token-manifest.md); (2) light `--primary` is mockup `--evergreen-700` (`#1f4d3f`) and light `--background` is `--stone-100` (`#f4f1eb`); (3) contrast pairs in [contracts/contrast.md](./contracts/contrast.md) meet the stated ratios in light and dark; (4) `tailwind.config.ts` maps listed colors to `var(--*)` and does **not** wrap them in `hsl()`; (5) `components/ui/*.tsx` contain no hex / `rgb(` / `hsl(` literals. Assert the cases in those contracts. This task MUST stay standalone.
 
 ### Implementation
 
-- [ ] T003 Copy primitive + semantic tokens from `mockup/src/styles/tokens.css` into `app/tokens.css` (complete colors, not HSL channels). Apply mockup `:root.dark` semantic overrides inside `@media (prefers-color-scheme: dark)` on `:root`. Set `--font-body` / `--font-heading` / `--font-mono` to `var(--font-geist-sans)` / `var(--font-geist-mono)` plus system fallbacks. Cite [research.md](./research.md) §1 and §3 and [contracts/token-manifest.md](./contracts/token-manifest.md).
-- [ ] T004 Import `./tokens.css` from `app/globals.css`; remove HSL-channel `:root` / `prefers-color-scheme` placeholders; set body to token background/foreground/font; keep existing `prefers-reduced-motion` rules.
-- [ ] T005 [P] Extend `tailwind.config.ts` per [contracts/theme-mapping.md](./contracts/theme-mapping.md): colors as `var(--*)` (add `primary-hover`, `support`, `success`/`warning`/`info`, `border-strong`, sidebar); fontFamily/fontSize/spacing/radius/shadow/motion from tokens; `minHeight.touch` / `minWidth.touch` / `spacing.tap` = `--tap-target`. Drop `hsl(var(--…))` wrappers and `calc(var(--radius) - 2px)`.
-- [ ] T006 [P] Load Geist and Geist Mono via `next/font/google` in `app/layout.tsx` (`variable: "--font-geist-sans"` / `"--font-geist-mono"`, `subsets: ["latin"]`, `display: "swap"`) and put those variables on `<html>`. No Google `<link>` or CSS `@import`. Cite [research.md](./research.md) §4.
+- [x] T003 Copy primitive + semantic tokens from `mockup/src/styles/tokens.css` into `app/tokens.css` (complete colors, not HSL channels). Apply mockup `:root.dark` semantic overrides inside `@media (prefers-color-scheme: dark)` on `:root`. Set `--font-body` / `--font-heading` / `--font-mono` to `var(--font-geist-sans)` / `var(--font-geist-mono)` plus system fallbacks. Cite [research.md](./research.md) §1 and §3 and [contracts/token-manifest.md](./contracts/token-manifest.md).
+- [x] T004 Import `./tokens.css` from `app/globals.css`; remove HSL-channel `:root` / `prefers-color-scheme` placeholders; set body to token background/foreground/font; keep existing `prefers-reduced-motion` rules.
+- [x] T005 [P] Extend `tailwind.config.ts` per [contracts/theme-mapping.md](./contracts/theme-mapping.md): colors as `var(--*)` (add `primary-hover`, `support`, `success`/`warning`/`info`, `border-strong`, sidebar); fontFamily/fontSize/spacing/radius/shadow/motion from tokens; `minHeight.touch` / `minWidth.touch` / `spacing.tap` = `--tap-target`. Drop `hsl(var(--…))` wrappers and `calc(var(--radius) - 2px)`.
+- [x] T006 [P] Load Geist and Geist Mono via `next/font/google` in `app/layout.tsx` (`variable: "--font-geist-sans"` / `"--font-geist-mono"`, `subsets: ["latin"]`, `display: "swap"`) and put those variables on `<html>`. No Google `<link>` or CSS `@import`. Cite [research.md](./research.md) §4.
 
 **Checkpoint**: T002 cases (1)–(4) pass. Case (5) may still fail until US1. `pnpm typecheck` still succeeds. User stories may start.
 
@@ -61,14 +61,14 @@ Repository-root Next.js app per plan.md (`app/`, `components/`, `tests/`).
 
 ### Implementation for User Story 1
 
-- [ ] T007 [P] [US1] Restyle `components/ui/button.tsx` with token utilities only (`bg-primary`, `hover:bg-primary-hover`, ring/focus tokens). Keep variants and `min-h-touch` / `min-w-touch`. No structure/prop changes.
-- [ ] T008 [P] [US1] Restyle `components/ui/input.tsx` with token border/radius/focus; export `controlClassName` for native select/textarea reuse. Keep `min-h-touch`. Cite [contracts/shared-chrome.md](./contracts/shared-chrome.md).
-- [ ] T009 [P] [US1] Restyle `components/ui/label.tsx` with token type/color only.
-- [ ] T010 [US1] Add presentational card classes in `components/ui/card.tsx` (`bg-card`, `border-border`, radius, shadow tokens). Export a helper usable on an existing `<article>` — do not force an extra wrapper. Cite [research.md](./research.md) §5.
-- [ ] T011 [P] [US1] Apply card tokens on the existing `<article>` in `components/resource-card.tsx` (classes only; keep Link/img/heading structure).
-- [ ] T012 [P] [US1] Apply card tokens on the existing `<article>` in `components/announcement-banners.tsx` (classes only).
-- [ ] T013 [US1] Apply layout chrome tokens (background, border, gutter padding, type) on `app/(member)/layout.tsx` header/nav/main. Do not add a sidebar or bottom bar. Keep the same links and `min-h-touch` on nav.
-- [ ] T014 [P] [US1] Apply the **same** token set on `app/(admin)/layout.tsx` header/nav/main (one brand, not a second skin).
+- [x] T007 [P] [US1] Restyle `components/ui/button.tsx` with token utilities only (`bg-primary`, `hover:bg-primary-hover`, ring/focus tokens). Keep variants and `min-h-touch` / `min-w-touch`. No structure/prop changes.
+- [x] T008 [P] [US1] Restyle `components/ui/input.tsx` with token border/radius/focus; export `controlClassName` for native select/textarea reuse. Keep `min-h-touch`. Cite [contracts/shared-chrome.md](./contracts/shared-chrome.md).
+- [x] T009 [P] [US1] Restyle `components/ui/label.tsx` with token type/color only.
+- [x] T010 [US1] Add presentational card classes in `components/ui/card.tsx` (`bg-card`, `border-border`, radius, shadow tokens). Export a helper usable on an existing `<article>` — do not force an extra wrapper. Cite [research.md](./research.md) §5.
+- [x] T011 [P] [US1] Apply card tokens on the existing `<article>` in `components/resource-card.tsx` (classes only; keep Link/img/heading structure).
+- [x] T012 [P] [US1] Apply card tokens on the existing `<article>` in `components/announcement-banners.tsx` (classes only).
+- [x] T013 [US1] Apply layout chrome tokens (background, border, gutter padding, type) on `app/(member)/layout.tsx` header/nav/main. Do not add a sidebar or bottom bar. Keep the same links and `min-h-touch` on nav.
+- [x] T014 [P] [US1] Apply the **same** token set on `app/(admin)/layout.tsx` header/nav/main (one brand, not a second skin).
 
 **Checkpoint**: Spec US1 independent test passes. T002 case (5) passes for `components/ui/*.tsx`.
 
@@ -82,11 +82,11 @@ Repository-root Next.js app per plan.md (`app/`, `components/`, `tests/`).
 
 ### Tests for User Story 2 ⚠️ fail first
 
-- [ ] T015 [US2] Write failing tests in `tests/unit/control-class-reuse.test.ts` that `components/register-form.tsx`, `components/invite-form.tsx`, `components/invite-complete-form.tsx`, `components/resource-form.tsx`, `components/announcement-form.tsx`, `components/event-form.tsx`, `components/pending-queue.tsx`, and `components/resource-filters.tsx` import `controlClassName` from `@/components/ui/input` (no local duplicated `border-input` / `bg-background` control strings).
+- [x] T015 [US2] Write failing tests in `tests/unit/control-class-reuse.test.ts` that `components/register-form.tsx`, `components/invite-form.tsx`, `components/invite-complete-form.tsx`, `components/resource-form.tsx`, `components/announcement-form.tsx`, `components/event-form.tsx`, `components/pending-queue.tsx`, and `components/resource-filters.tsx` import `controlClassName` from `@/components/ui/input` (no local duplicated `border-input` / `bg-background` control strings).
 
 ### Implementation for User Story 2
 
-- [ ] T016 [US2] Replace duplicated `fieldClassName` / `selectClassName` with `controlClassName` from `components/ui/input.tsx` in `components/register-form.tsx`, `components/invite-form.tsx`, `components/invite-complete-form.tsx`, `components/resource-form.tsx`, `components/announcement-form.tsx`, `components/event-form.tsx`, `components/pending-queue.tsx`, and `components/resource-filters.tsx`. Markup and handlers unchanged.
+- [x] T016 [US2] Replace duplicated `fieldClassName` / `selectClassName` with `controlClassName` from `components/ui/input.tsx` in `components/register-form.tsx`, `components/invite-form.tsx`, `components/invite-complete-form.tsx`, `components/resource-form.tsx`, `components/announcement-form.tsx`, `components/event-form.tsx`, `components/pending-queue.tsx`, and `components/resource-filters.tsx`. Markup and handlers unchanged.
 
 **Checkpoint**: Spec US2 independent test passes. T015 passes.
 
@@ -100,8 +100,8 @@ Repository-root Next.js app per plan.md (`app/`, `components/`, `tests/`).
 
 ### Implementation for User Story 3
 
-- [ ] T017 [P] [US3] Confirm `min-h-touch` / `min-w-touch` remain on `components/ui/button.tsx`, `components/ui/input.tsx`, `components/member-initials.tsx`, and member nav links in `app/(member)/layout.tsx`; restore if a prior restyle dropped them. `--tap-target` stays `2.75rem` in `app/tokens.css`.
-- [ ] T018 [P] [US3] Confirm `prefers-reduced-motion` rules remain in `app/globals.css`; do not remove them while cleaning HSL placeholders.
+- [x] T017 [P] [US3] Confirm `min-h-touch` / `min-w-touch` remain on `components/ui/button.tsx`, `components/ui/input.tsx`, `components/member-initials.tsx`, and member nav links in `app/(member)/layout.tsx`; restore if a prior restyle dropped them. `--tap-target` stays `2.75rem` in `app/tokens.css`.
+- [x] T018 [P] [US3] Confirm `prefers-reduced-motion` rules remain in `app/globals.css`; do not remove them while cleaning HSL placeholders.
 
 **Checkpoint**: Spec US3 independent test (same steps/outcomes; contrast and tap targets) holds in code. Full suite run is polish T020.
 
@@ -111,8 +111,8 @@ Repository-root Next.js app per plan.md (`app/`, `components/`, `tests/`).
 
 **Purpose**: Leftover placeholder theme, regression suites.
 
-- [ ] T019 [P] Remove leftover `hsl(var(` / HSL-channel placeholders from `app/globals.css` and `tailwind.config.ts` if any remain; do not rewrite unique page layouts in `app/(member)/app/**` or `app/(admin)/admin/**` beyond shared chrome already covered.
-- [ ] T020 Run [quickstart.md](./quickstart.md) locally (`pnpm test` including `tests/unit/design-tokens.test.ts` and `tests/unit/control-class-reuse.test.ts`, `pnpm test:rls`, `pnpm test:a11y`, `pnpm typecheck`, `pnpm lint`)
+- [x] T019 [P] Remove leftover `hsl(var(` / HSL-channel placeholders from `app/globals.css` and `tailwind.config.ts` if any remain; do not rewrite unique page layouts in `app/(member)/app/**` or `app/(admin)/admin/**` beyond shared chrome already covered.
+- [x] T020 Run [quickstart.md](./quickstart.md) locally (`pnpm test` including `tests/unit/design-tokens.test.ts` and `tests/unit/control-class-reuse.test.ts`, `pnpm test:rls`, `pnpm test:a11y`, `pnpm typecheck`, `pnpm lint`)
 
 ---
 

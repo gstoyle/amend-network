@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { controlClassName, Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
@@ -33,10 +33,6 @@ type InviteFormProps = {
 
 const initialState: InviteFormState = {};
 
-const selectClassName = cn(
-  "flex min-h-touch w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-);
-
 export function InviteForm({
   networks,
   items,
@@ -66,7 +62,7 @@ export function InviteForm({
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="networkId">Network</Label>
-          <select className={selectClassName} id="networkId" name="networkId" required>
+          <select className={controlClassName} id="networkId" name="networkId" required>
             <option value="">Select a network</option>
             {networks.map((row) => (
               <option key={row.id} value={row.id}>
@@ -107,7 +103,7 @@ export function InviteForm({
         <div className="flex flex-col gap-2">
           <Label htmlFor="csvText">Or paste CSV</Label>
           <textarea
-            className={cn(selectClassName, "min-h-32")}
+            className={cn(controlClassName, "min-h-32")}
             id="csvText"
             name="csvText"
             spellCheck={false}

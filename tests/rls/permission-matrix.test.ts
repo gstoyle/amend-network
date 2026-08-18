@@ -30,12 +30,12 @@ function isBuilt(capability: Capability): boolean {
     case "rsvp_events":
     case "appear_in_directory":
     case "view_directory":
+    case "view_analytics":
       return true;
     case "view_forum":
     case "post_forum":
     case "moderate_forum":
     case "assign_change_roles":
-    case "view_analytics":
     case "change_system_configuration":
       return false;
     default: {
@@ -393,6 +393,30 @@ async function rlsCanSeeDirectoryListing(role: MatrixRole): Promise<boolean> {
   return rows.length > 0;
 }
 
+async function rlsCanViewAnalytics(role: MatrixRole): Promise<boolean> {
+  const session = claimsFor(role);
+  const rows = await withRls(
+    session
+      ? {
+          userId: session.userId,
+          programRole: session.programRole,
+          adminRole: session.adminRole,
+          status: session.status,
+        }
+      : {},
+    (tx) =>
+      tx.$queryRaw<{ snapshot: unknown }[]>`
+        SELECT admin_analytics_snapshot(NULL) AS snapshot
+      `,
+  );
+  const raw = rows[0]?.snapshot;
+  const parsed = typeof raw === "string" ? (JSON.parse(raw) as unknown) : raw;
+  if (parsed == null || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return false;
+  }
+  return "kpis" in parsed;
+}
+
 function rlsVerdict(
   role: MatrixRole,
   capability: Capability,
@@ -404,6 +428,7 @@ function rlsVerdict(
   rsvpAllowed: boolean,
   appearAllowed: boolean,
   directoryVisible: boolean,
+  analyticsVisible: boolean,
 ): MatrixVerdict {
   switch (capability) {
     case "log_in":
@@ -436,11 +461,12 @@ function rlsVerdict(
       return appearAllowed ? "allow" : "deny";
     case "view_directory":
       return directoryVisible ? "allow" : "deny";
+    case "view_analytics":
+      return analyticsVisible ? "allow" : "deny";
     case "view_forum":
     case "post_forum":
     case "moderate_forum":
     case "assign_change_roles":
-    case "view_analytics":
     case "change_system_configuration":
       return isBuilt(capability) ? "allow" : "fail-closed";
     default: {
@@ -500,6 +526,8 @@ describe("RLS permission matrix (GUCs only, no requireRole)", () => {
         capability === "appear_in_directory" ? await rlsCanInsertDirectoryListing(role) : false;
       const directoryVisible =
         capability === "view_directory" ? await rlsCanSeeDirectoryListing(role) : false;
+      const analyticsVisible =
+        capability === "view_analytics" ? await rlsCanViewAnalytics(role) : false;
       const expected = PRD_MATRIX[capability][role];
       if (!isBuilt(capability)) {
         expect(["deny", "fail-closed"]).toContain(expected);
@@ -517,6 +545,7 @@ describe("RLS permission matrix (GUCs only, no requireRole)", () => {
         rsvpAllowed,
         appearAllowed,
         directoryVisible,
+        analyticsVisible,
       );
       expect(actual).toBe(expected);
     },

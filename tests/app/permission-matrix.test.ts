@@ -14,6 +14,7 @@ import { listDirectory } from "@/lib/directory/list";
 import { grantDownload } from "@/lib/resources/download";
 import { listResources } from "@/lib/resources/list";
 import { mintIngestSlots } from "@/lib/resources/publish";
+import { loadAdminAnalytics } from "@/lib/admin-analytics/load";
 import {
   CAPABILITIES,
   EXPECTED_VISIBLE_TITLES,
@@ -42,12 +43,12 @@ function isBuilt(_capability: Capability): boolean {
     case "rsvp_events":
     case "appear_in_directory":
     case "view_directory":
+    case "view_analytics":
       return true;
     case "view_forum":
     case "post_forum":
     case "moderate_forum":
     case "assign_change_roles":
-    case "view_analytics":
     case "change_system_configuration":
       return false;
     default: {
@@ -189,11 +190,18 @@ async function appAllows(role: MatrixRole, capability: Capability): Promise<bool
         return false;
       }
     }
+    case "view_analytics": {
+      try {
+        await loadAdminAnalytics(session ? { ...session, mfaSatisfied: true } : null, null);
+        return true;
+      } catch {
+        return false;
+      }
+    }
     case "view_forum":
     case "post_forum":
     case "moderate_forum":
     case "assign_change_roles":
-    case "view_analytics":
     case "change_system_configuration":
       return false;
     default: {

@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { controlClassName, Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 
 const SOURCES = ["Amend", "Partner Org", "External"] as const;
 const SORTS = [
@@ -9,10 +8,6 @@ const SORTS = [
   { value: "downloads", label: "Most downloaded" },
   { value: "title", label: "Alphabetical" },
 ] as const;
-
-const selectClassName = cn(
-  "flex min-h-touch w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-);
 
 export type ResourceFilterValues = {
   q?: string;
@@ -61,7 +56,7 @@ export function ResourceFilters({
       <div className="flex flex-col gap-2">
         <Label htmlFor="resource-source">Source</Label>
         <select
-          className={selectClassName}
+          className={controlClassName}
           defaultValue={query.source ?? ""}
           id="resource-source"
           name="source"
@@ -78,7 +73,7 @@ export function ResourceFilters({
       <div className="flex flex-col gap-2">
         <Label htmlFor="resource-sort">Sort</Label>
         <select
-          className={selectClassName}
+          className={controlClassName}
           defaultValue={query.sort ?? "newest"}
           id="resource-sort"
           name="sort"

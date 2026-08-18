@@ -146,6 +146,22 @@ CTA click does not increase on repeat click for the same member and
 announcement). That is a unique-member reading of the §2 CTR
 definition, not unique-per-button.
 
+**Leaderboard k-anonymity (admin-analytics slice, 2026-08-18).** The
+admin dashboard leaderboards omit a live resource or uncancelled event
+unless its count is at least **3** (`download_count` or Yes RSVPs).
+Below-threshold items are left off the list entirely — not shown with
+a zero, blank, or "<3" count — then the remaining rows are capped
+at 10. KPI cards and funnel stage totals are not k-filtered. PRD §6
+asks for top-10 downloads and most-attended events for content
+planning and says the lists are “not for member-ranking”; it does not
+set a numeric floor. k=3 is a typical k-anonymity convention, chosen
+because a named event with one Yes on a passively viewed dashboard is
+close to identifying a member in a small cohort (LEAD in particular).
+That is a different exposure than an Admin opening that event’s RSVP
+roster on purpose. **Unconfirmed by Amend.** Revisit if program leads
+want a different k or no floor. See
+`specs/009-admin-analytics/research.md` §6a.
+
 ---
 
 ## Still fully open, not yet assumed or addressed
@@ -160,4 +176,4 @@ Q15 (budget ceiling).
 
 **Log maintained by:** solo developer, per constitution governance.
 
-**Last updated:** 2026-08-17
+**Last updated:** 2026-08-18

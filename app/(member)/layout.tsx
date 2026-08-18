@@ -29,9 +29,9 @@ export default async function MemberLayout({ children }: { children: ReactNode }
   }
 
   return (
-    <div>
-      <header>
-        <nav aria-label="Member" className="flex flex-wrap gap-4 p-6">
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-border bg-sidebar px-gutter py-4">
+        <nav aria-label="Member" className="flex flex-wrap gap-4">
           <Link
             className="inline-flex min-h-touch items-center text-foreground underline"
             href="/app"
@@ -68,7 +68,7 @@ export default async function MemberLayout({ children }: { children: ReactNode }
         </nav>
       </header>
       <AnnouncementBanners banners={banners} />
-      <main>{children}</main>
+      <main className="px-gutter py-6">{children}</main>
     </div>
   );
 }

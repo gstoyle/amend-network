@@ -2,9 +2,8 @@
 
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { controlClassName, Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 
 export type EventFormState = {
   error?: string;
@@ -31,10 +30,6 @@ type EventFormProps = {
   capacityConfirm?: boolean;
 };
 
-const fieldClassName = cn(
-  "flex min-h-touch w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-);
-
 const VISIBILITY_OPTIONS = [
   { value: "all_authenticated", label: "Everyone signed in" },
   { value: "pathways", label: "Pathways only" },
@@ -59,7 +54,7 @@ export function EventForm({
       <div className="flex flex-col gap-2">
         <Label htmlFor="description">Description</Label>
         <textarea
-          className={fieldClassName}
+          className={controlClassName}
           defaultValue={initial?.description}
           id="description"
           maxLength={5000}
@@ -137,7 +132,7 @@ export function EventForm({
           <div className="flex flex-col gap-2">
             <Label htmlFor="notifyMessage">Optional message</Label>
             <textarea
-              className={fieldClassName}
+              className={controlClassName}
               id="notifyMessage"
               maxLength={1000}
               name="notifyMessage"

@@ -2,9 +2,8 @@
 
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { controlClassName, Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 
 export type InviteCompleteFormState = {
   message?: string;
@@ -27,10 +26,6 @@ type InviteCompleteFormProps = {
 };
 
 const initialState: InviteCompleteFormState = {};
-
-const selectClassName = cn(
-  "flex min-h-touch w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-);
 
 export function InviteCompleteForm({
   token,
@@ -78,7 +73,7 @@ export function InviteCompleteForm({
       <div className="flex flex-col gap-2">
         <Label htmlFor="docAffiliation">DOC affiliation</Label>
         <select
-          className={selectClassName}
+          className={controlClassName}
           defaultValue={docAffiliationId ?? ""}
           id="docAffiliation"
           name="docAffiliation"

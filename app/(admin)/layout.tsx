@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { LogoutButton } from "@/components/logout-button";
@@ -14,13 +15,33 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   }
 
   return (
-    <div>
-      <header>
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-border bg-sidebar px-gutter py-4">
+        <nav aria-label="Admin" className="flex flex-wrap gap-4">
+          <Link
+            className="inline-flex min-h-touch items-center text-foreground underline"
+            href="/admin"
+          >
+            Home
+          </Link>
+          <Link
+            className="inline-flex min-h-touch items-center text-foreground underline"
+            href="/admin/analytics"
+          >
+            Analytics
+          </Link>
+          <Link
+            className="inline-flex min-h-touch items-center text-foreground underline"
+            href="/admin/audit-log"
+          >
+            Audit log
+          </Link>
+        </nav>
         <nav aria-label="Account">
           <LogoutButton />
         </nav>
       </header>
-      <main>{children}</main>
+      <main className="px-gutter py-6">{children}</main>
     </div>
   );
 }

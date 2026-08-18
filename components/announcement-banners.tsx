@@ -1,6 +1,8 @@
 import { AnnouncementBody } from "@/components/announcement-body";
 import { Button } from "@/components/ui/button";
+import { cardClassName } from "@/components/ui/card";
 import type { MemberBanner } from "@/lib/announcements/list";
+import { cn } from "@/lib/utils";
 
 export function AnnouncementBanners({ banners }: { banners: MemberBanner[] }) {
   if (banners.length === 0) {
@@ -10,7 +12,7 @@ export function AnnouncementBanners({ banners }: { banners: MemberBanner[] }) {
     <section aria-label="Announcements" className="flex flex-col gap-3 p-6">
       {banners.map((banner) => (
         <article
-          className="rounded-md border border-border bg-background p-4"
+          className={cn(cardClassName, "p-4")}
           key={banner.id}
         >
           <h2 className="text-lg font-medium text-foreground">{banner.headline}</h2>

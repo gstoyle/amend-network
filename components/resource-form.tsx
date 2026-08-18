@@ -2,9 +2,8 @@
 
 import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { controlClassName, Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 
 export type ResourceListItem = {
   id: string;
@@ -48,10 +47,6 @@ type ResourceFormProps = {
 };
 
 const initialState: ResourceFormState = {};
-
-const fieldClassName = cn(
-  "flex min-h-touch w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-);
 
 const VISIBILITY_OPTIONS = [
   { value: "all_authenticated", label: "Everyone signed in" },
@@ -142,7 +137,7 @@ export function ResourceForm({
       <div className="flex flex-col gap-2">
         <Label htmlFor="previewText">Preview text</Label>
         <textarea
-          className={fieldClassName}
+          className={controlClassName}
           defaultValue={initial?.previewText ?? ""}
           id="previewText"
           maxLength={500}
@@ -154,7 +149,7 @@ export function ResourceForm({
       <div className="flex flex-col gap-2">
         <Label htmlFor="sourceLabel">Source</Label>
         <select
-          className={fieldClassName}
+          className={controlClassName}
           defaultValue={initial?.sourceLabel ?? "Amend"}
           id="sourceLabel"
           name="sourceLabel"

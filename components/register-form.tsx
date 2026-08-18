@@ -2,9 +2,8 @@
 
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { controlClassName, Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 
 export type RegisterFormState = {
   message?: string;
@@ -18,10 +17,6 @@ type RegisterFormProps = {
 };
 
 const initialState: RegisterFormState = {};
-
-const selectClassName = cn(
-  "flex min-h-touch w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-);
 
 export function RegisterForm({ affiliations, networks, action }: RegisterFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
@@ -38,7 +33,7 @@ export function RegisterForm({ affiliations, networks, action }: RegisterFormPro
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="docAffiliation">DOC affiliation</Label>
-        <select className={selectClassName} id="docAffiliation" name="docAffiliation" required>
+        <select className={controlClassName} id="docAffiliation" name="docAffiliation" required>
           <option value="">Select an affiliation</option>
           {affiliations.map((row) => (
             <option key={row.id} value={row.id}>
@@ -57,7 +52,7 @@ export function RegisterForm({ affiliations, networks, action }: RegisterFormPro
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="networkId">Network</Label>
-        <select className={selectClassName} id="networkId" name="networkId" required>
+        <select className={controlClassName} id="networkId" name="networkId" required>
           <option value="">Select a network</option>
           {networks.map((row) => (
             <option key={row.id} value={row.id}>
