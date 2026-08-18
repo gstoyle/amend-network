@@ -52,6 +52,12 @@ export default async function MemberLayout({ children }: { children: ReactNode }
           </Link>
           <Link
             className="inline-flex min-h-touch items-center text-foreground underline"
+            href="/app/directory"
+          >
+            Directory
+          </Link>
+          <Link
+            className="inline-flex min-h-touch items-center text-foreground underline"
             href="/app/profile/privacy"
           >
             Privacy

@@ -6,7 +6,9 @@ export type AnalyticsEventName =
   | "announcement_impression"
   | "announcement_cta_click"
   | "event_viewed"
-  | "event_rsvp";
+  | "event_rsvp"
+  | "directory_search"
+  | "directory_profile_viewed";
 
 export type AnalyticsRsvpStatus = "yes" | "no" | "maybe" | "waitlist";
 
@@ -18,6 +20,7 @@ export type AnalyticsPayload = {
   ctaSlot?: "primary" | "secondary";
   eventId?: string;
   rsvpStatus?: AnalyticsRsvpStatus;
+  viewedUserId?: string;
 };
 
 const ALLOWED_KEYS = new Set([
@@ -28,11 +31,17 @@ const ALLOWED_KEYS = new Set([
   "ctaSlot",
   "eventId",
   "rsvpStatus",
+  "viewedUserId",
 ]);
 const BLOCKED_KEYS = new Set([
   "email",
   "name",
   "title",
+  "query",
+  "q",
+  "doc",
+  "doclabel",
+  "affiliation",
   "headline",
   "body",
   "ctaLabel",
@@ -67,6 +76,8 @@ export function track(event: AnalyticsEventName, payload: AnalyticsPayload): voi
     case "announcement_cta_click":
     case "event_viewed":
     case "event_rsvp":
+    case "directory_search":
+    case "directory_profile_viewed":
       return;
     default: {
       const exhaustive: never = event;

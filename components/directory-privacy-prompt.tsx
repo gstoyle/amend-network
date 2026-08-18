@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export function DirectoryPrivacyPrompt() {
   return (
-    <aside className="flex flex-col gap-3 p-6">
+    <aside aria-label="Directory privacy" className="flex flex-col gap-3 p-6">
       <p className="text-foreground">
         You are not in the member directory until you choose. If you opt in, same-program
         members and staff who can view the directory will see your name and network.

@@ -12,6 +12,8 @@ import { updateEvent } from "@/lib/events/edit";
 import { createEvent, listAdminEvents } from "@/lib/events/publish";
 import { setEventRsvp } from "@/lib/events/rsvp";
 import { saveDirectoryPrivacy } from "@/lib/directory/privacy";
+import { listDirectory } from "@/lib/directory/list";
+import { getDirectoryProfile } from "@/lib/directory/profile";
 import { listAdminResources, mintIngestSlots } from "@/lib/resources/publish";
 import { claimsFor } from "@/tests/helpers/prd-matrix";
 
@@ -365,6 +367,43 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
     await expect(saveDirectoryPrivacy(claimsFor("invited"), input, ctx)).rejects.toThrowError(
       AUTH_FAILURE_MESSAGE,
     );
+  });
+
+  it("directory list denies pending, invited, and signed-out (US2)", async () => {
+    expect(authorizedFor("/app/directory")).toBe(false);
+    expect(authorizedFor("/app/directory", "session-id")).toBe(true);
+    expect(() => requireRole(null)).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(() => requireRole(claimsFor("pending"))).toThrowError(AUTH_FAILURE_MESSAGE);
+
+    await expect(listDirectory(null, { q: "" })).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    await expect(listDirectory(claimsFor("pending"), { q: "" })).rejects.toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    await expect(listDirectory(claimsFor("invited"), { q: "" })).rejects.toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+  });
+
+  it("directory profile denies pending, invited, and signed-out; withholds unknown ids (US3)", async () => {
+    expect(authorizedFor("/app/directory/any-id")).toBe(false);
+    expect(authorizedFor("/app/directory/any-id", "session-id")).toBe(true);
+    expect(() => requireRole(null)).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(() => requireRole(claimsFor("pending"))).toThrowError(AUTH_FAILURE_MESSAGE);
+
+    const unknownId = "00000000-0000-4000-8000-000000000099";
+    const ctx = { ip: "127.0.0.1", userAgent: "vitest-directory-profile-deny" };
+    await expect(getDirectoryProfile(null, unknownId, ctx)).rejects.toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    await expect(getDirectoryProfile(claimsFor("pending"), unknownId, ctx)).rejects.toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    await expect(getDirectoryProfile(claimsFor("invited"), unknownId, ctx)).rejects.toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+
+    const withheld = await getDirectoryProfile(claimsFor("pathways"), unknownId, ctx);
+    expect(withheld).toBeNull();
   });
 
   it("member resource library denies a missing session at layer 1 (US2)", () => {

@@ -1,0 +1,203 @@
+/* =============================================================
+   THEME TOKEN MANIFEST — "Quiet Institution"
+   Swap this file to re-theme the entire portal.
+   Layer 1: primitives (raw values)
+   Layer 2: semantic tokens (consumed by Tailwind + components)
+   ============================================================= */
+
+:root {
+  /* ---------- Layer 1: primitives ---------- */
+
+  /* Warm neutral base */
+  --stone-50: #faf8f5;
+  --stone-100: #f4f1eb;
+  --stone-200: #e8e3da;
+  --stone-300: #d8d1c5;
+  --stone-400: #b3aa9b;
+  --stone-500: #8a8175;
+  --stone-600: #6b6459;
+  --stone-700: #514b43;
+  --stone-800: #35312c;
+  --stone-900: #1f1d1a;
+  /* Accent — evergreen */
+  --evergreen-50: #eef3f0;
+  --evergreen-100: #dbe6e0;
+  --evergreen-300: #8fb3a4;
+  --evergreen-600: #2b6350;
+  --evergreen-700: #1f4d3f;
+  --evergreen-800: #173a30;
+  /* Supporting — warm clay (status + role distinction) */
+  --clay-50: #fbf1e9;
+  --clay-100: #f4e2d3;
+  --clay-600: #a2531f;
+  --clay-700: #843f16;
+  /* Status */
+  --status-success: #26624c;
+  --status-warning: #7d5310;
+  --status-danger: #8f2f1e;
+  --status-info: #2a4f6e;
+  --white: #ffffff;
+  /* ---------- Layer 2: semantic — color ---------- */
+  --background: var(--stone-100);
+  --foreground: var(--stone-900);
+  --card: var(--white);
+  --card-foreground: var(--stone-900);
+  --popover: var(--white);
+  --popover-foreground: var(--stone-900);
+  /* Confident accent */
+  --primary: var(--evergreen-700);
+  --primary-hover: var(--evergreen-800);
+  --primary-foreground: var(--stone-50);
+  --primary-subtle: var(--evergreen-50);
+  --primary-subtle-foreground: var(--evergreen-800);
+  /* Supporting colour */
+  --support: var(--clay-700);
+  --support-foreground: var(--stone-50);
+  --support-subtle: var(--clay-50);
+  --support-subtle-foreground: var(--clay-700);
+  --secondary: var(--stone-200);
+  --secondary-foreground: var(--stone-800);
+  --muted: var(--stone-100);
+  --muted-foreground: var(--stone-600); /* 6.4:1 on --background */
+  /* shadcn hover-surface token (NOT the brand accent) */
+  --accent: var(--stone-100);
+  --accent-foreground: var(--stone-800);
+  --destructive: var(--status-danger);
+  --destructive-foreground: var(--stone-50);
+  --success: var(--status-success);
+  --success-subtle: #e7efeb;
+  --warning: var(--status-warning);
+  --warning-subtle: #f7eedc;
+  --info: var(--status-info);
+  --info-subtle: #e6edf3;
+  /* Borders: hairline = decorative, strong = interactive (>= 3:1) */
+  --border: var(--stone-200);
+  --border-strong: var(--stone-500);
+  --input: var(--stone-400);
+  --ring: var(--evergreen-700);
+  --sidebar: var(--stone-50);
+  --sidebar-foreground: var(--stone-800);
+  --sidebar-primary: var(--evergreen-700);
+  --sidebar-primary-foreground: var(--stone-50);
+  --sidebar-accent: var(--stone-200);
+  --sidebar-accent-foreground: var(--stone-900);
+  --sidebar-border: var(--stone-200);
+  --sidebar-ring: var(--evergreen-700);
+  --chart-1: var(--evergreen-700);
+  --chart-2: var(--clay-600);
+  --chart-3: var(--status-info);
+  --chart-4: var(--stone-500);
+  --chart-5: var(--status-warning);
+  /* ---------- Layer 2: semantic — typography ---------- */
+  --font-body: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+  --text-eyebrow: 0.75rem;
+  --leading-eyebrow: 1rem;
+  --tracking-eyebrow: 0.08em;
+  --text-xs: 0.75rem;
+  --leading-xs: 1.125rem;
+  --text-sm: 0.875rem;
+  --leading-sm: 1.375rem;
+  --text-base: 1rem;
+  --leading-base: 1.5rem;
+  --text-lg: 1.125rem;
+  --leading-lg: 1.625rem;
+  --text-xl: 1.3125rem;
+  --leading-xl: 1.75rem;
+  --text-2xl: 1.5rem;
+  --leading-2xl: 1.875rem;
+  --text-3xl: 1.875rem;
+  --leading-3xl: 2.25rem;
+  --text-4xl: 2.25rem;
+  --leading-4xl: 2.5rem;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  /* ---------- Layer 2: semantic — space (4px base) ---------- */
+  --space-px: 1px;
+  --space-0-5: 0.125rem;
+  --space-1: 0.25rem;
+  --space-1-5: 0.375rem;
+  --space-2: 0.5rem;
+  --space-2-5: 0.625rem;
+  --space-3: 0.75rem;
+  --space-3-5: 0.875rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 1.75rem;
+  --space-8: 2rem;
+  --space-9: 2.25rem;
+  --space-10: 2.5rem;
+  --space-11: 2.75rem; /* 44px minimum tap target */
+  --space-12: 3rem;
+  --space-14: 3.5rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --tap-target: 2.75rem;
+  --gutter: var(--space-4);
+  --gutter-lg: var(--space-8);
+  --content-max: 78rem;
+  /* ---------- Layer 2: semantic — radius ---------- */
+  --radius-xs: 0.125rem;
+  --radius-sm: 0.25rem;
+  --radius: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+  /* ---------- Layer 2: semantic — elevation ---------- */
+  --shadow-none: none;
+  --shadow-xs: 0 1px 1px rgba(31, 29, 26, 0.04);
+  --shadow-sm: 0 1px 2px rgba(31, 29, 26, 0.06);
+  --shadow-md: 0 2px 6px rgba(31, 29, 26, 0.07);
+  --shadow-lg: 0 6px 20px rgba(31, 29, 26, 0.1);
+  --shadow-bar: 0 -1px 0 var(--border);
+  /* ---------- Layer 2: semantic — focus ---------- */
+  --focus-width: 2px;
+  --focus-offset: 2px;
+  /* ---------- Layer 2: semantic — motion ---------- */
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+:root.dark {
+  --background: var(--stone-900);
+  --foreground: var(--stone-50);
+  --card: #26231f;
+  --card-foreground: var(--stone-50);
+  --popover: #26231f;
+  --popover-foreground: var(--stone-50);
+  --primary: var(--evergreen-300);
+  --primary-hover: #a6c4b7;
+  --primary-foreground: var(--stone-900);
+  --primary-subtle: #22322c;
+  --primary-subtle-foreground: var(--evergreen-300);
+  --support: #e0b090;
+  --support-foreground: var(--stone-900);
+  --support-subtle: #33261d;
+  --support-subtle-foreground: #e0b090;
+  --secondary: var(--stone-800);
+  --secondary-foreground: var(--stone-50);
+  --muted: var(--stone-800);
+  --muted-foreground: var(--stone-400);
+  --accent: var(--stone-800);
+  --accent-foreground: var(--stone-50);
+  --border: #3a352f;
+  --border-strong: var(--stone-500);
+  --input: var(--stone-600);
+  --ring: var(--evergreen-300);
+  --sidebar: #26231f;
+  --sidebar-foreground: var(--stone-50);
+  --sidebar-primary: var(--evergreen-300);
+  --sidebar-primary-foreground: var(--stone-900);
+  --sidebar-accent: var(--stone-800);
+  --sidebar-accent-foreground: var(--stone-50);
+  --sidebar-border: #3a352f;
+  --success-subtle: #1e2b25;
+  --warning-subtle: #2e2618;
+  --info-subtle: #1c262e;
+}

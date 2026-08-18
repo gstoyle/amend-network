@@ -91,17 +91,17 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 2 ⚠️ fail first
 
-- [ ] T017 [P] [US2] Write failing same-program list/search / hidden-field oracle / pending-zero tests in `tests/integration/directory-search.test.ts`
-- [ ] T018 [P] [US2] Mark `view_directory` built in `tests/helpers/prd-matrix.ts`, `tests/app/permission-matrix.test.ts`, and `tests/rls/permission-matrix.test.ts` per [contracts/permission-matrix.md](./contracts/permission-matrix.md)
-- [ ] T019 [P] [US2] Write failing unit tests in `tests/unit/directory-search-match.test.ts` that a query matching only a hidden title or hidden DOC label does not keep that member, and a visible name match does
-- [ ] T020 [P] [US2] Write failing unauthorized deny for `/app/directory` (pending, signed-out) in `tests/app/unauthorized-routes.test.ts`
+- [x] T017 [P] [US2] Write failing same-program list/search / hidden-field oracle / pending-zero tests in `tests/integration/directory-search.test.ts`
+- [x] T018 [P] [US2] Mark `view_directory` built in `tests/helpers/prd-matrix.ts`, `tests/app/permission-matrix.test.ts`, and `tests/rls/permission-matrix.test.ts` per [contracts/permission-matrix.md](./contracts/permission-matrix.md)
+- [x] T019 [P] [US2] Write failing unit tests in `tests/unit/directory-search-match.test.ts` that a query matching only a hidden title or hidden DOC label does not keep that member, and a visible name match does
+- [x] T020 [P] [US2] Write failing unauthorized deny for `/app/directory` (pending, signed-out) in `tests/app/unauthorized-routes.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T021 [US2] Implement decrypt-then-match list/search (RLS listings + shown children; never `SELECT` other `users` rows; staff see both programs at this layer too) in `lib/directory/list.ts`
-- [ ] T022 [US2] Extend `lib/analytics/track.ts` with `directory_search` (opaque ids + roles only; denylist query/name/email/title/DOC)
-- [ ] T023 [US2] Build search leaf (no role logic) in `components/directory-search-form.tsx` and page `app/(member)/app/directory/page.tsx`; show first-run prompt when privacy unset
-- [ ] T024 [US2] Add Directory link on `app/(member)/layout.tsx`
+- [x] T021 [US2] Implement decrypt-then-match list/search (RLS listings + shown children; never `SELECT` other `users` rows; staff see both programs at this layer too) in `lib/directory/list.ts`
+- [x] T022 [US2] Extend `lib/analytics/track.ts` with `directory_search` (opaque ids + roles only; denylist query/name/email/title/DOC)
+- [x] T023 [US2] Build search leaf (no role logic) in `components/directory-search-form.tsx` and page `app/(member)/app/directory/page.tsx`; show first-run prompt when privacy unset
+- [x] T024 [US2] Add Directory link on `app/(member)/layout.tsx`
 
 **Checkpoint**: Spec US2 independent test passes. Hidden-field oracle holds.
 
@@ -115,14 +115,14 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 3 ⚠️ fail first
 
-- [ ] T025 [P] [US3] Write failing profile field-hide / withhold / other-member audit / self-view no-audit tests in `tests/integration/directory-profile.test.ts`
-- [ ] T026 [P] [US3] Write failing unauthorized / withhold cases for `/app/directory/[id]` in `tests/app/unauthorized-routes.test.ts`
+- [x] T025 [P] [US3] Write failing profile field-hide / withhold / other-member audit / self-view no-audit tests in `tests/integration/directory-profile.test.ts`
+- [x] T026 [P] [US3] Write failing unauthorized / withhold cases for `/app/directory/[id]` in `tests/app/unauthorized-routes.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T027 [US3] Extend `lib/analytics/track.ts` with `directory_profile_viewed` and allowlisted `viewedUserId`
-- [ ] T028 [US3] Implement profile load (same visibility as list; audit + track only when viewer ≠ subject) in `lib/directory/profile.ts`
-- [ ] T029 [US3] Build initials treatment (tokens, no uploaded avatar) in `components/member-initials.tsx` and profile page `app/(member)/app/directory/[id]/page.tsx`
+- [x] T027 [US3] Extend `lib/analytics/track.ts` with `directory_profile_viewed` and allowlisted `viewedUserId`
+- [x] T028 [US3] Implement profile load (same visibility as list; audit + track only when viewer ≠ subject) in `lib/directory/profile.ts`
+- [x] T029 [US3] Build initials treatment (tokens, no uploaded avatar) in `components/member-initials.tsx` and profile page `app/(member)/app/directory/[id]/page.tsx`
 
 **Checkpoint**: Spec US3 independent test passes. SC-010 / SC-011 for profile view.
 
@@ -136,11 +136,11 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 4 ⚠️ fail first
 
-- [ ] T030 [P] [US4] Write failing staff-both-programs + staff-uniform-hide tests in `tests/integration/directory-staff.test.ts`
+- [x] T030 [P] [US4] Write failing staff-both-programs + staff-uniform-hide tests in `tests/integration/directory-staff.test.ts`
 
 ### Implementation for User Story 4
 
-- [ ] T031 [US4] Confirm `lib/directory/list.ts` and `lib/directory/profile.ts` use RLS (staff OR same-program) with **no** extra layer-2 filter that drops the other program for staff; add privacy-page copy that staff see all listed members in `components/directory-privacy-form.tsx` if missing
+- [x] T031 [US4] Confirm `lib/directory/list.ts` and `lib/directory/profile.ts` use RLS (staff OR same-program) with **no** extra layer-2 filter that drops the other program for staff; add privacy-page copy that staff see all listed members in `components/directory-privacy-form.tsx` if missing
 
 **Checkpoint**: Spec US4 independent test passes.
 
@@ -154,12 +154,12 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 5 ⚠️ fail first
 
-- [ ] T032 [P] [US5] Write failing 30-then-31st / second-user-unaffected tests in `tests/integration/directory-rate-limit.test.ts`
+- [x] T032 [P] [US5] Write failing 30-then-31st / second-user-unaffected tests in `tests/integration/directory-rate-limit.test.ts`
 
 ### Implementation for User Story 5
 
-- [ ] T033 [US5] Implement own-row tumbling window counter in `lib/directory/throttle.ts`
-- [ ] T034 [US5] Call throttle **before** list/search in `lib/directory/list.ts` (over cap → no rows, no `track('directory_search')`)
+- [x] T033 [US5] Implement own-row tumbling window counter in `lib/directory/throttle.ts`
+- [x] T034 [US5] Call throttle **before** list/search in `lib/directory/list.ts` (over cap → no rows, no `track('directory_search')`)
 
 **Checkpoint**: Spec US5 independent test passes. SC-009.
 
@@ -167,9 +167,9 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T035 [P] Axe fixtures for `/app/directory`, `/app/directory/[id]`, `/app/profile/privacy`, and home prompt in `tests/a11y/directory-pages.test.ts`
-- [ ] T036 [P] Extend payload allow/deny cases in `tests/unit/analytics.test.ts` for `directory_search` / `directory_profile_viewed` (reject query strings, names, emails, titles, DOC)
-- [ ] T037 Run [quickstart.md](./quickstart.md) locally (`pnpm test`, `pnpm test:rls`, `pnpm test:a11y`, `pnpm typecheck`, `pnpm lint`)
+- [x] T035 [P] Axe fixtures for `/app/directory`, `/app/directory/[id]`, `/app/profile/privacy`, and home prompt in `tests/a11y/directory-pages.test.ts`
+- [x] T036 [P] Extend payload allow/deny cases in `tests/unit/analytics.test.ts` for `directory_search` / `directory_profile_viewed` (reject query strings, names, emails, titles, DOC)
+- [x] T037 Run [quickstart.md](./quickstart.md) locally (`pnpm test`, `pnpm test:rls`, `pnpm test:a11y`, `pnpm typecheck`, `pnpm lint`)
 
 ---
 

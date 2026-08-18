@@ -29,8 +29,8 @@ function isBuilt(capability: Capability): boolean {
     case "view_events":
     case "rsvp_events":
     case "appear_in_directory":
-      return true;
     case "view_directory":
+      return true;
     case "view_forum":
     case "post_forum":
     case "moderate_forum":
@@ -377,6 +377,22 @@ async function rlsCanInsertDirectoryListing(role: MatrixRole): Promise<boolean> 
   }
 }
 
+async function rlsCanSeeDirectoryListing(role: MatrixRole): Promise<boolean> {
+  const session = claimsFor(role);
+  const rows = await withRls(
+    session
+      ? {
+          userId: session.userId,
+          programRole: session.programRole,
+          adminRole: session.adminRole,
+          status: session.status,
+        }
+      : {},
+    (tx) => tx.directoryListing.findMany({ take: 1, select: { userId: true } }),
+  );
+  return rows.length > 0;
+}
+
 function rlsVerdict(
   role: MatrixRole,
   capability: Capability,
@@ -387,6 +403,7 @@ function rlsVerdict(
   roleSpecificVisible: boolean,
   rsvpAllowed: boolean,
   appearAllowed: boolean,
+  directoryVisible: boolean,
 ): MatrixVerdict {
   switch (capability) {
     case "log_in":
@@ -418,6 +435,7 @@ function rlsVerdict(
     case "appear_in_directory":
       return appearAllowed ? "allow" : "deny";
     case "view_directory":
+      return directoryVisible ? "allow" : "deny";
     case "view_forum":
     case "post_forum":
     case "moderate_forum":
@@ -480,6 +498,8 @@ describe("RLS permission matrix (GUCs only, no requireRole)", () => {
       const rsvpAllowed = capability === "rsvp_events" ? await rlsCanRsvpEvent(role) : false;
       const appearAllowed =
         capability === "appear_in_directory" ? await rlsCanInsertDirectoryListing(role) : false;
+      const directoryVisible =
+        capability === "view_directory" ? await rlsCanSeeDirectoryListing(role) : false;
       const expected = PRD_MATRIX[capability][role];
       if (!isBuilt(capability)) {
         expect(["deny", "fail-closed"]).toContain(expected);
@@ -496,6 +516,7 @@ describe("RLS permission matrix (GUCs only, no requireRole)", () => {
         roleSpecificVisible,
         rsvpAllowed,
         appearAllowed,
+        directoryVisible,
       );
       expect(actual).toBe(expected);
     },

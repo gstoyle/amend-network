@@ -10,6 +10,7 @@ import { listEligibleBanners } from "@/lib/announcements/list";
 import { createEvent } from "@/lib/events/publish";
 import { listVisibleEvents } from "@/lib/events/list";
 import { setEventRsvp } from "@/lib/events/rsvp";
+import { listDirectory } from "@/lib/directory/list";
 import { grantDownload } from "@/lib/resources/download";
 import { listResources } from "@/lib/resources/list";
 import { mintIngestSlots } from "@/lib/resources/publish";
@@ -40,8 +41,8 @@ function isBuilt(_capability: Capability): boolean {
     case "view_events":
     case "rsvp_events":
     case "appear_in_directory":
-      return true;
     case "view_directory":
+      return true;
     case "view_forum":
     case "post_forum":
     case "moderate_forum":
@@ -180,7 +181,14 @@ async function appAllows(role: MatrixRole, capability: Capability): Promise<bool
         return false;
       }
     }
-    case "view_directory":
+    case "view_directory": {
+      try {
+        await listDirectory(session, { q: "" });
+        return true;
+      } catch {
+        return false;
+      }
+    }
     case "view_forum":
     case "post_forum":
     case "moderate_forum":

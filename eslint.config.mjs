@@ -21,6 +21,7 @@ const eslintConfig = [
       "infra/**",
       "specs/**",
       ".specify/**",
+      "mockup/**",
       "next-env.d.ts",
     ],
   },
