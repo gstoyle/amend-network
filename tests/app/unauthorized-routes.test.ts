@@ -7,6 +7,8 @@ import { listPendingRegistrations } from "@/lib/registration/approve";
 import { addDocAffiliation } from "@/lib/registration/doc-affiliations";
 import { sendManualInvite } from "@/lib/registration/invite";
 import { listAdminAnnouncements, createAnnouncement } from "@/lib/announcements/publish";
+import { cancelEvent } from "@/lib/events/cancel";
+import { updateEvent } from "@/lib/events/edit";
 import { createEvent, listAdminEvents } from "@/lib/events/publish";
 import { setEventRsvp } from "@/lib/events/rsvp";
 import { listAdminResources, mintIngestSlots } from "@/lib/resources/publish";
@@ -311,6 +313,15 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
         AUTH_FAILURE_MESSAGE,
       );
       await expect(listAdminEvents(claimsFor(role))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+      await expect(updateEvent(claimsFor(role), "00000000-0000-4000-8000-000000000099", createInput)).rejects.toThrowError(
+        AUTH_FAILURE_MESSAGE,
+      );
+      await expect(
+        cancelEvent(claimsFor(role), "00000000-0000-4000-8000-000000000099", {
+          ip: "127.0.0.1",
+          userAgent: "vitest-event-deny",
+        }),
+      ).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
     }
     await expect(listAdminEvents(claimsFor("moderator"))).resolves.toEqual(expect.any(Array));
   });

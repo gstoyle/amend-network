@@ -6,6 +6,7 @@ import { EventLocalTime } from "@/components/event-calendar";
 import { EventRsvp } from "@/components/event-rsvp";
 import { AuthDeniedError, isPendingSession, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
+import { getRevealedJoinUrl } from "@/lib/events/join-link";
 import { getVisibleEvent } from "@/lib/events/list";
 import { getOwnEventRsvp } from "@/lib/events/rsvp";
 
@@ -22,10 +23,12 @@ export default async function MemberEventDetailPage({
   }
   let event;
   let currentStatus;
+  let joinUrl: string | null = null;
   try {
     requireRole(claims);
     event = await getVisibleEvent(claims, id);
     currentStatus = event ? await getOwnEventRsvp(claims, id) : null;
+    joinUrl = event ? await getRevealedJoinUrl(claims, id) : null;
   } catch (error) {
     if (error instanceof AuthDeniedError) {
       redirect("/login");
@@ -47,8 +50,20 @@ export default async function MemberEventDetailPage({
       <EventLocalTime endsAt={event.endsAt.toISOString()} startsAt={event.startsAt.toISOString()} />
       {event.location ? <p>{event.location}</p> : null}
       {event.isVirtual ? <p>This is an online event.</p> : null}
+      {joinUrl ? (
+        <p>
+          <a className="underline" href={joinUrl} rel="noreferrer noopener">
+            Join meeting
+          </a>
+        </p>
+      ) : null}
       {event.capacity !== null ? <p>Capacity {event.capacity}</p> : null}
       <AnnouncementBody source={event.description} />
+      <p>
+        <Link className="underline" href={`/app/events/${event.id}/ics`}>
+          Download calendar file
+        </Link>
+      </p>
       <EventRsvp currentStatus={currentStatus} eventId={event.id} />
     </div>
   );

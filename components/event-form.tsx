@@ -27,6 +27,8 @@ type EventFormProps = {
   action: (state: EventFormState, formData: FormData) => Promise<EventFormState>;
   initial?: EventFormInitial;
   submitLabel: string;
+  notifyRsvps?: boolean;
+  capacityConfirm?: boolean;
 };
 
 const fieldClassName = cn(
@@ -39,7 +41,13 @@ const VISIBILITY_OPTIONS = [
   { value: "lead", label: "LEAD only" },
 ] as const;
 
-export function EventForm({ action, initial, submitLabel }: EventFormProps) {
+export function EventForm({
+  action,
+  initial,
+  submitLabel,
+  notifyRsvps = false,
+  capacityConfirm = false,
+}: EventFormProps) {
   const [state, formAction, pending] = useActionState(action, {});
   return (
     <form action={formAction} className="flex max-w-xl flex-col gap-4">
@@ -114,6 +122,30 @@ export function EventForm({ action, initial, submitLabel }: EventFormProps) {
         <Label htmlFor="capacity">Capacity (optional)</Label>
         <Input defaultValue={initial?.capacity} id="capacity" min={1} name="capacity" type="number" />
       </div>
+      {capacityConfirm ? (
+        <label className="flex min-h-touch items-center gap-2 text-foreground">
+          <input name="confirmCapacityShrink" type="checkbox" value="true" />
+          Save even if capacity is below the current Yes count. Existing Yes RSVPs stay Yes.
+        </label>
+      ) : null}
+      {notifyRsvps ? (
+        <>
+          <label className="flex min-h-touch items-center gap-2 text-foreground">
+            <input name="notifyRsvps" type="checkbox" value="true" />
+            Email people who RSVPed if the start or end time changes
+          </label>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="notifyMessage">Optional message</Label>
+            <textarea
+              className={fieldClassName}
+              id="notifyMessage"
+              maxLength={1000}
+              name="notifyMessage"
+              rows={3}
+            />
+          </div>
+        </>
+      ) : null}
       <Button disabled={pending} type="submit">
         {submitLabel}
       </Button>

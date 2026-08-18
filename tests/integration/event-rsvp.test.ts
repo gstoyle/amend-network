@@ -190,7 +190,7 @@ describe("member event RSVP (US3)", () => {
       },
     );
 
-    await aHasLock.promise;
+    await aHasLock;
     const bStarted = Date.now();
     const bResult = await setEventRsvp(other, eventB, "yes", auditCtx());
     const bElapsedMs = Date.now() - bStarted;

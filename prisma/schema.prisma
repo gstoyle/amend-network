@@ -255,6 +255,7 @@ model AnnouncementCtaClick {
 
 model Event {
   id           String    @id @default(uuid()) @db.Uuid
+  lockKey      BigInt    @unique @default(autoincrement()) @map("lock_key")
   title        String
   description  String
   startsAt     DateTime  @map("starts_at") @db.Timestamptz(6)

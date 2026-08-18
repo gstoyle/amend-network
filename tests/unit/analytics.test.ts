@@ -82,6 +82,33 @@ describe("analytics tracker (T047 / FR-021)", () => {
         programRole: "pathways",
         adminRole: "none",
         eventId: "00000000-0000-4000-8000-000000000002",
+        rsvpStatus: "maybe",
+      }),
+    ).not.toThrow();
+    expect(() =>
+      track("event_rsvp", {
+        distinctId: "00000000-0000-4000-8000-000000000001",
+        programRole: "pathways",
+        adminRole: "none",
+        eventId: "00000000-0000-4000-8000-000000000002",
+        rsvpStatus: "no",
+      }),
+    ).not.toThrow();
+    expect(() =>
+      track("event_rsvp", {
+        distinctId: "00000000-0000-4000-8000-000000000001",
+        programRole: "pathways",
+        adminRole: "none",
+        eventId: "00000000-0000-4000-8000-000000000002",
+        rsvpStatus: "attending" as never,
+      }),
+    ).toThrowError(/analytics payload/);
+    expect(() =>
+      track("event_rsvp", {
+        distinctId: "00000000-0000-4000-8000-000000000001",
+        programRole: "pathways",
+        adminRole: "none",
+        eventId: "00000000-0000-4000-8000-000000000002",
         rsvpStatus: "yes",
         description: "secret",
       } as never),

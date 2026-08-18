@@ -19,8 +19,20 @@ export type LifecycleEmailKind =
   | "invite_expiring_soon"
   | "invite_expired";
 
+export type EventEmailKind =
+  | "event_time_changed"
+  | "event_cancelled"
+  | "event_yes_invite"
+  | "event_reminder";
+
 export type LifecycleEmailInput = {
   kind: LifecycleEmailKind;
+  to: string;
+  vars?: Record<string, string>;
+};
+
+export type EventEmailInput = {
+  kind: EventEmailKind;
   to: string;
   vars?: Record<string, string>;
 };
@@ -78,6 +90,54 @@ function lifecycleCopy(kind: LifecycleEmailKind, vars: Record<string, string>): 
   }
 }
 
+function eventCopy(kind: EventEmailKind, vars: Record<string, string>): { subject: string; text: string } {
+  const title = vars.title ?? "An event";
+  const message = vars.message?.trim() ?? "";
+  const starts = vars.startsAt ?? "";
+  const location = vars.location ?? "";
+  switch (kind) {
+    case "event_time_changed":
+      return {
+        subject: `Event time updated: ${title}`,
+        text: [
+          `The time for ${title} has changed.`,
+          starts ? `New start: ${starts}` : "",
+          message,
+        ]
+          .filter((line) => line.length > 0)
+          .join("\n"),
+      };
+    case "event_cancelled":
+      return {
+        subject: `Event cancelled: ${title}`,
+        text: `${title} has been cancelled.`,
+      };
+    case "event_yes_invite":
+      return {
+        subject: `Calendar invite: ${title}`,
+        text: [
+          `You are confirmed for ${title}.`,
+          starts ? `Starts: ${starts}` : "",
+          location ? `Location: ${location}` : "",
+          vars.joinUrl ? `Join: ${vars.joinUrl}` : "",
+        ]
+          .filter((line) => line.length > 0)
+          .join("\n"),
+      };
+    case "event_reminder":
+      return {
+        subject: `Reminder: ${title} is tomorrow`,
+        text: [`${title} starts in 24 hours.`, starts ? `Starts: ${starts}` : ""]
+          .filter((line) => line.length > 0)
+          .join("\n"),
+      };
+    default: {
+      const _exhaustive: never = kind;
+      return _exhaustive;
+    }
+  }
+}
+
 async function sendMail(payload: { to: string; subject: string; text: string }): Promise<void> {
   const settings = env();
   const message = {
@@ -123,5 +183,10 @@ export async function sendResetEmail(input: ResetEmailInput): Promise<void> {
 
 export async function sendLifecycleEmail(input: LifecycleEmailInput): Promise<void> {
   const copy = lifecycleCopy(input.kind, input.vars ?? {});
+  await sendMail({ to: input.to, subject: copy.subject, text: copy.text });
+}
+
+export async function sendEventEmail(input: EventEmailInput): Promise<void> {
+  const copy = eventCopy(input.kind, input.vars ?? {});
   await sendMail({ to: input.to, subject: copy.subject, text: copy.text });
 }

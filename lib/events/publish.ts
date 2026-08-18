@@ -61,7 +61,7 @@ export function authorizeEventStaff(session: SessionClaims | null): SessionClaim
   return requireRole(session, { admin: [...EVENT_STAFF_ROLES], mfa: true });
 }
 
-function parsedFields(input: EventWriteInput) {
+export function parseEventWriteFields(input: EventWriteInput) {
   const parsed = createSchema.safeParse(input);
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? "Could not save this event.");
@@ -106,7 +106,7 @@ export async function createEvent(
   const claims = authorizeEventStaff(session);
   let fields;
   try {
-    fields = parsedFields(input);
+    fields = parseEventWriteFields(input);
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : "Could not save this event." };
   }
@@ -159,9 +159,13 @@ export type AdminEvent = {
   visibility: string[];
   startsAt: Date;
   endsAt: Date;
+  timezoneHint: string | null;
+  location: string | null;
   cancelledAt: Date | null;
   isVirtual: boolean;
+  joinUrl: string | null;
   capacity: number | null;
+  rsvpCount: number;
 };
 
 export async function listAdminEvents(session: SessionClaims | null): Promise<AdminEvent[]> {
@@ -173,7 +177,11 @@ export async function listAdminEvents(session: SessionClaims | null): Promise<Ad
       adminRole: claims.adminRole,
       status: claims.status,
     },
-    (tx) => tx.event.findMany({ orderBy: [{ startsAt: "desc" }, { id: "desc" }] }),
+    (tx) =>
+      tx.event.findMany({
+        orderBy: [{ startsAt: "desc" }, { id: "desc" }],
+        include: { _count: { select: { rsvps: true } }, joinLink: { select: { url: true } } },
+      }),
   );
   return rows.map((row) => ({
     id: row.id,
@@ -182,8 +190,50 @@ export async function listAdminEvents(session: SessionClaims | null): Promise<Ad
     visibility: row.visibility,
     startsAt: row.startsAt,
     endsAt: row.endsAt,
+    timezoneHint: row.timezoneHint,
+    location: row.location,
     cancelledAt: row.cancelledAt,
     isVirtual: row.isVirtual,
+    joinUrl: row.joinLink?.url ?? null,
     capacity: row.capacity,
+    rsvpCount: row._count.rsvps,
   }));
+}
+
+export async function getAdminEvent(
+  session: SessionClaims | null,
+  id: string,
+): Promise<AdminEvent | null> {
+  const claims = authorizeEventStaff(session);
+  const row = await withRls(
+    {
+      userId: claims.userId,
+      programRole: claims.programRole,
+      adminRole: claims.adminRole,
+      status: claims.status,
+    },
+    (tx) =>
+      tx.event.findUnique({
+        where: { id },
+        include: { _count: { select: { rsvps: true } }, joinLink: { select: { url: true } } },
+      }),
+  );
+  if (!row) {
+    return null;
+  }
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    visibility: row.visibility,
+    startsAt: row.startsAt,
+    endsAt: row.endsAt,
+    timezoneHint: row.timezoneHint,
+    location: row.location,
+    cancelledAt: row.cancelledAt,
+    isVirtual: row.isVirtual,
+    joinUrl: row.joinLink?.url ?? null,
+    capacity: row.capacity,
+    rsvpCount: row._count.rsvps,
+  };
 }

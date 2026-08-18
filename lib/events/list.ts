@@ -122,11 +122,12 @@ export async function listUpcomingEvents(
 export async function getVisibleEvent(
   session: SessionClaims | null,
   id: string,
+  options?: { trackView?: boolean },
 ): Promise<MemberEvent | null> {
   const claims = requireRole(session);
   const rows = await loadVisibleEvents(claims, { id });
   const event = rows[0] ?? null;
-  if (event) {
+  if (event && options?.trackView !== false) {
     track("event_viewed", {
       distinctId: claims.userId,
       programRole: claims.programRole,

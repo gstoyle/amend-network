@@ -45,12 +45,17 @@ const BLOCKED_KEYS = new Set([
   "virtualLink",
 ]);
 
+const ALLOWED_RSVP_STATUS = new Set<AnalyticsRsvpStatus>(["yes", "no", "maybe", "waitlist"]);
+
 export function track(event: AnalyticsEventName, payload: AnalyticsPayload): void {
   const keys = Object.keys(payload);
   for (const key of keys) {
     if (!ALLOWED_KEYS.has(key) || BLOCKED_KEYS.has(key.toLowerCase())) {
       throw new Error("analytics payload must not contain extra or PII fields");
     }
+  }
+  if (payload.rsvpStatus !== undefined && !ALLOWED_RSVP_STATUS.has(payload.rsvpStatus)) {
+    throw new Error("analytics payload must not contain extra or PII fields");
   }
   if (!env().POSTHOG_KEY) {
     return;

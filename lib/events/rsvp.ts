@@ -4,8 +4,12 @@ import { track, type AnalyticsRsvpStatus } from "@/lib/analytics/track";
 import { writeAudit } from "@/lib/audit/write";
 import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
+import { decryptPii } from "@/lib/crypto/pii";
 import { withRls } from "@/lib/db/rls";
 import { visibilityTokens } from "@/lib/db/visibility";
+import { sendEventEmail } from "@/lib/email/transport";
+import { getRevealedJoinUrl } from "@/lib/events/join-link";
+import { getVisibleEvent } from "@/lib/events/list";
 
 const choiceSchema = z.enum(["yes", "no", "maybe"]);
 
@@ -40,20 +44,17 @@ function intersects(visibility: string[], tokens: string[]): boolean {
 }
 
 /**
- * Choice (a): two-arg advisory lock, no extra events column.
- * Postgres has pg_advisory_xact_lock(bigint) and pg_advisory_xact_lock(int, int)
- * (the pair is one 64-bit lock id). There is no (bigint, bigint) overload.
- * Two hashtext salts, not a single hashtextextended pass.
+ * Option (b): lock on events.lock_key, a unique bigserial distinct from the uuid PK.
+ * Collision-free by construction. Not a public identifier; FKs still reference id.
  */
 export async function acquireEventRsvpLock(
   tx: Prisma.TransactionClient,
   eventId: string,
 ): Promise<void> {
   await tx.$queryRaw<{ locked: string }[]>`
-    SELECT pg_advisory_xact_lock(
-      hashtext(${eventId}::text || chr(1)),
-      hashtext(${eventId}::text || chr(2))
-    )::text AS locked
+    SELECT pg_advisory_xact_lock(lock_key)::text AS locked
+    FROM events
+    WHERE id = ${eventId}::uuid
   `;
 }
 
@@ -204,7 +205,7 @@ export async function setEventRsvp(
         }
       }
 
-      return { ok: true, status: nextStatus, promotedUserId } as const;
+      return { ok: true, status: nextStatus, previous, promotedUserId } as const;
     },
   );
 
@@ -216,5 +217,62 @@ export async function setEventRsvp(
   if (result.promotedUserId) {
     trackRsvp(claims, eventId, "yes", result.promotedUserId);
   }
+  if (result.status === "yes" && result.previous !== "yes") {
+    await sendYesInviteEmail(claims, eventId, claims.userId);
+  }
+  if (result.promotedUserId) {
+    await sendYesInviteEmail(claims, eventId, result.promotedUserId);
+  }
   return { ok: true, status: result.status };
+}
+
+async function sendYesInviteEmail(
+  viewer: SessionClaims,
+  eventId: string,
+  recipientUserId: string,
+): Promise<void> {
+  const event = await getVisibleEvent(viewer, eventId, { trackView: false });
+  if (!event) {
+    return;
+  }
+  const staffLookup = recipientUserId !== viewer.userId;
+  const user = await withRls(
+    staffLookup
+      ? { adminRole: "admin", status: "active" }
+      : {
+          userId: viewer.userId,
+          programRole: viewer.programRole,
+          adminRole: viewer.adminRole,
+          status: viewer.status,
+        },
+    (tx) =>
+      tx.user.findUnique({
+        where: { id: recipientUserId },
+        select: { emailEncrypted: true, programRole: true },
+      }),
+  );
+  if (!user) {
+    return;
+  }
+  const joinUrl = await getRevealedJoinUrl(
+    staffLookup
+      ? {
+          ...viewer,
+          userId: recipientUserId,
+          programRole: user.programRole,
+          adminRole: "none",
+        }
+      : viewer,
+    eventId,
+  );
+  await sendEventEmail({
+    kind: "event_yes_invite",
+    to: decryptPii(user.emailEncrypted),
+    vars: {
+      title: event.title,
+      startsAt: event.startsAt.toISOString(),
+      location: event.location ?? "",
+      joinUrl: joinUrl ?? "",
+    },
+  });
 }

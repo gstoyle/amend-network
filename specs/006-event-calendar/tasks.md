@@ -134,14 +134,14 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 4 ⚠️ fail first
 
-- [ ] T030 [P] [US4] Write failing edit / capacity-shrink warn / time-change notify / cancel tests in `tests/integration/event-edit-cancel.test.ts`
+- [x] T030 [P] [US4] Write failing edit / capacity-shrink warn / time-change notify / cancel tests in `tests/integration/event-edit-cancel.test.ts`
 
 ### Implementation for User Story 4
 
-- [ ] T031 [US4] Implement edit (including capacity-shrink warning, no silent Yes demotion) in `lib/events/edit.ts`
-- [ ] T032 [US4] Implement cancel (`cancelled_at`, `event_cancelled`, retain RSVPs) in `lib/events/cancel.ts`
-- [ ] T033 [US4] Extend `lib/email/transport.ts` with event time-change and cancel kinds (no join URL in copy)
-- [ ] T034 [US4] Build `/admin/events/[id]` edit + cancel + notify dialog in `app/(admin)/admin/events/[id]/page.tsx`
+- [x] T031 [US4] Implement edit (including capacity-shrink warning, no silent Yes demotion) in `lib/events/edit.ts`
+- [x] T032 [US4] Implement cancel (`cancelled_at`, `event_cancelled`, retain RSVPs) in `lib/events/cancel.ts`
+- [x] T033 [US4] Extend `lib/email/transport.ts` with event time-change and cancel kinds (no join URL in copy)
+- [x] T034 [US4] Build `/admin/events/[id]` edit + cancel + notify dialog in `app/(admin)/admin/events/[id]/page.tsx``
 
 **Checkpoint**: Spec US4 independent test passes.
 
@@ -155,14 +155,14 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 5 ⚠️ fail first
 
-- [ ] T035 [P] [US5] Write failing ICS withhold/contents tests in `tests/integration/event-ics.test.ts`
-- [ ] T036 [P] [US5] Write failing in-process ICS unit tests (omit join URL; escape text) in `tests/unit/event-ics.test.ts`
+- [x] T035 [P] [US5] Write failing ICS withhold/contents tests in `tests/integration/event-ics.test.ts`
+- [x] T036 [P] [US5] Write failing in-process ICS unit tests (omit join URL; escape text) in `tests/unit/event-ics.test.ts`
 
 ### Implementation for User Story 5
 
-- [ ] T037 [US5] Implement RFC 5545 subset builder (no new npm package) in `lib/events/ics.ts`
-- [ ] T038 [US5] Implement GET `/app/events/[id]/ics` in `app/(member)/app/events/[id]/ics/route.ts`
-- [ ] T039 [US5] Extend `lib/email/transport.ts` with Yes-invite kind and send it from `lib/events/rsvp.ts` on Yes and on promotion (omit join URL unless reveal would succeed)
+- [x] T037 [US5] Implement RFC 5545 subset builder (no new npm package) in `lib/events/ics.ts`
+- [x] T038 [US5] Implement GET `/app/events/[id]/ics` in `app/(member)/app/events/[id]/ics/route.ts`
+- [x] T039 [US5] Extend `lib/email/transport.ts` with Yes-invite kind and send it from `lib/events/rsvp.ts` on Yes and on promotion (omit join URL unless reveal would succeed)
 
 **Checkpoint**: Spec US5 independent test passes.
 
@@ -176,11 +176,11 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 6 ⚠️ fail first
 
-- [ ] T040 [P] [US6] Write failing reminder tests (inject `now`; cancelled skip; idempotent) in `tests/integration/event-reminders.test.ts`
+- [x] T040 [P] [US6] Write failing reminder tests (inject `now`; cancelled skip; idempotent) in `tests/integration/event-reminders.test.ts`
 
 ### Implementation for User Story 6
 
-- [ ] T041 [US6] Implement `runEventReminders(now)` in `lib/events/reminders.ts` and add reminder kind in `lib/email/transport.ts` (never include join URL at T−24h)
+- [x] T041 [US6] Implement `runEventReminders(now)` in `lib/events/reminders.ts` and add reminder kind in `lib/email/transport.ts` (never include join URL at T−24h)
 
 **Checkpoint**: Spec US6 independent test passes. No host crontab required.
 
@@ -194,12 +194,12 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 7 ⚠️ fail first
 
-- [ ] T042 [P] [US7] Write failing reveal tests (detail, ICS, mail; other-cohort withhold) in `tests/integration/event-join-reveal.test.ts`
+- [x] T042 [P] [US7] Write failing reveal tests (detail, ICS, mail; other-cohort withhold) in `tests/integration/event-join-reveal.test.ts`
 
 ### Implementation for User Story 7
 
-- [ ] T043 [US7] Implement join-link read (query `event_join_links` after `requireRole`; never a field on the `events` DTO) in `lib/events/join-link.ts`
-- [ ] T044 [US7] Wire reveal into `app/(member)/app/events/[id]/page.tsx`, `lib/events/ics.ts`, and Yes-invite mail in `lib/events/rsvp.ts`
+- [x] T043 [US7] Implement join-link read (query `event_join_links` after `requireRole`; never a field on the `events` DTO) in `lib/events/join-link.ts`
+- [x] T044 [US7] Wire reveal into `app/(member)/app/events/[id]/page.tsx`, `lib/events/ics.ts`, and Yes-invite mail in `lib/events/rsvp.ts`
 
 **Checkpoint**: Spec US7 independent test passes. SC-008.
 
@@ -207,9 +207,9 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ## Phase 10: Polish & Cross-Cutting Concerns
 
-- [ ] T045 [P] Axe fixtures for `/app/events*`, `/app` upcoming, and `/admin/events*` in `tests/a11y/event-pages.test.ts`
-- [ ] T046 [P] Extend payload allow/deny cases in `tests/unit/analytics.test.ts` for `event_viewed` / `event_rsvp`
-- [ ] T047 Run [quickstart.md](./quickstart.md) locally (`pnpm test`, `pnpm test:rls`, `pnpm test:a11y`, `pnpm typecheck`, `pnpm lint`)
+- [x] T045 [P] Axe fixtures for `/app/events*`, `/app` upcoming, and `/admin/events*` in `tests/a11y/event-pages.test.ts`
+- [x] T046 [P] Extend payload allow/deny cases in `tests/unit/analytics.test.ts` for `event_viewed` / `event_rsvp`
+- [x] T047 Run [quickstart.md](./quickstart.md) locally (`pnpm test`, `pnpm test:rls`, `pnpm test:a11y`, `pnpm typecheck`, `pnpm lint`)
 
 ---
 

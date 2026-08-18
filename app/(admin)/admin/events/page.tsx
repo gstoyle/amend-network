@@ -37,7 +37,11 @@ export default async function AdminEventsPage() {
         <ul className="flex flex-col gap-3">
           {items.map((item) => (
             <li className="text-foreground" key={item.id}>
-              <p className="font-medium">{item.title}</p>
+              <p className="font-medium">
+                <Link className="underline" href={`/admin/events/${item.id}`}>
+                  {item.title}
+                </Link>
+              </p>
               <p className="text-sm">
                 {item.cancelledAt ? "cancelled" : "scheduled"} · {item.visibility.join(", ")}
               </p>
