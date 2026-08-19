@@ -15,9 +15,9 @@ describe("directory_listing_visible is the single shared SQL fragment", () => {
 
   it("listings and shown-field SELECT policies call directory_listing_visible instead of pasting staff-OR-same-program predicates", async () => {
     const policies = await migrator.$queryRaw<
-      { tablename: string; cmd: string; qual: string | null }[]
+      { tablename: string; policyname: string; cmd: string; qual: string | null }[]
     >`
-      SELECT tablename, cmd, qual::text AS qual
+      SELECT tablename, policyname, cmd, qual::text AS qual
       FROM pg_policies
       WHERE tablename IN (
         'directory_listings',
@@ -27,11 +27,19 @@ describe("directory_listing_visible is the single shared SQL fragment", () => {
       )
         AND cmd = 'SELECT'
     `;
-    expect(policies.length).toBe(4);
-    for (const policy of policies) {
+    const memberSelect = policies.filter((p) => !p.policyname.includes("retention"));
+    const retentionSelect = policies.filter((p) => p.policyname.includes("retention"));
+    expect(memberSelect).toHaveLength(4);
+    for (const policy of memberSelect) {
       expect(policy.qual).toMatch(/directory_listing_visible/i);
       expect(policy.qual).not.toMatch(/app\.admin_role/i);
       expect(policy.qual).not.toMatch(/app\.program_role/i);
+    }
+    expect(retentionSelect).toHaveLength(4);
+    for (const policy of retentionSelect) {
+      expect(policy.qual).toMatch(/app\.auth_mode/i);
+      expect(policy.qual).toMatch(/retention/);
+      expect(policy.qual).not.toMatch(/directory_listing_visible/i);
     }
   });
 

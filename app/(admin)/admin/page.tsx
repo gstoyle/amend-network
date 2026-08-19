@@ -35,28 +35,28 @@ export default async function AdminPage() {
       <p className="text-foreground">You are signed in with an administrative session.</p>
       {kpis ? <AdminKpiCards kpis={kpis} /> : null}
       <nav aria-label="User administration" className="flex flex-col gap-2">
-        <Link className="text-foreground underline" href="/admin/analytics">
+        <Link className="inline-flex min-h-touch items-center text-foreground underline" href="/admin/analytics">
           Analytics
         </Link>
-        <Link className="text-foreground underline" href="/admin/audit-log">
+        <Link className="inline-flex min-h-touch items-center text-foreground underline" href="/admin/audit-log">
           Audit log
         </Link>
-        <Link className="text-foreground underline" href="/admin/users/pending">
+        <Link className="inline-flex min-h-touch items-center text-foreground underline" href="/admin/users/pending">
           Pending registrations
         </Link>
-        <Link className="text-foreground underline" href="/admin/users/invite">
+        <Link className="inline-flex min-h-touch items-center text-foreground underline" href="/admin/users/invite">
           Invitations
         </Link>
-        <Link className="text-foreground underline" href="/admin/users/affiliations">
+        <Link className="inline-flex min-h-touch items-center text-foreground underline" href="/admin/users/affiliations">
           DOC affiliations
         </Link>
-        <Link className="text-foreground underline" href="/admin/resources">
+        <Link className="inline-flex min-h-touch items-center text-foreground underline" href="/admin/resources">
           Resources
         </Link>
-        <Link className="text-foreground underline" href="/admin/announcements">
+        <Link className="inline-flex min-h-touch items-center text-foreground underline" href="/admin/announcements">
           Announcements
         </Link>
-        <Link className="text-foreground underline" href="/admin/events">
+        <Link className="inline-flex min-h-touch items-center text-foreground underline" href="/admin/events">
           Events
         </Link>
       </nav>

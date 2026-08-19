@@ -260,10 +260,23 @@ describe("directory RLS (GUCs only, no requireRole) — contracts/rls-policies.m
       "directory_shown_docs",
       "directory_shown_emails",
     ]) {
-      const select = policies.find((row) => row.tablename === table && row.cmd === "SELECT");
+      const select = policies.find(
+        (row) =>
+          row.tablename === table &&
+          row.cmd === "SELECT" &&
+          !row.policyname.includes("retention"),
+      );
       expect(select?.qual).toMatch(/directory_listing_visible/i);
       expect(select?.qual).not.toMatch(/app\.admin_role/i);
       expect(select?.qual).not.toMatch(/app_role_tokens\(\)/i);
+      const retentionSelect = policies.find(
+        (row) =>
+          row.tablename === table &&
+          row.cmd === "SELECT" &&
+          row.policyname.includes("retention"),
+      );
+      expect(retentionSelect?.qual).toMatch(/app\.auth_mode/i);
+      expect(retentionSelect?.qual).toMatch(/retention/);
     }
 
     const usersSelect = policies.find(

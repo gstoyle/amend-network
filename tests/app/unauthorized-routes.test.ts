@@ -16,6 +16,8 @@ import { listDirectory } from "@/lib/directory/list";
 import { getDirectoryProfile } from "@/lib/directory/profile";
 import { listAdminResources, mintIngestSlots } from "@/lib/resources/publish";
 import { loadAdminAnalytics } from "@/lib/admin-analytics/load";
+import { exportAuditLog } from "@/lib/audit/export";
+import { listAuditLog } from "@/lib/audit/read";
 import { claimsFor } from "@/tests/helpers/prd-matrix";
 
 function authorizedFor(pathname: string, sessionId?: string): boolean {
@@ -68,7 +70,7 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
     );
   });
 
-  it("audit-log read denies members, moderator, and admin without mfa_satisfied", () => {
+  it("audit-log read denies members, moderator, pending, signed-out, and admin without mfa_satisfied", async () => {
     expect(authorizedFor("/admin/audit-log")).toBe(false);
     expect(authorizedFor("/admin/audit-log", "session-id")).toBe(true);
 
@@ -80,6 +82,13 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
     expect(() => requireRole(claimsFor("moderator"), auditRead)).toThrowError(
       AUTH_FAILURE_MESSAGE,
     );
+    expect(() => requireRole(claimsFor("pending"), auditRead)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(() => requireRole(claimsFor("invited"), auditRead)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(() => requireRole(null, auditRead)).toThrowError(AUTH_FAILURE_MESSAGE);
     expect(() => requireRole(claimsFor("admin"), auditRead)).toThrowError(AUTH_FAILURE_MESSAGE);
     expect(
       requireRole(
@@ -87,6 +96,52 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
         auditRead,
       ).adminRole,
     ).toBe("admin");
+
+    await expect(listAuditLog(null)).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    await expect(listAuditLog(claimsFor("pathways"))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    await expect(listAuditLog(claimsFor("lead"))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    await expect(listAuditLog(claimsFor("moderator"))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    await expect(listAuditLog(claimsFor("pending"))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    await expect(listAuditLog(claimsFor("admin"))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    await expect(
+      listAuditLog(claimsFor("pathways"), { clientAdminRole: "super_admin", clientMfaSatisfied: true }),
+    ).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+  });
+
+  it("audit-log export denies Admin, Moderator, members, pending, and signed-out (no file, no audit_log_exported)", async () => {
+    expect(authorizedFor("/admin/audit-log/export")).toBe(false);
+    expect(authorizedFor("/admin/audit-log/export", "session-id")).toBe(true);
+
+    const exportAccess = { admin: ["super_admin"] satisfies AdminRole[], mfa: true };
+    expect(() => requireRole(claimsFor("admin"), exportAccess)).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(() =>
+      requireRole({ ...claimsFor("admin")!, mfaSatisfied: true }, exportAccess),
+    ).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(() => requireRole(claimsFor("moderator"), exportAccess)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(() => requireRole(claimsFor("pathways"), exportAccess)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(() => requireRole(claimsFor("lead"), exportAccess)).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(() => requireRole(claimsFor("pending"), exportAccess)).toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(() => requireRole(null, exportAccess)).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(requireRole(claimsFor("super_admin"), exportAccess).adminRole).toBe("super_admin");
+
+    await expect(exportAuditLog(null)).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    await expect(exportAuditLog(claimsFor("admin"))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    await expect(
+      exportAuditLog({ ...claimsFor("admin")!, mfaSatisfied: true }),
+    ).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    await expect(exportAuditLog(claimsFor("moderator"))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    await expect(exportAuditLog(claimsFor("pathways"))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    await expect(exportAuditLog(claimsFor("lead"))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    await expect(exportAuditLog(claimsFor("pending"))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    await expect(
+      exportAuditLog({ ...claimsFor("admin")!, mfaSatisfied: true }, { clientAdminRole: "super_admin" }),
+    ).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
   });
 
   it("analytics denies Moderator, Pathways, LEAD, pending, signed-out, and Admin without mfa_satisfied (US1)", async () => {

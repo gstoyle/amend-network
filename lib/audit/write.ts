@@ -2,7 +2,7 @@ import type { Prisma } from "@prisma/client";
 import type { AuditAction, AuditSeverity } from "@/lib/audit/actions";
 import { AUDIT_ACTIONS } from "@/lib/audit/actions";
 
-const PII_METADATA_KEYS = new Set([
+export const PII_METADATA_KEYS = new Set([
   "email",
   "name",
   "first_name",

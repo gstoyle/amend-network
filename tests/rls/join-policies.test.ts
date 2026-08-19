@@ -166,6 +166,51 @@ describe("join-flow RLS (GUCs only, no requireRole)", () => {
     ).rejects.toSatisfy(isRlsDenied);
   });
 
+  it("admin with auth_mode unset can UPDATE pending to active and to denied", async () => {
+    const approveId = randomUUID();
+    const denyId = randomUUID();
+    createdUserIds.push(approveId, denyId);
+    await insertUserRaw(migrator, {
+      id: approveId,
+      email: `${MARKER}-approve@example.com`,
+      status: "pending",
+      programRole: "none",
+      adminRole: "none",
+    });
+    await insertUserRaw(migrator, {
+      id: denyId,
+      email: `${MARKER}-deny@example.com`,
+      status: "pending",
+      programRole: "none",
+      adminRole: "none",
+    });
+    const admin = await seedUser("admin@local");
+    const adminGucs = {
+      userId: admin.id,
+      programRole: admin.programRole,
+      adminRole: admin.adminRole,
+      status: admin.status,
+    };
+
+    const approved = await withRls(adminGucs, async (tx) =>
+      tx.$executeRaw`
+        UPDATE users SET status = 'active'::"UserStatus"
+        WHERE id = ${approveId}::uuid AND status = 'pending'
+      `,
+    );
+    const denied = await withRls(adminGucs, async (tx) =>
+      tx.$executeRaw`
+        UPDATE users SET status = 'denied'::"UserStatus"
+        WHERE id = ${denyId}::uuid AND status = 'pending'
+      `,
+    );
+
+    expect(approved).toBe(1);
+    expect(denied).toBe(1);
+    expect((await migrator.user.findUnique({ where: { id: approveId } }))?.status).toBe("active");
+    expect((await migrator.user.findUnique({ where: { id: denyId } }))?.status).toBe("denied");
+  });
+
   it("moderator cannot SELECT other users, invitations, or mutate affiliations", async () => {
     const moderator = await seedUser("moderator@local");
     const pending = await seedUser("pending@local");

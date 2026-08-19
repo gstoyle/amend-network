@@ -44,6 +44,7 @@ export const AUDIT_ACTIONS = [
   "audit_log_exported",
   "bulk_invite_sent",
   "system_setting_changed",
+  "retention_purged",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];

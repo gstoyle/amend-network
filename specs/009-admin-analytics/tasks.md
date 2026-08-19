@@ -105,11 +105,11 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 3 ⚠️ fail first
 
-- [ ] T017 [P] [US3] Write failing k=3 omission / max-10 / withdrawn-cancelled-omitted / empty-state / no-forum tests in `tests/integration/admin-analytics-leaderboards.test.ts`
+- [x] T017 [P] [US3] Write failing k=3 omission / max-10 / withdrawn-cancelled-omitted / empty-state / no-forum tests in `tests/integration/admin-analytics-leaderboards.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T018 [US3] Build presentational leaderboards (no role logic; empty state; no flag/thread section) in `components/admin-leaderboards.tsx` and render them on `app/(admin)/admin/analytics/page.tsx`
+- [x] T018 [US3] Build presentational leaderboards (no role logic; empty state; no flag/thread section) in `components/admin-leaderboards.tsx` and render them on `app/(admin)/admin/analytics/page.tsx`
 
 **Checkpoint**: Spec US3 independent test passes. SC-005.
 
@@ -123,13 +123,13 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 4 ⚠️ fail first
 
-- [ ] T019 [P] [US4] Extend failing filter / 90-day clip / combined-AND / viewed-row tests in `tests/app/audit-read.test.ts` and `tests/rls/audit-read.test.ts` per [contracts/audit-http.md](./contracts/audit-http.md)
-- [ ] T020 [P] [US4] Confirm `/admin/audit-log` unauthorized cases remain in `tests/app/unauthorized-routes.test.ts` (Moderator, members, Admin without MFA)
+- [x] T019 [P] [US4] Extend failing filter / 90-day clip / combined-AND / viewed-row tests in `tests/app/audit-read.test.ts` and `tests/rls/audit-read.test.ts` per [contracts/audit-http.md](./contracts/audit-http.md)
+- [x] T020 [P] [US4] Confirm `/admin/audit-log` unauthorized cases remain in `tests/app/unauthorized-routes.test.ts` (Moderator, members, Admin without MFA)
 
 ### Implementation for User Story 4
 
-- [ ] T021 [US4] Extend `listAuditLog` in `lib/audit/read.ts` with Zod-validated `actor` / `action` / `from` / `to` / `severity` AND the existing Admin 90-day window; return the viewer column set (no `metadata`)
-- [ ] T022 [US4] Build presentational filter form (no role logic) in `components/audit-log-filters.tsx` and wire query params on `app/(admin)/admin/audit-log/page.tsx`; table may container-scroll at 360px
+- [x] T021 [US4] Extend `listAuditLog` in `lib/audit/read.ts` with Zod-validated `actor` / `action` / `from` / `to` / `severity` AND the existing Admin 90-day window; return the viewer column set (no `metadata`)
+- [x] T022 [US4] Build presentational filter form (no role logic) in `components/audit-log-filters.tsx` and wire query params on `app/(admin)/admin/audit-log/page.tsx`; table may container-scroll at 360px
 
 **Checkpoint**: Spec US4 independent test passes. SC-006 / SC-008 (viewed).
 
@@ -143,14 +143,14 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ### Tests for User Story 5 ⚠️ fail first
 
-- [ ] T023 [P] [US5] Write failing Super Admin CSV / empty-headers-only / export-audit-row / no-PII-columns tests in `tests/integration/audit-log-export.test.ts`
-- [ ] T024 [P] [US5] Write failing Admin/Moderator/member export deny (no file, no `audit_log_exported`) in `tests/app/unauthorized-routes.test.ts`
+- [x] T023 [P] [US5] Write failing Super Admin CSV / empty-headers-only / export-audit-row / no-PII-columns tests in `tests/integration/audit-log-export.test.ts`
+- [x] T024 [P] [US5] Write failing Admin/Moderator/member export deny (no file, no `audit_log_exported`) in `tests/app/unauthorized-routes.test.ts`
 
 ### Implementation for User Story 5
 
-- [ ] T025 [US5] Implement CSV export helper (same filters as `listAuditLog`, no cursor, RFC 4180, omit `metadata` and decrypted PII, `writeAudit` `audit_log_exported` same transaction) in `lib/audit/export.ts`
-- [ ] T026 [US5] Add `POST` handler in `app/(admin)/admin/audit-log/export/route.ts` with `requireRole({ admin: ['super_admin'], mfa: true })` and CSRF per [contracts/audit-http.md](./contracts/audit-http.md)
-- [ ] T027 [US5] Add export control on `app/(admin)/admin/audit-log/page.tsx` only when the server passes `canExport` (boolean prop; no `if (role === …)` in `components/`)
+- [x] T025 [US5] Implement CSV export helper (same filters as `listAuditLog`, no cursor, RFC 4180, omit `metadata` and decrypted PII, `writeAudit` `audit_log_exported` same transaction) in `lib/audit/export.ts`
+- [x] T026 [US5] Add `POST` handler in `app/(admin)/admin/audit-log/export/route.ts` with `requireRole({ admin: ['super_admin'], mfa: true })` and CSRF per [contracts/audit-http.md](./contracts/audit-http.md)
+- [x] T027 [US5] Add export control on `app/(admin)/admin/audit-log/page.tsx` only when the server passes `canExport` (boolean prop; no `if (role === …)` in `components/`)
 
 **Checkpoint**: Spec US5 independent test passes. SC-007 / SC-008 (exported).
 
@@ -158,9 +158,9 @@ Repository-root Next.js app per plan.md (`app/`, `lib/`, `prisma/`, `tests/`).
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T028 [P] Axe fixtures for `/admin`, `/admin/analytics`, `/admin/audit-log` in `tests/a11y/admin-analytics-pages.test.ts` (44px targets; tables container-scroll at 360px)
-- [ ] T029 [P] Assert dashboard load does not call `track()` and export metadata keys stay off the PII denylist in `tests/unit/admin-analytics-privacy.test.ts`
-- [ ] T030 Run [quickstart.md](./quickstart.md) locally (`pnpm test`, `pnpm test:rls`, `pnpm test:a11y`, `pnpm typecheck`, `pnpm lint`)
+- [x] T028 [P] Axe fixtures for `/admin`, `/admin/analytics`, `/admin/audit-log` in `tests/a11y/admin-analytics-pages.test.ts` (44px targets; tables container-scroll at 360px)
+- [x] T029 [P] Assert dashboard load does not call `track()` and export metadata keys stay off the PII denylist in `tests/unit/admin-analytics-privacy.test.ts`
+- [x] T030 Run [quickstart.md](./quickstart.md) locally (`pnpm test`, `pnpm test:rls`, `pnpm test:a11y`, `pnpm typecheck`, `pnpm lint`)
 
 ---
 

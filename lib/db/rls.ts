@@ -16,6 +16,7 @@ export type RlsContext = {
     | "registration"
     | "invite_lookup"
     | "resource_download"
+    | "retention"
     | "";
 };
 

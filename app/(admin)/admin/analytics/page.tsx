@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AdminFunnel } from "@/components/admin-funnel";
 import { AdminKpiCards } from "@/components/admin-kpi-cards";
+import { AdminLeaderboards } from "@/components/admin-leaderboards";
 import { loadAdminAnalytics, parseAnalyticsNetworkQuery } from "@/lib/admin-analytics/load";
 import { AuthDeniedError } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
@@ -31,6 +32,7 @@ export default async function AdminAnalyticsPage({
       <h1 className="text-2xl font-medium text-foreground">Analytics</h1>
       <AdminKpiCards kpis={snapshot.kpis} />
       <AdminFunnel funnel={snapshot.funnel} networkId={networkId} networks={networks} />
+      <AdminLeaderboards topEvents={snapshot.topEvents} topResources={snapshot.topResources} />
     </div>
   );
 }
