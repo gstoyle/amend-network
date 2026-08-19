@@ -1,7 +1,15 @@
 import type { Prisma } from "@prisma/client";
+import {
+  defaultAnalyticsRetentionPort,
+  type AnalyticsRetentionPort,
+} from "@/lib/analytics/retention";
 import { writeAudit } from "@/lib/audit/write";
 import { withRls } from "@/lib/db/rls";
 import { anonymizeEligibleUsers } from "@/lib/retention/anonymize";
+
+export type RetentionJobOptions = {
+  analyticsPort?: AnalyticsRetentionPort;
+};
 
 export type RetentionJobResult = {
   auditSecurityDeleted: number;
@@ -30,9 +38,21 @@ function utcYearsBefore(now: Date, years: number): Date {
   return value;
 }
 
+function utcMonthsBefore(now: Date, months: number): Date {
+  const value = new Date(now.getTime());
+  value.setUTCMonth(value.getUTCMonth() - months);
+  return value;
+}
+
 async function writeClassTrail(
   tx: Prisma.TransactionClient,
-  className: "audit_security" | "audit_other" | "users_anonymized",
+  className:
+    | "audit_security"
+    | "audit_other"
+    | "users_anonymized"
+    | "analytics"
+    | "password_reset_tokens"
+    | "invitations",
   count: number,
 ): Promise<void> {
   if (count <= 0) {
@@ -48,7 +68,11 @@ async function writeClassTrail(
   });
 }
 
-export async function runRetentionJob(now: Date = new Date()): Promise<RetentionJobResult> {
+export async function runRetentionJob(
+  now: Date = new Date(),
+  options: RetentionJobOptions = {},
+): Promise<RetentionJobResult> {
+  const analyticsPort = options.analyticsPort ?? defaultAnalyticsRetentionPort;
   return withRls(
     { adminRole: "admin", status: "active", authMode: "retention" },
     async (tx) => {
@@ -68,14 +92,32 @@ export async function runRetentionJob(now: Date = new Date()): Promise<Retention
       await writeClassTrail(tx, "audit_security", security.count);
       await writeClassTrail(tx, "audit_other", other.count);
 
+      const analyticsDeleted = await analyticsPort.deleteOlderThan(utcMonthsBefore(now, 24));
+      await writeClassTrail(tx, "analytics", analyticsDeleted);
+
       const usersAnonymized = await anonymizeEligibleUsers(tx, now);
       await writeClassTrail(tx, "users_anonymized", usersAnonymized);
+
+      const passwordResetTokens = await tx.passwordResetToken.deleteMany({
+        where: {
+          OR: [{ expiresAt: { lt: now } }, { consumedAt: { not: null } }],
+        },
+      });
+      await writeClassTrail(tx, "password_reset_tokens", passwordResetTokens.count);
+
+      const invitations = await tx.invitation.deleteMany({
+        where: { status: { in: ["expired", "revoked"] } },
+      });
+      await writeClassTrail(tx, "invitations", invitations.count);
 
       return {
         ...EMPTY_RESULT,
         auditSecurityDeleted: security.count,
         auditOtherDeleted: other.count,
+        analyticsDeleted,
         usersAnonymized,
+        passwordResetTokensDeleted: passwordResetTokens.count,
+        invitationsDeleted: invitations.count,
       };
     },
   );

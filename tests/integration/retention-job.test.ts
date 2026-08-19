@@ -362,3 +362,232 @@ describe("retention job user anonymization (US2 / contracts/job.md 4)", () => {
     ).toHaveLength(1);
   });
 });
+
+describe("retention job leftover tokens (US3 / contracts/job.md 5–6)", () => {
+  const createdUserIds: string[] = [];
+  const createdInvitationIds: string[] = [];
+
+  afterEach(async () => {
+    if (createdInvitationIds.length > 0) {
+      await migrator.invitation.deleteMany({ where: { id: { in: createdInvitationIds } } });
+      createdInvitationIds.length = 0;
+    }
+    if (createdUserIds.length > 0) {
+      await migrator.passwordResetToken.deleteMany({ where: { userId: { in: createdUserIds } } });
+      await migrator.user.deleteMany({ where: { id: { in: createdUserIds } } });
+      createdUserIds.length = 0;
+    }
+    await migrator.auditLog.deleteMany({
+      where: { action: "retention_purged", userAgent: "retention-job", createdAt: { gte: NOW } },
+    });
+  });
+
+  it("Independent Test: expired/consumed resets gone, valid unused reset kept, expired+revoked invites gone, pending in-window invite kept", async () => {
+    const network = await migrator.network.findFirst({ where: { name: "Pathways to Change" } });
+    if (!network) {
+      throw new Error("Pathways to Change network is required");
+    }
+    const networkId = network.id;
+    const holder = await insertMember({
+      email: `${MARKER}-tokens@example.com`,
+      status: "active",
+      lastLoginAt: NOW,
+      firstName: "Token",
+    });
+    createdUserIds.push(holder);
+
+    const expiredReset = await migrator.passwordResetToken.create({
+      data: {
+        userId: holder,
+        tokenHash: randomBytes(32),
+        expiresAt: new Date(NOW.getTime() - 60_000),
+      },
+    });
+    const consumedReset = await migrator.passwordResetToken.create({
+      data: {
+        userId: holder,
+        tokenHash: randomBytes(32),
+        expiresAt: new Date(NOW.getTime() + 1_800_000),
+        consumedAt: new Date(NOW.getTime() - 1_000),
+      },
+    });
+    const validReset = await migrator.passwordResetToken.create({
+      data: {
+        userId: holder,
+        tokenHash: randomBytes(32),
+        expiresAt: new Date(NOW.getTime() + 1_800_000),
+      },
+    });
+
+    async function insertInvite(
+      status: "pending" | "expired" | "revoked",
+      expiresAt: Date,
+    ): Promise<string> {
+      const row = await migrator.invitation.create({
+        data: {
+          emailLookup: hmacEmailLookup(`${MARKER}-${status}-${randomUUID()}@example.com`),
+          emailEncrypted: encryptPii(`${MARKER}-${status}@example.com`),
+          tokenHash: randomBytes(32),
+          inviterId: holder,
+          networkId,
+          firstNameEncrypted: encryptPii("Invite"),
+          lastNameEncrypted: encryptPii("Eee"),
+          status,
+          expiresAt,
+          revokedAt: status === "revoked" ? NOW : undefined,
+        },
+      });
+      createdInvitationIds.push(row.id);
+      return row.id;
+    }
+
+    const expiredInvite = await insertInvite("expired", new Date(NOW.getTime() - 86_400_000));
+    const revokedInvite = await insertInvite("revoked", new Date(NOW.getTime() + 86_400_000));
+    const pendingInvite = await insertInvite(
+      "pending",
+      new Date(NOW.getTime() + 7 * 86_400_000),
+    );
+
+    const first = await runRetentionJob(NOW);
+    expect(first.passwordResetTokensDeleted).toBe(2);
+    expect(first.invitationsDeleted).toBe(2);
+
+    expect(await migrator.passwordResetToken.findUnique({ where: { id: expiredReset.id } })).toBeNull();
+    expect(await migrator.passwordResetToken.findUnique({ where: { id: consumedReset.id } })).toBeNull();
+    expect(await migrator.passwordResetToken.findUnique({ where: { id: validReset.id } })).not.toBeNull();
+
+    expect(await migrator.invitation.findUnique({ where: { id: expiredInvite } })).toBeNull();
+    expect(await migrator.invitation.findUnique({ where: { id: revokedInvite } })).toBeNull();
+    expect(await migrator.invitation.findUnique({ where: { id: pendingInvite } })).not.toBeNull();
+
+    const trails = await migrator.auditLog.findMany({
+      where: {
+        action: "retention_purged",
+        userAgent: "retention-job",
+        createdAt: { gte: NOW },
+      },
+    });
+    const classes = trails.map((row) => row.metadata as { class: string; count: number });
+    expect(classes).toEqual(
+      expect.arrayContaining([
+        { class: "password_reset_tokens", count: 2 },
+        { class: "invitations", count: 2 },
+      ]),
+    );
+
+    const second = await runRetentionJob(NOW);
+    expect(second.passwordResetTokensDeleted).toBe(0);
+    expect(second.invitationsDeleted).toBe(0);
+    const trailsAfter = await migrator.auditLog.findMany({
+      where: {
+        action: "retention_purged",
+        userAgent: "retention-job",
+        createdAt: { gte: NOW },
+      },
+    });
+    expect(
+      trailsAfter.filter(
+        (row) => (row.metadata as { class: string }).class === "password_reset_tokens",
+      ),
+    ).toHaveLength(1);
+    expect(
+      trailsAfter.filter((row) => (row.metadata as { class: string }).class === "invitations"),
+    ).toHaveLength(1);
+  });
+});
+
+describe("retention job analytics port (US4 / contracts/job.md 3)", () => {
+  afterEach(async () => {
+    await migrator.auditLog.deleteMany({ where: { userAgent: MARKER } });
+    await migrator.auditLog.deleteMany({
+      where: { action: "retention_purged", userAgent: "retention-job", createdAt: { gte: NOW } },
+    });
+  });
+
+  it("Independent Test: injected 24-month port deletes old events, keeps younger, writes analytics trail, leaves in-window audit rows", async () => {
+    const { createInMemoryAnalyticsRetentionPort } = await import("@/lib/analytics/retention");
+    const inWindow = await insertAudit({
+      action: "logout",
+      severity: "info",
+      createdAt: utcYearsPlusDaysBefore(NOW, 1, 0),
+    });
+    const oldEvent = { id: "old", occurredAt: utcMonthsPlusDaysBefore(NOW, 24, 1) };
+    const youngEvent = { id: "young", occurredAt: utcMonthsPlusDaysBefore(NOW, 12, 0) };
+    const port = createInMemoryAnalyticsRetentionPort([oldEvent, youngEvent]);
+
+    const first = await runRetentionJob(NOW, { analyticsPort: port });
+    expect(first.analyticsDeleted).toBe(1);
+    expect(port.snapshot().map((event) => event.id)).toEqual(["young"]);
+    expect(await migrator.auditLog.findUnique({ where: { id: inWindow } })).not.toBeNull();
+
+    const trails = await migrator.auditLog.findMany({
+      where: {
+        action: "retention_purged",
+        userAgent: "retention-job",
+        createdAt: { gte: NOW },
+      },
+    });
+    expect(
+      trails.map((row) => row.metadata as { class: string; count: number }),
+    ).toEqual(expect.arrayContaining([{ class: "analytics", count: 1 }]));
+  });
+
+  it("default adapter (no PostHog client) returns 0, writes no analytics trail, and does not throw", async () => {
+    const inWindow = await insertAudit({
+      action: "logout",
+      severity: "info",
+      createdAt: utcYearsPlusDaysBefore(NOW, 1, 0),
+    });
+
+    const first = await runRetentionJob(NOW);
+    expect(first.analyticsDeleted).toBe(0);
+    expect(await migrator.auditLog.findUnique({ where: { id: inWindow } })).not.toBeNull();
+
+    const trails = await migrator.auditLog.findMany({
+      where: {
+        action: "retention_purged",
+        userAgent: "retention-job",
+        createdAt: { gte: NOW },
+      },
+    });
+    expect(
+      trails.filter((row) => (row.metadata as { class: string }).class === "analytics"),
+    ).toHaveLength(0);
+  });
+
+  it("aborts the transaction with no analytics trail when the port throws", async () => {
+    const inWindow = await insertAudit({
+      action: "logout",
+      severity: "info",
+      createdAt: utcYearsPlusDaysBefore(NOW, 1, 0),
+    });
+    const port = {
+      async deleteOlderThan(): Promise<number> {
+        throw new Error("analytics vendor unavailable");
+      },
+    };
+
+    await expect(runRetentionJob(NOW, { analyticsPort: port })).rejects.toThrow(
+      "analytics vendor unavailable",
+    );
+    expect(await migrator.auditLog.findUnique({ where: { id: inWindow } })).not.toBeNull();
+    const trails = await migrator.auditLog.findMany({
+      where: {
+        action: "retention_purged",
+        userAgent: "retention-job",
+        createdAt: { gte: NOW },
+      },
+    });
+    expect(
+      trails.filter((row) => (row.metadata as { class: string }).class === "analytics"),
+    ).toHaveLength(0);
+  });
+});
+
+function utcMonthsPlusDaysBefore(now: Date, months: number, extraDays: number): Date {
+  const value = new Date(now.getTime());
+  value.setUTCMonth(value.getUTCMonth() - months);
+  value.setUTCDate(value.getUTCDate() - extraDays);
+  return value;
+}
+

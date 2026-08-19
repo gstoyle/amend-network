@@ -100,11 +100,11 @@ Repository-root Next.js app per plan.md (`lib/`, `prisma/`, `scripts/`, `tests/`
 
 ### Tests for User Story 3 ⚠️ fail first
 
-- [ ] T012 [P] [US3] Extend failing cases in `tests/integration/retention-job.test.ts` for expired/consumed resets gone, valid unused reset kept, expired+revoked invites gone, pending in-window invite kept; trail classes `password_reset_tokens` and `invitations` with matching counts
+- [x] T012 [P] [US3] Extend failing cases in `tests/integration/retention-job.test.ts` for expired/consumed resets gone, valid unused reset kept, expired+revoked invites gone, pending in-window invite kept; trail classes `password_reset_tokens` and `invitations` with matching counts
 
 ### Implementation for User Story 3
 
-- [ ] T013 [US3] Implement leftover token/invite DELETE in `lib/retention/run.ts` per [contracts/job.md](./contracts/job.md) class order 5–6. Do not call `sendLifecycleEmail`. Do not change `lib/registration/sweep.ts`.
+- [x] T013 [US3] Implement leftover token/invite DELETE in `lib/retention/run.ts` per [contracts/job.md](./contracts/job.md) class order 5–6. Do not call `sendLifecycleEmail`. Do not change `lib/registration/sweep.ts`.
 
 **Checkpoint**: Spec US3 independent test passes. SC-005. FR-008, FR-009.
 
@@ -118,12 +118,12 @@ Repository-root Next.js app per plan.md (`lib/`, `prisma/`, `scripts/`, `tests/`
 
 ### Tests for User Story 4 ⚠️ fail first
 
-- [ ] T014 [P] [US4] Write failing tests in `tests/unit/retention-analytics.test.ts` for an in-memory `AnalyticsRetentionPort`: events older than 24 months removed, younger kept, return count
-- [ ] T015 [P] [US4] Extend `tests/integration/retention-job.test.ts` so an injected port count > 0 writes one `retention_purged` `{ class: "analytics", count }` and in-window `audit_log` rows are untouched; default adapter 0 writes no analytics trail row
+- [x] T014 [P] [US4] Write failing tests in `tests/unit/retention-analytics.test.ts` for an in-memory `AnalyticsRetentionPort`: events older than 24 months removed, younger kept, return count
+- [x] T015 [P] [US4] Extend `tests/integration/retention-job.test.ts` so an injected port count > 0 writes one `retention_purged` `{ class: "analytics", count }` and in-window `audit_log` rows are untouched; default adapter 0 writes no analytics trail row
 
 ### Implementation for User Story 4
 
-- [ ] T016 [US4] Add `AnalyticsRetentionPort` in `lib/analytics/retention.ts` (do not add purge logic to `lib/analytics/track.ts`). Default production adapter returns 0. Wire into `lib/retention/run.ts` (injected for tests). If the port throws, abort the transaction (no claiming trail row).
+- [x] T016 [US4] Add `AnalyticsRetentionPort` in `lib/analytics/retention.ts` (do not add purge logic to `lib/analytics/track.ts`). Default production adapter returns 0. Wire into `lib/retention/run.ts` (injected for tests). If the port throws, abort the transaction (no claiming trail row).
 
 **Checkpoint**: Spec US4 independent test passes. SC-006. FR-006.
 
