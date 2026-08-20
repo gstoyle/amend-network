@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { AuthSplit, authLinkClassName } from "@/components/auth-split";
 import { MfaForm } from "@/components/mfa-form";
-import { ADMIN_ROLES, adminMfaDestination } from "@/lib/auth/admin-mfa";
+import { ADMIN_ROLES, mfaSetupDestination } from "@/lib/auth/admin-mfa";
 import { challengeMfaAction } from "@/lib/auth/mfa-actions";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
@@ -19,7 +21,7 @@ export default async function MfaChallengePage() {
     throw error;
   }
 
-  const destination = adminMfaDestination(authorized);
+  const destination = mfaSetupDestination(authorized);
   if (destination === "/mfa/enroll") {
     redirect("/mfa/enroll");
   }
@@ -28,10 +30,20 @@ export default async function MfaChallengePage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-6 p-6">
-      <h1 className="text-2xl font-medium text-foreground">Authenticator code</h1>
-      <p className="text-foreground">Enter the 6-digit code from your authenticator app.</p>
+    <AuthSplit
+      description="Enter the 6-digit code from your authenticator app. This check is optional for now."
+      footer={
+        <p className="text-sm text-muted-foreground">
+          Continue without a code?{" "}
+          <Link className={authLinkClassName} href="/admin">
+            Skip for now
+          </Link>
+        </p>
+      }
+      panelAction={{ href: "/admin", label: "Back to admin" }}
+      title="Authenticator code"
+    >
       <MfaForm action={challengeMfaAction} />
-    </main>
+    </AuthSplit>
   );
 }

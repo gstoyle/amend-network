@@ -70,7 +70,7 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
     );
   });
 
-  it("audit-log read denies members, moderator, pending, signed-out, and admin without mfa_satisfied", async () => {
+  it("audit-log read denies members, moderator, pending, and signed-out", async () => {
     expect(authorizedFor("/admin/audit-log")).toBe(false);
     expect(authorizedFor("/admin/audit-log", "session-id")).toBe(true);
 
@@ -89,7 +89,7 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
       AUTH_FAILURE_MESSAGE,
     );
     expect(() => requireRole(null, auditRead)).toThrowError(AUTH_FAILURE_MESSAGE);
-    expect(() => requireRole(claimsFor("admin"), auditRead)).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(requireRole(claimsFor("admin"), auditRead).adminRole).toBe("admin");
     expect(
       requireRole(
         { ...claimsFor("admin")!, mfaSatisfied: true },
@@ -102,7 +102,6 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
     await expect(listAuditLog(claimsFor("lead"))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
     await expect(listAuditLog(claimsFor("moderator"))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
     await expect(listAuditLog(claimsFor("pending"))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
-    await expect(listAuditLog(claimsFor("admin"))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
     await expect(
       listAuditLog(claimsFor("pathways"), { clientAdminRole: "super_admin", clientMfaSatisfied: true }),
     ).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
@@ -144,7 +143,7 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
     ).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
   });
 
-  it("analytics denies Moderator, Pathways, LEAD, pending, signed-out, and Admin without mfa_satisfied (US1)", async () => {
+  it("analytics denies Moderator, Pathways, LEAD, pending, and signed-out (US1)", async () => {
     expect(authorizedFor("/admin/analytics")).toBe(false);
     expect(authorizedFor("/admin/analytics", "session-id")).toBe(true);
 
@@ -162,9 +161,7 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
       AUTH_FAILURE_MESSAGE,
     );
     expect(() => requireRole(null, analyticsAccess)).toThrowError(AUTH_FAILURE_MESSAGE);
-    expect(() => requireRole(claimsFor("admin"), analyticsAccess)).toThrowError(
-      AUTH_FAILURE_MESSAGE,
-    );
+    expect(requireRole(claimsFor("admin"), analyticsAccess).adminRole).toBe("admin");
     expect(
       requireRole({ ...claimsFor("admin")!, mfaSatisfied: true }, analyticsAccess).adminRole,
     ).toBe("admin");
@@ -180,9 +177,6 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
       AUTH_FAILURE_MESSAGE,
     );
     await expect(loadAdminAnalytics(claimsFor("pending"), null)).rejects.toThrowError(
-      AUTH_FAILURE_MESSAGE,
-    );
-    await expect(loadAdminAnalytics(claimsFor("admin"), null)).rejects.toThrowError(
       AUTH_FAILURE_MESSAGE,
     );
     await expect(
@@ -315,9 +309,7 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
     expect(() => requireRole(claimsFor("pending"), resourcesAccess)).toThrowError(
       AUTH_FAILURE_MESSAGE,
     );
-    expect(() => requireRole(claimsFor("admin"), resourcesAccess)).toThrowError(
-      AUTH_FAILURE_MESSAGE,
-    );
+    expect(requireRole(claimsFor("admin"), resourcesAccess).adminRole).toBe("admin");
     expect(
       requireRole({ ...claimsFor("admin")!, mfaSatisfied: true }, resourcesAccess).adminRole,
     ).toBe("admin");
@@ -349,9 +341,7 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
     expect(() => requireRole(claimsFor("pending"), announcementsAccess)).toThrowError(
       AUTH_FAILURE_MESSAGE,
     );
-    expect(() => requireRole(claimsFor("admin"), announcementsAccess)).toThrowError(
-      AUTH_FAILURE_MESSAGE,
-    );
+    expect(requireRole(claimsFor("admin"), announcementsAccess).adminRole).toBe("admin");
     expect(
       requireRole({ ...claimsFor("admin")!, mfaSatisfied: true }, announcementsAccess).adminRole,
     ).toBe("admin");
@@ -393,7 +383,7 @@ describe("unauthorized roles are denied on delivered handlers (FR-026)", () => {
     expect(() => requireRole(claimsFor("pathways"), eventsAccess)).toThrowError(AUTH_FAILURE_MESSAGE);
     expect(() => requireRole(claimsFor("lead"), eventsAccess)).toThrowError(AUTH_FAILURE_MESSAGE);
     expect(() => requireRole(claimsFor("pending"), eventsAccess)).toThrowError(AUTH_FAILURE_MESSAGE);
-    expect(() => requireRole(claimsFor("admin"), eventsAccess)).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(requireRole(claimsFor("admin"), eventsAccess).adminRole).toBe("admin");
     expect(
       requireRole({ ...claimsFor("admin")!, mfaSatisfied: true }, eventsAccess).adminRole,
     ).toBe("admin");

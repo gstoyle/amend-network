@@ -120,8 +120,10 @@ describe("account destinations (T003 / FR-006)", () => {
     ]);
   });
 
-  it("adds the administrative entry point for a staff session", () => {
-    expect(hrefs(accountDestinations(claimsFor("admin")))).toContain("/admin");
+  it("adds the administrative entry point and optional authenticator setup for a staff session", () => {
+    const hrefsForAdmin = hrefs(accountDestinations(claimsFor("admin")));
+    expect(hrefsForAdmin).toContain("/admin");
+    expect(hrefsForAdmin).toContain("/mfa/enroll");
   });
 });
 

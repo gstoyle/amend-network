@@ -4,10 +4,14 @@ import { headers } from "next/headers";
 import { auth } from "@/auth";
 import { AuditLogExport } from "@/components/audit-log-export";
 import { AuditLogFilters } from "@/components/audit-log-filters";
+import { PageHeader } from "@/components/page-header";
+import { buttonVariants } from "@/components/ui/button";
+import { cardClassName } from "@/components/ui/card";
 import { AuditFilterError, listAuditLog, type AuditLogPage } from "@/lib/audit/read";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
+import { cn } from "@/lib/utils";
 
 function firstQueryValue(value: string | string[] | undefined): string | undefined {
   const raw = Array.isArray(value) ? value[0] : value;
@@ -83,25 +87,36 @@ export default async function AuditLogPage({
   }
 
   return (
-    <div className="flex flex-col gap-4 p-6">
-      <h1 className="text-2xl font-medium text-foreground">Audit log</h1>
-      <AuditLogFilters values={{ actor, action, from, to, severity }} />
-      <AuditLogExport
-        canExport={claims?.adminRole === "super_admin"}
-        values={{ actor, action, from, to, severity }}
+    <div className="flex flex-col gap-6 lg:gap-8">
+      <PageHeader
+        description="Review append-only administrative and security activity. Filters also apply to exports."
+        eyebrow="Administration"
+        title="Audit log"
       />
+      <section
+        aria-label="Audit log filters"
+        className={cn(cardClassName, "flex flex-col gap-4 p-4 lg:p-6")}
+      >
+        <AuditLogFilters values={{ actor, action, from, to, severity }} />
+        <AuditLogExport
+          canExport={claims?.adminRole === "super_admin"}
+          values={{ actor, action, from, to, severity }}
+        />
+      </section>
       {filterInvalid ? (
-        <p className="text-sm text-muted-foreground">Check the form and try again.</p>
+        <p className="text-sm text-destructive" role="alert">
+          Check the filters and try again.
+        </p>
       ) : null}
       <div
         aria-label="Audit log table"
-        className="overflow-x-auto"
+        className={cn(cardClassName, "overflow-x-auto")}
         role="region"
         tabIndex={0}
       >
         <table className="w-full text-sm text-foreground">
           <caption className="sr-only">Audit log</caption>
-          <thead>
+          <thead className="bg-muted">
             <tr>
               <th className="whitespace-nowrap px-2 py-2 text-left font-medium" scope="col">
                 When
@@ -132,7 +147,7 @@ export default async function AuditLogPage({
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-border">
             {page.rows.map((row) => (
               <tr key={row.id}>
                 <td className="whitespace-nowrap px-2 py-2">{row.createdAt}</td>
@@ -154,7 +169,7 @@ export default async function AuditLogPage({
       {page.nextCursor ? (
         <p>
           <Link
-            className="inline-flex min-h-touch items-center text-foreground underline"
+            className={cn(buttonVariants({ variant: "outline" }), "min-h-touch")}
             href={nextPageHref({
               actor,
               action,
@@ -164,7 +179,7 @@ export default async function AuditLogPage({
               cursor: page.nextCursor,
             })}
           >
-            Next
+            Next page
           </Link>
         </p>
       ) : null}

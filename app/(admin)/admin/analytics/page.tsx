@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { AdminFunnel } from "@/components/admin-funnel";
 import { AdminKpiCards } from "@/components/admin-kpi-cards";
 import { AdminLeaderboards } from "@/components/admin-leaderboards";
+import { PageHeader } from "@/components/page-header";
 import { loadAdminAnalytics, parseAnalyticsNetworkQuery } from "@/lib/admin-analytics/load";
 import { AuthDeniedError } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
@@ -28,8 +29,12 @@ export default async function AdminAnalyticsPage({
   const networks = await listLaunchNetworks();
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-medium text-foreground">Analytics</h1>
+    <div className="flex flex-col gap-6 lg:gap-8">
+      <PageHeader
+        description="Monitor membership, return activity, and content engagement without exposing member PII."
+        eyebrow="Administration"
+        title="Analytics"
+      />
       <AdminKpiCards kpis={snapshot.kpis} />
       <AdminFunnel funnel={snapshot.funnel} networkId={networkId} networks={networks} />
       <AdminLeaderboards topEvents={snapshot.topEvents} topResources={snapshot.topResources} />

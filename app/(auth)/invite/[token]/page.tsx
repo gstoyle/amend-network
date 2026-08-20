@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { headers } from "next/headers";
 import { auth } from "@/auth";
+import { AuthSplit, authLinkClassName } from "@/components/auth-split";
 import {
   InviteCompleteForm,
   type InviteCompleteFormState,
@@ -47,14 +49,34 @@ export default async function InviteCompletePage({
   const preview = signedIn ? { state: "signed_in" as const } : await lookupInvite(token);
   const affiliations = preview.state === "pending" ? await listActiveDocAffiliations() : [];
 
+  const feedback =
+    preview.state === "signed_in"
+      ? INVITE_SIGNED_IN_COPY
+      : preview.state === "used"
+        ? INVITE_USED_COPY
+        : preview.state === "unusable"
+          ? INVITE_UNUSABLE_COPY
+          : null;
+
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-6 p-6">
-      <h1 className="text-2xl font-medium text-foreground">Complete invitation</h1>
-      {preview.state === "signed_in" ? (
-        <p role="alert">{INVITE_SIGNED_IN_COPY}</p>
+    <AuthSplit
+      description="Confirm your member details and choose a password to activate your account."
+      footer={
+        <p className="text-sm text-muted-foreground">
+          Already registered?{" "}
+          <Link className={authLinkClassName} href="/login">
+            Sign in
+          </Link>
+        </p>
+      }
+      panelAction={{ href: "/login", label: "Sign in" }}
+      title="Complete invitation"
+    >
+      {feedback ? (
+        <p className="rounded-md border border-border bg-muted p-4 text-sm text-foreground" role="alert">
+          {feedback}
+        </p>
       ) : null}
-      {preview.state === "used" ? <p role="alert">{INVITE_USED_COPY}</p> : null}
-      {preview.state === "unusable" ? <p role="alert">{INVITE_UNUSABLE_COPY}</p> : null}
       {preview.state === "pending" ? (
         <InviteCompleteForm
           action={submitInvite}
@@ -68,6 +90,6 @@ export default async function InviteCompletePage({
           token={token}
         />
       ) : null}
-    </main>
+    </AuthSplit>
   );
 }

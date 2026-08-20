@@ -45,8 +45,12 @@ export function EventForm({
 }: EventFormProps) {
   const [state, formAction, pending] = useActionState(action, {});
   return (
-    <form action={formAction} className="flex max-w-xl flex-col gap-4">
-      {state.error ? <p className="text-destructive">{state.error}</p> : null}
+    <form action={formAction} className="flex max-w-2xl flex-col gap-6">
+      {state.error ? (
+        <p className="text-sm text-destructive" role="alert">
+          {state.error}
+        </p>
+      ) : null}
       <div className="flex flex-col gap-2">
         <Label htmlFor="title">Title</Label>
         <Input defaultValue={initial?.title} id="title" maxLength={120} name="title" required />
@@ -68,6 +72,7 @@ export function EventForm({
         {VISIBILITY_OPTIONS.map((option) => (
           <label className="flex min-h-touch items-center gap-2 text-foreground" key={option.value}>
             <input
+              className="size-4 accent-primary"
               defaultChecked={initial?.visibility.includes(option.value) ?? option.value === "all_authenticated"}
               name="visibility"
               type="checkbox"
@@ -77,25 +82,27 @@ export function EventForm({
           </label>
         ))}
       </fieldset>
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="startsAt">Starts</Label>
-        <Input
-          defaultValue={initial?.startsAt}
-          id="startsAt"
-          name="startsAt"
-          required
-          type="datetime-local"
-        />
-      </div>
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="endsAt">Ends</Label>
-        <Input
-          defaultValue={initial?.endsAt}
-          id="endsAt"
-          name="endsAt"
-          required
-          type="datetime-local"
-        />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="startsAt">Starts</Label>
+          <Input
+            defaultValue={initial?.startsAt}
+            id="startsAt"
+            name="startsAt"
+            required
+            type="datetime-local"
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="endsAt">Ends</Label>
+          <Input
+            defaultValue={initial?.endsAt}
+            id="endsAt"
+            name="endsAt"
+            required
+            type="datetime-local"
+          />
+        </div>
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="timezoneHint">Timezone hint</Label>
@@ -106,7 +113,13 @@ export function EventForm({
         <Input defaultValue={initial?.location} id="location" maxLength={200} name="location" />
       </div>
       <label className="flex min-h-touch items-center gap-2 text-foreground">
-        <input defaultChecked={initial?.isVirtual} name="isVirtual" type="checkbox" value="true" />
+        <input
+          className="size-4 accent-primary"
+          defaultChecked={initial?.isVirtual}
+          name="isVirtual"
+          type="checkbox"
+          value="true"
+        />
         Virtual meeting
       </label>
       <div className="flex flex-col gap-2">
@@ -119,14 +132,24 @@ export function EventForm({
       </div>
       {capacityConfirm ? (
         <label className="flex min-h-touch items-center gap-2 text-foreground">
-          <input name="confirmCapacityShrink" type="checkbox" value="true" />
+          <input
+            className="size-4 accent-primary"
+            name="confirmCapacityShrink"
+            type="checkbox"
+            value="true"
+          />
           Save even if capacity is below the current Yes count. Existing Yes RSVPs stay Yes.
         </label>
       ) : null}
       {notifyRsvps ? (
         <>
           <label className="flex min-h-touch items-center gap-2 text-foreground">
-            <input name="notifyRsvps" type="checkbox" value="true" />
+            <input
+              className="size-4 accent-primary"
+              name="notifyRsvps"
+              type="checkbox"
+              value="true"
+            />
             Email people who RSVPed if the start or end time changes
           </label>
           <div className="flex flex-col gap-2">
@@ -142,7 +165,7 @@ export function EventForm({
         </>
       ) : null}
       <Button disabled={pending} type="submit">
-        {submitLabel}
+        {pending ? "Saving…" : submitLabel}
       </Button>
     </form>
   );

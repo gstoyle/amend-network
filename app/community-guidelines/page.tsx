@@ -1,30 +1,53 @@
 import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
+import { cardClassName } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export default function CommunityGuidelinesPage() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 p-6">
+    <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-gutter py-8 lg:px-gutter-lg lg:py-12">
       <p>
-        <Link className="text-foreground underline" href="/login">
-          Sign in
+        <Link className={cn(buttonVariants({ variant: "ghost" }), "px-0")} href="/app/forum">
+          Back to forum
         </Link>
       </p>
-      <h1 className="text-2xl font-medium text-foreground">Community guidelines</h1>
-      <p className="text-foreground">
-        The forum is a professional space for Amend members. These are the rules the product
-        enforces. Programme staff own anything beyond them.
-      </p>
-      <ul className="flex list-disc flex-col gap-3 pl-5 text-foreground">
-        <li>Stay in the category you can see. Visibility is role-gated; do not try to work around it.</li>
-        <li>Write in allowlisted markdown only: bold, italics, and http(s) or /app/ links. No HTML and no image uploads.</li>
-        <li>You may edit your own post for 15 minutes. After that, only staff can change it.</li>
-        <li>Flag content that is harmful, harassing, or off-mission. Staff can hide or delete posts and lock or pin threads.</li>
-        <li>Rate limits apply: one new thread per minute, five posts per minute, thirty posts per hour.</li>
-        <li>Subscribe to a thread if you want email when someone else replies. Unsubscribe from that email at any time.</li>
-      </ul>
-      <p className="text-muted-foreground">
-        Escalation for harm sits with Amend programme staff. This page does not replace that
-        policy.
-      </p>
+      <header>
+        <p className="eyebrow text-muted-foreground">Member community</p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground lg:text-3xl">
+          Community guidelines
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+          The forum is a professional space for Amend members. These guidelines explain how to
+          participate safely and constructively.
+        </p>
+      </header>
+      <section className={cn(cardClassName, "p-5 lg:p-6")} aria-labelledby="guidelines-heading">
+        <h2 className="text-lg font-semibold text-foreground" id="guidelines-heading">
+          How to participate
+        </h2>
+        <ul className="mt-4 flex list-disc flex-col gap-3 pl-5 text-foreground">
+          <li>Participate only in the categories available to your program role.</li>
+          <li>
+            Use the supported markdown formatting. Do not add raw HTML, images, or identifying
+            details.
+          </li>
+          <li>You may edit your own post for 15 minutes. Staff can moderate it after that.</li>
+          <li>
+            Flag content that is harmful, harassing, or off-mission so staff can review it.
+          </li>
+          <li>
+            Rate limits apply: one new thread per minute, five posts per minute, and thirty posts
+            per hour.
+          </li>
+          <li>
+            Subscribe when you want reply emails. Every message includes an unsubscribe option.
+          </li>
+        </ul>
+      </section>
+      <aside className="rounded-lg border border-support bg-support-subtle p-4 text-sm text-support-subtle-foreground">
+        For urgent safety concerns, contact Amend program staff directly. This page does not
+        replace Amend&apos;s escalation policy.
+      </aside>
     </main>
   );
 }

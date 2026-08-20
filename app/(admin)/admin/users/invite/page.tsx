@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { InviteForm, type InviteFormState } from "@/components/invite-form";
+import { PageHeader } from "@/components/page-header";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
@@ -127,8 +128,12 @@ export default async function InvitePage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-6">
-      <h1 className="text-2xl font-medium text-foreground">Invitations</h1>
+    <div className="flex flex-col gap-6 lg:gap-8">
+      <PageHeader
+        description="Invite one member at a time or upload a CSV, then track outstanding invitations."
+        eyebrow="Member administration"
+        title="Invitations"
+      />
       <InviteForm
         csvAction={csvAction}
         items={items}

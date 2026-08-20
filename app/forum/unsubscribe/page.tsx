@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { AuthSplit, authLinkClassName } from "@/components/auth-split";
 import { unsubscribeWithToken } from "@/lib/forum/subscribe";
 
 export default async function ForumUnsubscribePage({
@@ -16,13 +18,27 @@ export default async function ForumUnsubscribePage({
     (await unsubscribeWithToken(userId, threadId, token));
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-4 p-6">
-      <h1 className="text-2xl font-medium text-foreground">Forum emails</h1>
-      <p className="text-foreground">
+    <AuthSplit
+      description="Manage email updates for a forum discussion."
+      footer={
+        <p className="text-sm text-muted-foreground">
+          Return to{" "}
+          <Link className={authLinkClassName} href="/login">
+            sign in
+          </Link>
+        </p>
+      }
+      panelAction={{ href: "/login", label: "Sign in" }}
+      title="Forum emails"
+    >
+      <p
+        className="rounded-md border border-border bg-muted p-4 text-sm text-foreground"
+        role={ok ? "status" : "alert"}
+      >
         {ok
           ? "You are unsubscribed from that thread."
           : "That unsubscribe link is not valid."}
       </p>
-    </main>
+    </AuthSplit>
   );
 }

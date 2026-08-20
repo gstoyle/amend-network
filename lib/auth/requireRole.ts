@@ -1,3 +1,4 @@
+import { ADMIN_MFA_REQUIRED } from "@/lib/auth/admin-mfa";
 import { AUTH_FAILURE_MESSAGE } from "@/lib/auth/errors";
 import type { AdminRole, ProgramRole, SessionClaims, UserStatus } from "@/lib/auth/types";
 
@@ -43,7 +44,7 @@ export function requireRole(
     throw new AuthDeniedError();
   }
 
-  if (options.mfa && !session.mfaSatisfied) {
+  if (ADMIN_MFA_REQUIRED && options.mfa && !session.mfaSatisfied) {
     throw new AuthDeniedError();
   }
 

@@ -68,12 +68,12 @@ describe("audit log read (app layer, FR-020)", () => {
     }
   });
 
-  it("does not mock requireRole: admin without mfa_satisfied is denied", () => {
+  it("does not mock requireRole: admin without mfa_satisfied is allowed while MFA is optional", () => {
     const admin = claimsFor("admin");
     expect(admin?.mfaSatisfied).toBe(false);
-    expect(() =>
-      requireRole(admin, { admin: ["super_admin", "admin"], mfa: true }),
-    ).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(requireRole(admin, { admin: ["super_admin", "admin"], mfa: true }).adminRole).toBe(
+      "admin",
+    );
   });
 
   it("Independent Test: Super Admin full history; Admin last 90 days", async () => {

@@ -189,7 +189,7 @@ describe("admin event publish (US1)", () => {
     expect(after).toBe(before);
   });
 
-  it("Pathways, LEAD, and Pending cannot create; Admin without MFA cannot create", async () => {
+  it("Pathways, LEAD, and Pending cannot create; Admin can create while MFA is optional", async () => {
     const input = {
       title: `${MARKER}-deny`,
       description: "Body",
@@ -201,6 +201,6 @@ describe("admin event publish (US1)", () => {
     for (const role of ["pathways", "lead", "pending"] as const) {
       await expect(createEvent(claimsFor(role), input)).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
     }
-    await expect(createEvent(claimsFor("admin"), input)).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+    await expect(createEvent(claimsFor("admin"), input)).resolves.toMatchObject({ ok: true });
   });
 });

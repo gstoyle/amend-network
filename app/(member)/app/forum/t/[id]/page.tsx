@@ -14,7 +14,7 @@ import {
 import { AnnouncementBody } from "@/components/announcement-body";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { controlClassName } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthDeniedError, isPendingSession, requireRole } from "@/lib/auth/requireRole";
@@ -22,7 +22,11 @@ import { loadSession } from "@/lib/auth/session";
 import { getForumThread } from "@/lib/forum/list";
 import { isForumStaff } from "@/lib/forum/staff";
 import { FORUM_EDIT_WINDOW_MS } from "@/lib/forum/validate";
-import { formatDayMonthYear } from "@/lib/utils";
+import { cn, formatDayMonthYear } from "@/lib/utils";
+
+function currentTimestamp(): number {
+  return Date.now();
+}
 
 export default async function ForumThreadPage({
   params,
@@ -56,13 +60,13 @@ export default async function ForumThreadPage({
     notFound();
   }
 
-  const now = Date.now();
+  const now = currentTimestamp();
 
   return (
     <div className="flex flex-col gap-6 lg:gap-8">
       <p>
         <Link
-          className="inline-flex min-h-touch items-center text-sm font-medium text-foreground underline decoration-border-strong underline-offset-4"
+          className={cn(buttonVariants({ variant: "ghost" }), "px-0")}
           href={`/app/forum/${thread.categorySlug}`}
         >
           {thread.categoryName}
@@ -74,7 +78,11 @@ export default async function ForumThreadPage({
         {thread.locked ? <Badge>Locked</Badge> : null}
         {thread.hidden ? <Badge tone="support">Hidden</Badge> : null}
       </div>
-      {query.error ? <p className="text-sm text-destructive">{query.error}</p> : null}
+      {query.error ? (
+        <p className="text-sm text-destructive" role="alert">
+          {query.error}
+        </p>
+      ) : null}
 
       <form action={subscribeAction}>
         <input name="threadId" type="hidden" value={thread.id} />

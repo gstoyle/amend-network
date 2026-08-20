@@ -6,6 +6,7 @@ import {
   DocAffiliationForm,
   type AffiliationFormState,
 } from "@/components/doc-affiliation-form";
+import { PageHeader } from "@/components/page-header";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
@@ -99,8 +100,12 @@ export default async function AffiliationsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-6">
-      <h1 className="text-2xl font-medium text-foreground">DOC affiliations</h1>
+    <div className="flex flex-col gap-6 lg:gap-8">
+      <PageHeader
+        description="Maintain the affiliation choices members can select during registration."
+        eyebrow="Member administration"
+        title="DOC affiliations"
+      />
       <DocAffiliationForm
         addAction={addAction}
         deactivateAction={deactivateAction}

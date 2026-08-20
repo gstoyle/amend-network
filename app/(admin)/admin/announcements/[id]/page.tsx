@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
@@ -6,12 +7,16 @@ import {
   AnnouncementForm,
   type AnnouncementFormState,
 } from "@/components/announcement-form";
-import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/page-header";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cardClassName } from "@/components/ui/card";
 import { updateAnnouncement, withdrawAnnouncement } from "@/lib/announcements/edit";
 import { getAdminAnnouncement } from "@/lib/announcements/publish";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
+import { cn } from "@/lib/utils";
 
 async function loadClaims() {
   const session = await auth();
@@ -99,29 +104,43 @@ export default async function EditAnnouncementPage({
   const boundSave = saveAction.bind(null, id);
   const boundWithdraw = withdrawAction.bind(null, id);
   return (
-    <div className="flex flex-col gap-4 p-6">
-      <h1 className="text-2xl font-medium text-foreground">Edit announcement</h1>
-      {item.deletedAt ? <p className="text-foreground">This announcement is withdrawn.</p> : null}
-      <AnnouncementForm
-        action={boundSave}
-        initial={{
-          headline: item.headline,
-          body: item.body,
-          visibility: item.visibility,
-          activatesAt: toLocalInput(item.activatesAt),
-          expiresAt: toLocalInput(item.expiresAt),
-          dismissible: item.dismissible,
-          ctaPrimaryLabel: item.ctaPrimaryLabel ?? "",
-          ctaPrimaryUrl: item.ctaPrimaryUrl ?? "",
-          ctaSecondaryLabel: item.ctaSecondaryLabel ?? "",
-          ctaSecondaryUrl: item.ctaSecondaryUrl ?? "",
-        }}
-        submitLabel="Save"
+    <div className="flex flex-col gap-6 lg:gap-8">
+      <p>
+        <Link
+          className={cn(buttonVariants({ variant: "ghost" }), "px-0")}
+          href="/admin/announcements"
+        >
+          Back to announcements
+        </Link>
+      </p>
+      <PageHeader
+        actions={item.deletedAt ? <Badge tone="support">Withdrawn</Badge> : null}
+        description="Update the notice, audience, schedule, and optional member actions."
+        eyebrow="Announcement management"
+        title={item.headline}
       />
+      <section className={cn(cardClassName, "p-4 lg:p-6")} aria-label="Announcement details">
+        <AnnouncementForm
+          action={boundSave}
+          initial={{
+            headline: item.headline,
+            body: item.body,
+            visibility: item.visibility,
+            activatesAt: toLocalInput(item.activatesAt),
+            expiresAt: toLocalInput(item.expiresAt),
+            dismissible: item.dismissible,
+            ctaPrimaryLabel: item.ctaPrimaryLabel ?? "",
+            ctaPrimaryUrl: item.ctaPrimaryUrl ?? "",
+            ctaSecondaryLabel: item.ctaSecondaryLabel ?? "",
+            ctaSecondaryUrl: item.ctaSecondaryUrl ?? "",
+          }}
+          submitLabel="Save announcement"
+        />
+      </section>
       {item.deletedAt ? null : (
-        <form action={boundWithdraw}>
+        <form action={boundWithdraw} className="border-t border-border pt-6">
           <Button type="submit" variant="destructive">
-            Withdraw
+            Withdraw announcement
           </Button>
         </form>
       )}

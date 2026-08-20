@@ -216,6 +216,14 @@ rules the product enforces: role-gated rooms, allowlisted markdown, a
 lock / pin. Escalation for harm stays with programme staff. **Unconfirmed
 by Amend.** Revisit when Q5/Q16 is answered.
 
+**Administrative MFA is optional until Amend confirms the gate
+(2026-08-19).** PRD §5.1 still says Super Admin, Admin, and Moderator
+must enroll TOTP before `/admin`. Local and staging use currently need
+admin pages without an authenticator, so `ADMIN_MFA_REQUIRED` is
+`false`: enrollment and challenge remain available, but admin routes do
+not redirect or deny on `mfa_satisfied`. Flip that flag to restore the
+PRD gate. **Unconfirmed by Amend.** Revisit before production launch.
+
 ---
 
 ## Still fully open, not yet assumed or addressed
@@ -230,5 +238,5 @@ Q15 (budget ceiling).
 
 **Log maintained by:** solo developer, per constitution governance.
 
-**Last updated:** 2026-08-19 (in-app member guide added to primary
-navigation; Q5/Q16 still open)
+**Last updated:** 2026-08-19 (administrative MFA optional until launch;
+in-app member guide still present; Q5/Q16 still open)

@@ -5,18 +5,22 @@ export type PageHeaderProps = {
   eyebrow: string;
   title: string;
   description?: ReactNode;
+  actions?: ReactNode;
 };
 
-export function PageHeader({ description, eyebrow, title }: PageHeaderProps) {
+export function PageHeader({ actions, description, eyebrow, title }: PageHeaderProps) {
   return (
-    <header>
-      <p className="eyebrow text-muted-foreground">{eyebrow}</p>
-      <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground lg:text-3xl">
-        {title}
-      </h1>
-      {description ? (
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{description}</p>
-      ) : null}
+    <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="min-w-0">
+        <p className="eyebrow text-muted-foreground">{eyebrow}</p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground lg:text-3xl">
+          {title}
+        </h1>
+        {description ? (
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{description}</p>
+        ) : null}
+      </div>
+      {actions ? <div className="flex shrink-0 flex-wrap gap-2">{actions}</div> : null}
     </header>
   );
 }

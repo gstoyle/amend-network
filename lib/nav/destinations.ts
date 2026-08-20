@@ -68,6 +68,15 @@ const ADMIN_ENTRIES: { destination: Destination; allowed: AdminRole[] }[] = [
   },
   {
     destination: {
+      href: "/admin/forum/flags",
+      label: "Forum flags",
+      iconKey: "shield",
+      match: "prefix",
+    },
+    allowed: ADMIN_ROLES,
+  },
+  {
+    destination: {
       href: "/admin/announcements",
       label: "Announcements",
       iconKey: "shield",
@@ -88,6 +97,15 @@ const ADMIN_ENTRIES: { destination: Destination; allowed: AdminRole[] }[] = [
     destination: {
       href: "/admin/users/invite",
       label: "Invite",
+      iconKey: "account",
+      match: "prefix",
+    },
+    allowed: CONTENT_ADMIN_ROLES,
+  },
+  {
+    destination: {
+      href: "/admin/users/affiliations",
+      label: "DOC affiliations",
       iconKey: "account",
       match: "prefix",
     },
@@ -146,6 +164,14 @@ export function accountDestinations(claims: SessionClaims | null): Destination[]
   const entries = [...ACCOUNT_ENTRIES];
   if (claims.adminRole !== "none") {
     entries.push({ href: "/admin", label: "Admin", iconKey: "shield", match: "prefix" });
+    if (!claims.mfaEnabled) {
+      entries.push({
+        href: "/mfa/enroll",
+        label: "Set up authenticator",
+        iconKey: "shield",
+        match: "prefix",
+      });
+    }
   }
   return entries;
 }

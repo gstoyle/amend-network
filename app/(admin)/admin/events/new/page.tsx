@@ -1,12 +1,17 @@
+import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { EventForm, type EventFormState } from "@/components/event-form";
+import { PageHeader } from "@/components/page-header";
+import { buttonVariants } from "@/components/ui/button";
+import { cardClassName } from "@/components/ui/card";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
 import { EVENT_STAFF_ROLES, createEvent } from "@/lib/events/publish";
+import { cn } from "@/lib/utils";
 
 async function loadClaims() {
   const session = await auth();
@@ -59,9 +64,23 @@ export default async function NewEventPage() {
     denyOrThrow(error);
   }
   return (
-    <div className="flex flex-col gap-4 p-6">
-      <h1 className="text-2xl font-medium text-foreground">New event</h1>
-      <EventForm action={createAction} submitLabel="Publish" />
+    <div className="flex flex-col gap-6 lg:gap-8">
+      <p>
+        <Link
+          className={cn(buttonVariants({ variant: "ghost" }), "px-0")}
+          href="/admin/events"
+        >
+          Back to events
+        </Link>
+      </p>
+      <PageHeader
+        description="Set the schedule, audience, location, and registration capacity."
+        eyebrow="Event management"
+        title="New event"
+      />
+      <section className={cn(cardClassName, "p-4 lg:p-6")} aria-label="Event details">
+        <EventForm action={createAction} submitLabel="Publish event" />
+      </section>
     </div>
   );
 }

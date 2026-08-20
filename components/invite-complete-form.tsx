@@ -99,17 +99,17 @@ export function InviteCompleteForm({
         />
       </div>
       {state.message ? (
-        <p aria-live="polite" role="status">
+        <p className="text-sm text-success" aria-live="polite" role="status">
           {state.message}
         </p>
       ) : null}
       {state.error ? (
-        <p aria-live="polite" role="alert">
+        <p className="text-sm text-destructive" aria-live="polite" role="alert">
           {state.error}
         </p>
       ) : null}
       <Button disabled={pending} type="submit">
-        Complete registration
+        {pending ? "Activating…" : "Complete registration"}
       </Button>
     </form>
   );

@@ -6,12 +6,14 @@ import {
   hideFlaggedAction,
   keepFlagAction,
 } from "@/app/(admin)/admin/forum/actions";
-import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/page-header";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cardClassName } from "@/components/ui/card";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
 import { listOpenFlags } from "@/lib/forum/moderate";
 import { FORUM_STAFF_ROLES } from "@/lib/forum/staff";
-import { formatDayMonthYear } from "@/lib/utils";
+import { cn, formatDayMonthYear } from "@/lib/utils";
 
 export default async function AdminForumFlagsPage({
   searchParams,
@@ -33,46 +35,68 @@ export default async function AdminForumFlagsPage({
   }
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      <p>
-        <Link className="text-foreground underline" href="/admin/forum">
-          Forum categories
-        </Link>
-      </p>
-      <h1 className="text-2xl font-medium text-foreground">Forum flags</h1>
-      {query.error ? <p className="text-destructive">{query.error}</p> : null}
+    <div className="flex flex-col gap-6 lg:gap-8">
+      <PageHeader
+        actions={
+          <Link className={buttonVariants({ variant: "outline" })} href="/admin/forum">
+            Forum categories
+          </Link>
+        }
+        description="Review reported posts and choose whether to keep, hide, or permanently delete them."
+        eyebrow="Forum moderation"
+        title="Open flags"
+      />
+      {query.error ? (
+        <p className="text-sm text-destructive" role="alert">
+          {query.error}
+        </p>
+      ) : null}
       {flags.length === 0 ? (
-        <p className="text-foreground">No open flags.</p>
+        <section className={cn(cardClassName, "border-dashed p-6 text-center")}>
+          <h2 className="font-semibold text-foreground">No open flags</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            New member reports will appear here for review.
+          </p>
+        </section>
       ) : (
-        <ul className="flex flex-col gap-4">
+        <ul className="grid gap-4">
           {flags.map((flag) => (
-            <li className="flex flex-col gap-2 border border-border p-4 text-foreground" key={flag.id}>
-              <p>
-                <Link className="underline" href={`/app/forum/t/${flag.threadId}`}>
-                  Open thread
+            <li className={cn(cardClassName, "flex flex-col gap-4 p-4 lg:p-6")} key={flag.id}>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <Link
+                  className={buttonVariants({ variant: "ghost" })}
+                  href={`/app/forum/t/${flag.threadId}`}
+                >
+                  View discussion
                 </Link>
-                {" · "}
-                {formatDayMonthYear(flag.createdAt)}
-              </p>
-              <p>{flag.reason}</p>
-              <p className="text-sm">{flag.excerpt}</p>
-              <div className="flex flex-wrap gap-2">
+                <p className="text-xs text-muted-foreground">
+                  Reported {formatDayMonthYear(flag.createdAt)}
+                </p>
+              </div>
+              <div>
+                <p className="eyebrow text-muted-foreground">Reason</p>
+                <p className="mt-1 font-medium text-foreground">{flag.reason}</p>
+              </div>
+              <blockquote className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
+                {flag.excerpt}
+              </blockquote>
+              <div className="flex flex-wrap gap-2 border-t border-border pt-4">
                 <form action={keepFlagAction}>
                   <input name="postId" type="hidden" value={flag.postId} />
                   <Button type="submit" variant="outline">
-                    Keep
+                    Keep post
                   </Button>
                 </form>
                 <form action={hideFlaggedAction}>
                   <input name="postId" type="hidden" value={flag.postId} />
-                  <Button type="submit" variant="outline">
-                    Hide
+                  <Button type="submit" variant="secondary">
+                    Hide post
                   </Button>
                 </form>
                 <form action={deleteFlaggedAction}>
                   <input name="postId" type="hidden" value={flag.postId} />
-                  <Button type="submit" variant="outline">
-                    Delete
+                  <Button type="submit" variant="destructive">
+                    Delete post
                   </Button>
                 </form>
               </div>

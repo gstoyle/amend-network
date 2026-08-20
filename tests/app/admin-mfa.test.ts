@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { authConfig } from "@/auth.config";
 import { AUTH_FAILURE_MESSAGE } from "@/lib/auth/errors";
-import { adminMfaDestination } from "@/lib/auth/admin-mfa";
+import {
+  ADMIN_MFA_REQUIRED,
+  adminMfaDestination,
+  mfaSetupDestination,
+} from "@/lib/auth/admin-mfa";
 import { requireRole } from "@/lib/auth/requireRole";
 import { claimsFor } from "@/tests/helpers/prd-matrix";
 
@@ -19,55 +23,49 @@ function authorizedFor(pathname: string, sessionId?: string): boolean {
   return result === true;
 }
 
-describe("/admin requires mfa_satisfied from the signed session (US3 / FR-012)", () => {
-  it("denies an admin role when the session mfa_satisfied claim is false", () => {
+describe("/admin MFA gate (US3 / FR-012)", () => {
+  it("does not force MFA on admin routes while ADMIN_MFA_REQUIRED is off", () => {
+    expect(ADMIN_MFA_REQUIRED).toBe(false);
     const admin = claimsFor("admin");
     expect(admin?.mfaSatisfied).toBe(false);
-    expect(() =>
-      requireRole(admin, { admin: [...ADMIN_ROLES], mfa: true }),
-    ).toThrowError(AUTH_FAILURE_MESSAGE);
+    expect(requireRole(admin, { admin: [...ADMIN_ROLES], mfa: true }).adminRole).toBe("admin");
+    expect(adminMfaDestination(admin)).toBeNull();
   });
 
   it("ignores a client-supplied mfaSatisfied flag", () => {
     const admin = claimsFor("admin");
-    expect(() =>
+    expect(
       requireRole(admin, {
         admin: [...ADMIN_ROLES],
         mfa: true,
         clientMfaSatisfied: true,
-      }),
-    ).toThrowError(AUTH_FAILURE_MESSAGE);
+      }).adminRole,
+    ).toBe("admin");
   });
 
-  it("allows an admin only when the signed session already has mfa_satisfied", () => {
-    const admin = { ...claimsFor("admin")!, mfaSatisfied: true };
-    expect(requireRole(admin, { admin: [...ADMIN_ROLES], mfa: true }).adminRole).toBe(
-      "admin",
-    );
-  });
-
-  it("sends MFA-off admins to enroll and enrolled-unsatisfied admins to challenge", () => {
+  it("keeps optional enroll/challenge routing for staff who choose to set MFA up", () => {
     const enroll = claimsFor("admin");
-    expect(adminMfaDestination(enroll)).toBe("/mfa/enroll");
+    expect(mfaSetupDestination(enroll)).toBe("/mfa/enroll");
 
     const challenge = {
       ...claimsFor("admin")!,
       mfaEnabled: true,
       mfaSatisfied: false,
     };
-    expect(adminMfaDestination(challenge)).toBe("/mfa/challenge");
+    expect(mfaSetupDestination(challenge)).toBe("/mfa/challenge");
 
     const satisfied = {
       ...claimsFor("admin")!,
       mfaEnabled: true,
       mfaSatisfied: true,
     };
-    expect(adminMfaDestination(satisfied)).toBeNull();
+    expect(mfaSetupDestination(satisfied)).toBeNull();
   });
 
   it("does not prompt a Pathways member for MFA", () => {
     const pathways = claimsFor("pathways");
     expect(adminMfaDestination(pathways)).toBeNull();
+    expect(mfaSetupDestination(pathways)).toBeNull();
     expect(requireRole(pathways).programRole).toBe("pathways");
     expect(() =>
       requireRole(pathways, { admin: [...ADMIN_ROLES], mfa: true }),

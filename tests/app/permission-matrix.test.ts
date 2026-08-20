@@ -294,8 +294,8 @@ describe("app permission matrix (FR-025, requireRole not mocked)", () => {
     }
   });
 
-  it("admin without mfa_satisfied is denied invite list; with mfa_satisfied is allowed", async () => {
-    await expect(listInvitations(claimsFor("admin"))).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
+  it("admin without mfa_satisfied is allowed invite list while MFA is optional", async () => {
+    await expect(listInvitations(claimsFor("admin"))).resolves.toEqual(expect.any(Array));
     await expect(
       listInvitations({ ...claimsFor("admin")!, mfaSatisfied: true }),
     ).resolves.toEqual(expect.any(Array));

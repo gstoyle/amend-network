@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { afterEach, describe, expect, it } from "vitest";
-import { adminMfaDestination } from "@/lib/auth/admin-mfa";
+import { adminMfaDestination, mfaSetupDestination } from "@/lib/auth/admin-mfa";
 import { AUTH_FAILURE_MESSAGE } from "@/lib/auth/errors";
 import { authorizeCredentials } from "@/lib/auth/credentials";
 import {
@@ -187,7 +187,7 @@ describe("TOTP enrollment and challenge (US3 / FR-012)", () => {
     ).rejects.toThrowError(AUTH_FAILURE_MESSAGE);
   });
 
-  it("Independent Test: admin@local blocked until enroll; wrong code audited; Pathways not prompted", async () => {
+  it("Independent Test: admin@local can use admin without MFA; enroll remains available; Pathways not prompted", async () => {
     const admin = await authorizeCredentials({
       email: "admin@local",
       password: env().SEED_PASSWORD,
@@ -198,13 +198,14 @@ describe("TOTP enrollment and challenge (US3 / FR-012)", () => {
     const adminClaims = await loadSession(admin!.sessionId);
     expect(adminClaims?.mfaEnabled).toBe(false);
     expect(adminClaims?.mfaSatisfied).toBe(false);
-    expect(adminMfaDestination(adminClaims)).toBe("/mfa/enroll");
-    expect(() =>
+    expect(adminMfaDestination(adminClaims)).toBeNull();
+    expect(mfaSetupDestination(adminClaims)).toBe("/mfa/enroll");
+    expect(
       requireRole(adminClaims, {
         admin: ["super_admin", "admin", "moderator"],
         mfa: true,
-      }),
-    ).toThrowError(AUTH_FAILURE_MESSAGE);
+      }).adminRole,
+    ).toBe("admin");
 
     const pending = await beginMfaEnrollment({
       sessionId: admin!.sessionId,

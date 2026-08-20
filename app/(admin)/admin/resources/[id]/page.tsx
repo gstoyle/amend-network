@@ -3,13 +3,17 @@ import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { auth } from "@/auth";
+import { PageHeader } from "@/components/page-header";
 import { ResourceForm, type ResourceFormState } from "@/components/resource-form";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cardClassName } from "@/components/ui/card";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
 import { getAdminResource, replaceResource, updateResource, withdrawResource } from "@/lib/resources/edit";
 import { mintIngestSlots } from "@/lib/resources/publish";
+import { cn } from "@/lib/utils";
 
 async function loadClaims() {
   const session = await auth();
@@ -142,30 +146,45 @@ export default async function AdminResourceEditPage({
   }
 
   return (
-    <div className="flex flex-col gap-4 p-6">
-      <h1 className="text-2xl font-medium text-foreground">Edit resource</h1>
+    <div className="flex flex-col gap-6 lg:gap-8">
       <p>
-        <Link className="text-foreground underline" href="/admin/resources">
+        <Link
+          className={cn(buttonVariants({ variant: "ghost" }), "px-0")}
+          href="/admin/resources"
+        >
           Back to resources
         </Link>
       </p>
+      <PageHeader
+        actions={resource.deletedAt ? <Badge tone="support">Withdrawn</Badge> : null}
+        description="Update the member-facing details, audience, or replace the file and thumbnail together."
+        eyebrow="Resource management"
+        title={resource.title}
+      />
       {resource.deletedAt ? (
-        <p className="text-foreground">This resource is withdrawn.</p>
+        <section className={cn(cardClassName, "border-dashed p-6")}>
+          <h2 className="font-semibold text-foreground">This resource is withdrawn</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            It is no longer available in the member library.
+          </p>
+        </section>
       ) : (
         <>
-          <ResourceForm
-            initial={{
-              id: resource.id,
-              title: resource.title,
-              previewText: resource.previewText,
-              sourceLabel: resource.sourceLabel,
-              tags: resource.tags,
-              visibility: resource.visibility,
-            }}
-            mintAction={mintAction}
-            saveAction={saveAction}
-          />
-          <form action={withdrawAction}>
+          <section className={cn(cardClassName, "p-4 lg:p-6")} aria-label="Resource details">
+            <ResourceForm
+              initial={{
+                id: resource.id,
+                title: resource.title,
+                previewText: resource.previewText,
+                sourceLabel: resource.sourceLabel,
+                tags: resource.tags,
+                visibility: resource.visibility,
+              }}
+              mintAction={mintAction}
+              saveAction={saveAction}
+            />
+          </section>
+          <form action={withdrawAction} className="border-t border-border pt-6">
             <input name="resourceId" type="hidden" value={resource.id} />
             <Button type="submit" variant="destructive">
               Withdraw resource

@@ -20,7 +20,10 @@ export function MfaForm({
   return (
     <form action={formAction} className="flex flex-col gap-4">
       {otpauthUri ? (
-        <p className="break-all text-sm text-muted-foreground">{otpauthUri}</p>
+        <div className="rounded-md border border-border bg-muted p-3">
+          <p className="text-sm font-medium text-foreground">Authenticator setup link</p>
+          <p className="mt-1 break-all font-mono text-xs text-muted-foreground">{otpauthUri}</p>
+        </div>
       ) : null}
       <div className="flex flex-col gap-2">
         <Label htmlFor="code">Authenticator code</Label>
@@ -35,12 +38,12 @@ export function MfaForm({
         />
       </div>
       {state.error ? (
-        <p aria-live="polite" role="alert">
+        <p className="text-sm text-destructive" aria-live="polite" role="alert">
           {state.error}
         </p>
       ) : null}
       <Button disabled={pending} type="submit">
-        Continue
+        {pending ? "Checking…" : "Continue"}
       </Button>
     </form>
   );

@@ -30,18 +30,18 @@ describe("shared chrome (008 US1)", () => {
     expect(source).toMatch(/export const controlClassName/);
     expect(source).toContain("controlClassName");
     expect(source).toContain("min-h-touch");
-    expect(source).toContain("border-input");
+    expect(source).toContain("border-border-strong");
     expect(source).toContain("focus-visible:ring-ring");
     expect(source).not.toMatch(forbiddenLiteral);
   });
 
-  it("select listbox uses the same field tokens as the trigger", () => {
+  it("select keeps native semantics and reuses the shared field chrome", () => {
     const source = read("components/ui/select.tsx");
     expect(source).toContain("controlClassName");
-    expect(source).toContain('role="listbox"');
-    expect(source).toContain("border-input");
-    expect(source).toContain("bg-background");
-    expect(source).toContain("bg-muted");
+    expect(source).toContain("<select");
+    expect(source).not.toContain('"use client"');
+    expect(source).not.toContain('role="listbox"');
+    expect(source).not.toContain('aria-hidden="true"');
     expect(source).not.toMatch(forbiddenLiteral);
   });
 

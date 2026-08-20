@@ -129,7 +129,7 @@ export function ResourceForm({
   const selected = new Set(initial?.visibility ?? []);
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
+    <form action={formAction} className="flex max-w-2xl flex-col gap-6">
       {initial ? <input name="resourceId" type="hidden" value={initial.id} /> : null}
       <div className="flex flex-col gap-2">
         <Label htmlFor="title">Title</Label>
@@ -172,8 +172,9 @@ export function ResourceForm({
       <fieldset className="flex flex-col gap-2">
         <legend className="text-sm font-medium text-foreground">Visibility</legend>
         {VISIBILITY_OPTIONS.map((option) => (
-          <label className="flex items-center gap-2 text-sm text-foreground" key={option.value}>
+          <label className="flex min-h-touch items-center gap-2 text-sm text-foreground" key={option.value}>
             <input
+              className="size-4 accent-primary"
               defaultChecked={selected.has(option.value)}
               name="visibility"
               type="checkbox"

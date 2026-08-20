@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { PageHeader } from "@/components/page-header";
 import { PendingQueue } from "@/components/pending-queue";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
@@ -82,8 +83,12 @@ export default async function PendingRegistrationsPage({
   const networks = await listLaunchNetworks();
 
   return (
-    <div className="flex flex-col gap-4 p-6">
-      <h1 className="text-2xl font-medium text-foreground">Pending registrations</h1>
+    <div className="flex flex-col gap-6 lg:gap-8">
+      <PageHeader
+        description="Review access requests, confirm the correct network, and keep denial reasons private."
+        eyebrow="Member administration"
+        title="Pending registrations"
+      />
       <PendingQueue
         approveAction={approveAction}
         denyAction={denyAction}

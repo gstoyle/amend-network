@@ -41,7 +41,12 @@ export function AppShell({
         identity={identity}
         primary={primary}
       />
-      <MobileTopBar account={account} identity={identity} />
+      <MobileTopBar
+        account={account}
+        admin={admin}
+        currentHref={currentHref}
+        identity={identity}
+      />
 
       <div className="lg:pl-64">
         <main

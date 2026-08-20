@@ -26,17 +26,17 @@ export function ResetPasswordForm({ token }: { token: string }) {
         />
       </div>
       {state.error ? (
-        <p aria-live="polite" role="alert">
+        <p className="text-sm text-destructive" aria-live="polite" role="alert">
           {state.error}
         </p>
       ) : null}
       {state.success ? (
-        <p aria-live="polite" role="status">
+        <p className="text-sm text-success" aria-live="polite" role="status">
           Password updated. You can sign in.
         </p>
       ) : null}
       <Button disabled={pending} type="submit">
-        Update password
+        {pending ? "Updating…" : "Update password"}
       </Button>
     </form>
   );

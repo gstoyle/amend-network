@@ -37,8 +37,12 @@ const VISIBILITY_OPTIONS = [
 export function AnnouncementForm({ action, initial, submitLabel }: AnnouncementFormProps) {
   const [state, formAction, pending] = useActionState(action, {});
   return (
-    <form action={formAction} className="flex max-w-xl flex-col gap-4">
-      {state.error ? <p className="text-destructive">{state.error}</p> : null}
+    <form action={formAction} className="flex max-w-2xl flex-col gap-6">
+      {state.error ? (
+        <p className="text-sm text-destructive" role="alert">
+          {state.error}
+        </p>
+      ) : null}
       <div className="flex flex-col gap-2">
         <Label htmlFor="headline">Headline</Label>
         <Input defaultValue={initial?.headline} id="headline" maxLength={120} name="headline" required />
@@ -60,6 +64,7 @@ export function AnnouncementForm({ action, initial, submitLabel }: AnnouncementF
         {VISIBILITY_OPTIONS.map((option) => (
           <label className="flex min-h-touch items-center gap-2 text-foreground" key={option.value}>
             <input
+              className="size-4 accent-primary"
               defaultChecked={initial?.visibility.includes(option.value) ?? option.value === "all_authenticated"}
               name="visibility"
               type="checkbox"
@@ -69,28 +74,31 @@ export function AnnouncementForm({ action, initial, submitLabel }: AnnouncementF
           </label>
         ))}
       </fieldset>
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="activatesAt">Activates</Label>
-        <Input
-          defaultValue={initial?.activatesAt}
-          id="activatesAt"
-          name="activatesAt"
-          required
-          type="datetime-local"
-        />
-      </div>
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="expiresAt">Expires</Label>
-        <Input
-          defaultValue={initial?.expiresAt}
-          id="expiresAt"
-          name="expiresAt"
-          required
-          type="datetime-local"
-        />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="activatesAt">Activates</Label>
+          <Input
+            defaultValue={initial?.activatesAt}
+            id="activatesAt"
+            name="activatesAt"
+            required
+            type="datetime-local"
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="expiresAt">Expires</Label>
+          <Input
+            defaultValue={initial?.expiresAt}
+            id="expiresAt"
+            name="expiresAt"
+            required
+            type="datetime-local"
+          />
+        </div>
       </div>
       <label className="flex min-h-touch items-center gap-2 text-foreground">
         <input
+          className="size-4 accent-primary"
           defaultChecked={initial?.dismissible ?? true}
           name="dismissible"
           type="checkbox"
@@ -115,7 +123,7 @@ export function AnnouncementForm({ action, initial, submitLabel }: AnnouncementF
         <Input defaultValue={initial?.ctaSecondaryUrl} id="ctaSecondaryUrl" name="ctaSecondaryUrl" />
       </div>
       <Button disabled={pending} type="submit">
-        {submitLabel}
+        {pending ? "Saving…" : submitLabel}
       </Button>
     </form>
   );

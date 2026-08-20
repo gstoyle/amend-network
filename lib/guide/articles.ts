@@ -42,7 +42,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
         type: "ol",
         items: [
           "Go to Sign in and enter the email and password for this network.",
-          "If you hold an administrative role, complete MFA enrollment or the MFA challenge when prompted. Members without an admin role are not asked for MFA.",
+          "If you hold an administrative role, you can set up an authenticator from the account menu. MFA is optional for now; members without an admin role are not asked for it.",
           "Approved members land on Home. Pending members land on the holding page.",
         ],
       },
@@ -335,13 +335,13 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
         items: [
           "Pathways members see Pathways-visible and all-authenticated content.",
           "LEAD members see LEAD-visible and all-authenticated content.",
-          "Staff with an administrative role also reach Admin from the account area, after MFA.",
+          "Staff with an administrative role also reach Admin from the account area. Authenticator setup is optional.",
         ],
       },
       { type: "h2", id: "mfa", text: "MFA for administrative work" },
       {
         type: "p",
-        text: "If your account has an administrative role, you enroll a TOTP app and enter a code before admin pages. Member pages do not require that challenge. Losing the authenticator is an operations issue — staff reset it; the product will not email a bypass code.",
+        text: "If your account has an administrative role, you can optionally enroll a TOTP app from Set up authenticator. Admin pages do not currently require that challenge. Losing the authenticator is an operations issue — staff reset it; the product will not email a bypass code.",
       },
       {
         type: "links",
@@ -389,7 +389,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   {
     slug: "staff-overview",
     title: "Staff overview",
-    summary: "How the admin overlay works, who can open which tools, and that MFA is required on admin routes.",
+    summary: "How the admin overlay works, who can open which tools, and that authenticator setup is optional.",
     category: "staff",
     audience: "staff",
     keywords: ["admin", "moderator", "mfa", "overlay"],
@@ -411,7 +411,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
         type: "callout",
         tone: "warning",
         title: "MFA",
-        text: "Admin pages require a satisfied MFA claim. If you skip the challenge, the route denies you the same way an unauthorized role would.",
+        text: "Authenticator setup is optional. Admin pages currently allow a signed-in administrative role without a satisfied MFA claim. You can still enroll from Set up authenticator in the account menu.",
       },
       {
         type: "links",

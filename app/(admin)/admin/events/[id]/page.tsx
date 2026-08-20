@@ -1,15 +1,20 @@
+import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { EventForm, type EventFormState } from "@/components/event-form";
-import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/page-header";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cardClassName } from "@/components/ui/card";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
 import { cancelEvent } from "@/lib/events/cancel";
 import { updateEvent } from "@/lib/events/edit";
 import { EVENT_STAFF_ROLES, getAdminEvent } from "@/lib/events/publish";
+import { cn } from "@/lib/utils";
 
 async function loadClaims() {
   const session = await auth();
@@ -102,29 +107,43 @@ export default async function EditEventPage({
   const boundSave = saveAction.bind(null, id);
   const boundCancel = cancelAction.bind(null, id);
   return (
-    <div className="flex flex-col gap-4 p-6">
-      <h1 className="text-2xl font-medium text-foreground">Edit event</h1>
-      {item.cancelledAt ? <p className="text-foreground">This event is cancelled.</p> : null}
-      <EventForm
-        action={boundSave}
-        capacityConfirm
-        initial={{
-          title: item.title,
-          description: item.description,
-          visibility: item.visibility,
-          startsAt: toLocalInput(item.startsAt),
-          endsAt: toLocalInput(item.endsAt),
-          timezoneHint: item.timezoneHint ?? "",
-          location: item.location ?? "",
-          isVirtual: item.isVirtual,
-          joinUrl: item.joinUrl ?? "",
-          capacity: item.capacity !== null ? String(item.capacity) : "",
-        }}
-        notifyRsvps={item.rsvpCount > 0}
-        submitLabel="Save"
+    <div className="flex flex-col gap-6 lg:gap-8">
+      <p>
+        <Link
+          className={cn(buttonVariants({ variant: "ghost" }), "px-0")}
+          href="/admin/events"
+        >
+          Back to events
+        </Link>
+      </p>
+      <PageHeader
+        actions={item.cancelledAt ? <Badge tone="support">Cancelled</Badge> : null}
+        description={`${item.rsvpCount} ${item.rsvpCount === 1 ? "person has" : "people have"} responded. Schedule changes can notify current respondents.`}
+        eyebrow="Event management"
+        title={item.title}
       />
+      <section className={cn(cardClassName, "p-4 lg:p-6")} aria-label="Event details">
+        <EventForm
+          action={boundSave}
+          capacityConfirm
+          initial={{
+            title: item.title,
+            description: item.description,
+            visibility: item.visibility,
+            startsAt: toLocalInput(item.startsAt),
+            endsAt: toLocalInput(item.endsAt),
+            timezoneHint: item.timezoneHint ?? "",
+            location: item.location ?? "",
+            isVirtual: item.isVirtual,
+            joinUrl: item.joinUrl ?? "",
+            capacity: item.capacity !== null ? String(item.capacity) : "",
+          }}
+          notifyRsvps={item.rsvpCount > 0}
+          submitLabel="Save event"
+        />
+      </section>
       {item.cancelledAt ? null : (
-        <form action={boundCancel}>
+        <form action={boundCancel} className="border-t border-border pt-6">
           <Button type="submit" variant="destructive">
             Cancel event
           </Button>

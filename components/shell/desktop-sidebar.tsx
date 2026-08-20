@@ -61,6 +61,11 @@ export function DesktopSidebar({
   identity,
   primary,
 }: DesktopSidebarProps) {
+  const accountEntries =
+    admin.length > 0
+      ? account.filter((destination) => destination.href !== "/admin")
+      : account;
+
   return (
     <aside
       aria-label="Member"
@@ -97,7 +102,7 @@ export function DesktopSidebar({
         </p>
         <nav aria-label="Account">
           <ul className="flex flex-col gap-1">
-            {account.map((destination) => (
+            {accountEntries.map((destination) => (
               <li key={destination.href}>
                 <Link
                   aria-current={destination.href === currentHref ? "page" : undefined}

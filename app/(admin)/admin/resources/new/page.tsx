@@ -1,12 +1,17 @@
+import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { PageHeader } from "@/components/page-header";
 import { ResourceForm, type ResourceFormState } from "@/components/resource-form";
+import { buttonVariants } from "@/components/ui/button";
+import { cardClassName } from "@/components/ui/card";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
 import { mintIngestSlots, publishResource } from "@/lib/resources/publish";
+import { cn } from "@/lib/utils";
 
 async function loadClaims() {
   const session = await auth();
@@ -93,9 +98,23 @@ export default async function AdminResourceNewPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-6">
-      <h1 className="text-2xl font-medium text-foreground">Publish a resource</h1>
-      <ResourceForm mintAction={mintAction} publishAction={publishAction} />
+    <div className="flex flex-col gap-6 lg:gap-8">
+      <p>
+        <Link
+          className={cn(buttonVariants({ variant: "ghost" }), "px-0")}
+          href="/admin/resources"
+        >
+          Back to resources
+        </Link>
+      </p>
+      <PageHeader
+        description="Add a library item, its member-facing summary, audience, and accessible thumbnail."
+        eyebrow="Resource management"
+        title="Publish a resource"
+      />
+      <section className={cn(cardClassName, "p-4 lg:p-6")} aria-label="Resource details">
+        <ResourceForm mintAction={mintAction} publishAction={publishAction} />
+      </section>
     </div>
   );
 }
