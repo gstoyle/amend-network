@@ -15,6 +15,7 @@
     "test:rls": "vitest run --config tests/rls/vitest.rls.config.ts",
     "test:a11y": "vitest run --config tests/a11y/vitest.a11y.config.ts",
     "db:migrate": "tsx scripts/db-migrate.ts",
+    "retention:run": "tsx scripts/run-retention.ts",
     "db:seed": "prisma db seed",
     "db:generate": "prisma generate"
   },

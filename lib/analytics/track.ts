@@ -8,7 +8,10 @@ export type AnalyticsEventName =
   | "event_viewed"
   | "event_rsvp"
   | "directory_search"
-  | "directory_profile_viewed";
+  | "directory_profile_viewed"
+  | "forum_thread_viewed"
+  | "forum_post_created"
+  | "forum_post_flagged";
 
 export type AnalyticsRsvpStatus = "yes" | "no" | "maybe" | "waitlist";
 
@@ -21,6 +24,8 @@ export type AnalyticsPayload = {
   eventId?: string;
   rsvpStatus?: AnalyticsRsvpStatus;
   viewedUserId?: string;
+  threadId?: string;
+  postId?: string;
 };
 
 const ALLOWED_KEYS = new Set([
@@ -32,6 +37,8 @@ const ALLOWED_KEYS = new Set([
   "eventId",
   "rsvpStatus",
   "viewedUserId",
+  "threadId",
+  "postId",
 ]);
 const BLOCKED_KEYS = new Set([
   "email",
@@ -78,6 +85,9 @@ export function track(event: AnalyticsEventName, payload: AnalyticsPayload): voi
     case "event_rsvp":
     case "directory_search":
     case "directory_profile_viewed":
+    case "forum_thread_viewed":
+    case "forum_post_created":
+    case "forum_post_flagged":
       return;
     default: {
       const exhaustive: never = event;

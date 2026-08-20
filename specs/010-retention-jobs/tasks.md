@@ -133,10 +133,10 @@ Repository-root Next.js app per plan.md (`lib/`, `prisma/`, `scripts/`, `tests/`
 
 **Purpose**: Local invoke, no HTTP, spec/quickstart gates.
 
-- [ ] T017 [P] Add `scripts/run-retention.ts` that only calls `runRetentionJob()` (no `authMode` literal) and add `"retention:run": "tsx scripts/run-retention.ts"` in `package.json`
-- [ ] T018 [P] Write failing unit test in `tests/unit/retention-no-http.test.ts` that `app/` contains no route/page importing `runRetentionJob`, then keep it green
-- [ ] T019 Confirm T002 item (6) still passes after US2–US4 (still exactly one `authMode: "retention"` under `lib/`+`app/`+`scripts/`) by running `pnpm test:rls` against `tests/rls/retention-policies.test.ts`
-- [ ] T020 Run [quickstart.md](./quickstart.md) commands: `pnpm test`, `pnpm test:rls`, `pnpm typecheck`, `pnpm lint` (do not require `pnpm test:a11y`)
+- [x] T017 [P] Add `scripts/run-retention.ts` that only calls `runRetentionJob()` (no `authMode` literal) and add `"retention:run": "tsx scripts/run-retention.ts"` in `package.json`
+- [x] T018 [P] Write failing unit test in `tests/unit/retention-no-http.test.ts` that `app/` contains no route/page importing `runRetentionJob`, then keep it green
+- [x] T019 Confirm T002 item (6) still passes after US2–US4 (still exactly one `authMode: "retention"` under `lib/`+`app/`+`scripts/`) by running `pnpm test:rls` against `tests/rls/retention-policies.test.ts`
+- [x] T020 Run [quickstart.md](./quickstart.md) commands: `pnpm test`, `pnpm test:rls`, `pnpm typecheck`, `pnpm lint` (do not require `pnpm test:a11y`)
 
 ---
 

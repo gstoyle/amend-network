@@ -44,6 +44,8 @@ function parseTokenFile(css: string): {
     /@media\s*\(\s*prefers-color-scheme:\s*dark\s*\)\s*\{\s*:root\s*\{([\s\S]*?)\}/,
   );
   const overrides: Record<string, string> = {};
+  // 012 FR-028 removed the dark block, so `dark` is now a copy of `light` and the
+  // pass below re-checks the light values. Do not read a green run as dark cover.
   if (darkBlock) {
     for (const line of darkBlock[1].split(";")) {
       const trimmed = line.trim();
@@ -147,13 +149,23 @@ describe("a11y lock (008 US3)", () => {
     expect(initials).toContain("min-h-touch");
     expect(initials).toContain("min-w-touch");
 
-    const member = read("app/(member)/layout.tsx");
-    expect(member).toContain("min-h-touch");
-    expect(member).toContain('href="/app"');
-    expect(member).toContain('href="/app/resources"');
-    expect(member).toContain('href="/app/events"');
-    expect(member).toContain('href="/app/directory"');
-    expect(member).toContain('href="/app/profile/privacy"');
+    // 011-app-shell moved member navigation out of the layout. Targets now
+    // live in the shell components and the link set in lib/nav/destinations.ts.
+    for (const relative of [
+      "components/shell/desktop-sidebar.tsx",
+      "components/shell/bottom-tab-bar.tsx",
+      "components/shell/mobile-top-bar.tsx",
+    ]) {
+      expect(read(relative), relative).toContain("min-h-touch");
+    }
+
+    const destinations = read("lib/nav/destinations.ts");
+    expect(destinations).toContain('href: "/app"');
+    expect(destinations).toContain('href: "/app/resources"');
+    expect(destinations).toContain('href: "/app/events"');
+    expect(destinations).toContain('href: "/app/directory"');
+    expect(destinations).toContain('href: "/app/guide"');
+    expect(destinations).toContain('href: "/app/profile/privacy"');
   });
 
   it("globals.css keeps prefers-reduced-motion rules", () => {

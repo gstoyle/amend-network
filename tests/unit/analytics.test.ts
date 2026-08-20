@@ -160,4 +160,37 @@ describe("analytics tracker (T047 / FR-021)", () => {
       track("directory_profile_viewed", { ...opaque, doc: "Test Agency A" } as never),
     ).toThrowError(/analytics payload/);
   });
+
+  it("accepts forum events with opaque ids and rejects title and body", () => {
+    const opaque = {
+      distinctId: "00000000-0000-4000-8000-000000000001",
+      programRole: "pathways",
+      adminRole: "none",
+    };
+    expect(() =>
+      track("forum_thread_viewed", {
+        ...opaque,
+        threadId: "00000000-0000-4000-8000-000000000002",
+      }),
+    ).not.toThrow();
+    expect(() =>
+      track("forum_post_created", {
+        ...opaque,
+        threadId: "00000000-0000-4000-8000-000000000002",
+        postId: "00000000-0000-4000-8000-000000000003",
+      }),
+    ).not.toThrow();
+    expect(() =>
+      track("forum_post_flagged", {
+        ...opaque,
+        postId: "00000000-0000-4000-8000-000000000003",
+      }),
+    ).not.toThrow();
+    expect(() =>
+      track("forum_thread_viewed", { ...opaque, title: "Welcome" } as never),
+    ).toThrowError(/analytics payload/);
+    expect(() =>
+      track("forum_post_created", { ...opaque, body: "Hello" } as never),
+    ).toThrowError(/analytics payload/);
+  });
 });

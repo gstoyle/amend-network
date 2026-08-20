@@ -5,6 +5,7 @@ import {
   DirectoryPrivacyForm,
   type DirectoryPrivacyFormState,
 } from "@/components/directory-privacy-form";
+import { PageHeader } from "@/components/page-header";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
@@ -60,8 +61,12 @@ export default async function DirectoryPrivacyPage() {
   const privacy = await loadDirectoryPrivacy(authorized);
 
   return (
-    <div className="flex flex-col gap-4 p-6">
-      <h1 className="text-2xl font-medium text-foreground">Directory privacy</h1>
+    <div className="flex flex-col gap-6 lg:gap-8">
+      <PageHeader
+        description="Choose whether you appear, and which optional fields other members can see. Hides apply to every viewer, including staff."
+        eyebrow="Account"
+        title="Directory privacy"
+      />
       <DirectoryPrivacyForm
         action={savePrivacyAction}
         canAppear={privacy.canAppear}

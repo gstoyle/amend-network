@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { controlClassName, Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { AUDIT_ACTIONS } from "@/lib/audit/actions";
 
 const SEVERITIES = ["info", "warning", "security"] as const;
@@ -27,8 +28,7 @@ export function AuditLogFilters({ values }: { values: AuditLogFilterValues }) {
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="audit-action">Action</Label>
-        <select
-          className={controlClassName}
+        <Select
           defaultValue={values.action ?? ""}
           id="audit-action"
           name="action"
@@ -39,7 +39,7 @@ export function AuditLogFilters({ values }: { values: AuditLogFilterValues }) {
               {action}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="audit-from">From</Label>
@@ -51,8 +51,7 @@ export function AuditLogFilters({ values }: { values: AuditLogFilterValues }) {
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="audit-severity">Severity</Label>
-        <select
-          className={controlClassName}
+        <Select
           defaultValue={values.severity ?? ""}
           id="audit-severity"
           name="severity"
@@ -63,7 +62,7 @@ export function AuditLogFilters({ values }: { values: AuditLogFilterValues }) {
               {severity}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       <Button type="submit" variant="outline">
         Apply

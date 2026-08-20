@@ -1,10 +1,23 @@
+import Link from "next/link";
+import { AuthSplit, authLinkClassName } from "@/components/auth-split";
 import { ForgotPasswordForm } from "@/components/forgot-password-form";
 
 export default function ForgotPasswordPage() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-6 p-6">
-      <h1 className="text-2xl font-medium text-foreground">Forgot password</h1>
+    <AuthSplit
+      description="Enter the email on your member account."
+      footer={
+        <p className="text-sm text-muted-foreground">
+          Remembered it?{" "}
+          <Link className={authLinkClassName} href="/login">
+            Sign in
+          </Link>
+        </p>
+      }
+      panelAction={{ href: "/login", label: "Sign in" }}
+      title="Forgot password"
+    >
       <ForgotPasswordForm />
-    </main>
+    </AuthSplit>
   );
 }

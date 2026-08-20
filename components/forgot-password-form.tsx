@@ -12,17 +12,17 @@ export function ForgotPasswordForm() {
   const [state, formAction, pending] = useActionState(requestResetAction, initialState);
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-2">
+    <form action={formAction} className="flex flex-col gap-5">
+      <div className="flex flex-col gap-1.5">
         <Label htmlFor="email">Email</Label>
         <Input autoComplete="username" id="email" name="email" required type="email" />
       </div>
       {state.success ? (
-        <p aria-live="polite" role="status">
+        <p aria-live="polite" className="text-sm text-foreground" role="status">
           If that email is eligible, you will receive instructions.
         </p>
       ) : null}
-      <Button disabled={pending} type="submit">
+      <Button className="w-full" disabled={pending} type="submit">
         Send reset link
       </Button>
     </form>

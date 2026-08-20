@@ -162,6 +162,60 @@ roster on purpose. **Unconfirmed by Amend.** Revisit if program leads
 want a different k or no floor. See
 `specs/009-admin-analytics/research.md` §6a.
 
+**Primary navigation composition (app-shell slice, 2026-08-18).** Two
+decisions, both because the PRD's own passages differ or outrun what
+this phase has built.
+
+*Forum is in primary navigation.* PRD Appendix §B.4 lists Forum
+(`/app/forum`) among primary destinations. Slice `013-community-forum`
+ships the route, so Forum sits between Events and Directory. Five
+primary destinations still fit the bottom bar without overflow.
+
+*The mobile bottom bar carries the built primary destinations, with no
+overflow menu.* PRD §7 says "bottom bar for the primary 4 actions
+(Home, Resources, Forum, Profile) with a hamburger for secondary
+items"; PRD Appendix §B.4 lists six entries (Home, Resources, Events,
+Forum, Directory, and a profile menu). Those two do not agree on the
+count. Guide (`/app/guide`) is appended after Directory so every
+approved member can open the in-app handbook from primary navigation.
+That is a sixth primary destination. Account actions stay in the
+account area. **Unconfirmed by Amend.** Revisit if the bottom bar
+overflows at 360px. See `specs/011-app-shell/spec.md` Assumptions.
+
+**Single light appearance, reversing the dark-mode decision (member page
+layouts slice, 2026-08-19).** Slice `008-design-tokens` took the design's
+opt-in dark appearance (a class the mockup only sets from a playground
+toggle) and mapped it onto `prefers-color-scheme: dark`, recording "no
+user-facing theme control" as an assumption. The consequence was that a
+member on a dark-set device received a dark portal with no way to leave
+it, which is what visual review surfaced. Amend chose a single light
+appearance over both alternatives offered — following the operating
+system with an override toggle, or defaulting light with a toggle. The
+dark token overrides are therefore removed rather than left inert, and
+no theme control ships. **Confirmed by Amend at review, 2026-08-19.**
+Revisit if shared-device use in low-light settings turns out to need a
+dark option; reinstating it is a token-file change plus a control, not a
+component change. See `specs/012-member-page-layouts/spec.md` US5 and
+`specs/008-design-tokens/research.md` §3 for the decision being reversed.
+
+**The public-writing column is reserved; forum activity is live (community
+forum slice, 2026-08-19).** The approved design's home page keeps a
+column for public blog writing and a block for recent forum activity.
+The blog is still PRD §5.8 and unimplemented, so that column stays a
+labelled reserved panel. Forum activity now has a data source and
+appears in the main column. **Confirmed by Amend at review for the
+reserved blog column, 2026-08-19; forum block added with
+`013-community-forum`.** See `specs/012-member-page-layouts/spec.md`
+FR-021 and `specs/013-community-forum/spec.md` FR-015.
+
+**Community guidelines are product rules, not a signed policy
+(community forum slice, 2026-08-19).** PRD Q5/Q16 (who signs the
+moderation policy) remains open. `/community-guidelines` publishes the
+rules the product enforces: role-gated rooms, allowlisted markdown, a
+15-minute edit window, rate limits, flagging, and staff hide / delete /
+lock / pin. Escalation for harm stays with programme staff. **Unconfirmed
+by Amend.** Revisit when Q5/Q16 is answered.
+
 ---
 
 ## Still fully open, not yet assumed or addressed
@@ -176,4 +230,5 @@ Q15 (budget ceiling).
 
 **Log maintained by:** solo developer, per constitution governance.
 
-**Last updated:** 2026-08-18
+**Last updated:** 2026-08-19 (in-app member guide added to primary
+navigation; Q5/Q16 still open)

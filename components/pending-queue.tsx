@@ -1,8 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { controlClassName, Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 
 export type PendingQueueItem = {
   id: string;
@@ -36,8 +37,7 @@ export function PendingQueue({
     <div className="flex flex-col gap-6">
       <form className="flex flex-col gap-2" method="get">
         <Label htmlFor="networkId">Filter by network</Label>
-        <select
-          className={controlClassName}
+        <Select
           defaultValue={selectedNetworkId ?? ""}
           id="networkId"
           name="networkId"
@@ -48,7 +48,7 @@ export function PendingQueue({
               {network.name}
             </option>
           ))}
-        </select>
+        </Select>
         <Button type="submit" variant="outline">
           Apply filter
         </Button>
@@ -67,8 +67,7 @@ export function PendingQueue({
             <form action={approveAction} className="flex flex-col gap-2">
               <input name="userId" type="hidden" value={item.id} />
               <Label htmlFor={`network-${item.id}`}>Assign network</Label>
-              <select
-                className={controlClassName}
+              <Select
                 defaultValue={item.networkId ?? ""}
                 id={`network-${item.id}`}
                 name="networkId"
@@ -78,7 +77,7 @@ export function PendingQueue({
                     {network.name}
                   </option>
                 ))}
-              </select>
+              </Select>
               <Button type="submit">Approve</Button>
             </form>
             <form action={denyAction} className="flex flex-col gap-2">

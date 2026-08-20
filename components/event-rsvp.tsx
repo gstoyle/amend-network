@@ -12,9 +12,11 @@ const CHOICES = [
 export function EventRsvp({
   eventId,
   currentStatus,
+  legendId,
 }: {
   eventId: string;
   currentStatus: StoredRsvpStatus | null;
+  legendId?: string;
 }) {
   return (
     <form
@@ -22,23 +24,27 @@ export function EventRsvp({
       className="flex flex-col gap-3"
       method="post"
     >
-      <fieldset className="flex flex-wrap gap-2">
-        <legend className="text-sm font-medium text-foreground">Your RSVP</legend>
-        {CHOICES.map((choice) => (
-          <Button
-            aria-pressed={currentStatus === choice.value}
-            key={choice.value}
-            name="status"
-            type="submit"
-            value={choice.value}
-            variant={currentStatus === choice.value ? "default" : "outline"}
-          >
-            {choice.label}
-          </Button>
-        ))}
+      <fieldset>
+        <legend className="mb-3 text-sm font-medium text-foreground" id={legendId}>
+          Your RSVP
+        </legend>
+        <div className="flex flex-wrap gap-2">
+          {CHOICES.map((choice) => (
+            <Button
+              aria-pressed={currentStatus === choice.value}
+              key={choice.value}
+              name="status"
+              type="submit"
+              value={choice.value}
+              variant={currentStatus === choice.value ? "default" : "outline"}
+            >
+              {choice.label}
+            </Button>
+          ))}
+        </div>
       </fieldset>
       {currentStatus === "waitlist" ? (
-        <p className="text-foreground">This event is full. You are on the waitlist.</p>
+        <p className="text-sm text-muted-foreground">This event is full. You are on the waitlist.</p>
       ) : null}
     </form>
   );

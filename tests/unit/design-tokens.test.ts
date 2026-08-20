@@ -241,6 +241,8 @@ function parseTokenFile(css: string): {
   const mediaIdx = stripped.search(/@media\s*\(\s*prefers-color-scheme\s*:\s*dark\s*\)/);
   const classIdx = stripped.search(/:root\.dark\s*\{/);
   let overrides: Record<string, string> = {};
+  // 012 FR-028 removed the dark block, so neither branch is taken and `dark` is a
+  // copy of `light`. Case (3) therefore re-checks light; it is not dark cover.
   if (mediaIdx >= 0) {
     const mediaBody = sliceBalanced(stripped, stripped.indexOf("{", mediaIdx));
     overrides = parseDeclarations(mediaBody);

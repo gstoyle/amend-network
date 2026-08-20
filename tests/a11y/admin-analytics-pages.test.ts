@@ -90,7 +90,7 @@ describe("axe-core on admin analytics pages (T028 / SC-010)", () => {
       </main>`,
     );
     const funnelSource = read("components/admin-funnel.tsx");
-    expect(funnelSource).toContain("controlClassName");
+    expect(funnelSource).toContain("Select");
     expect(funnelSource).toContain("Button");
   });
 
@@ -160,7 +160,7 @@ describe("axe-core on admin analytics pages (T028 / SC-010)", () => {
     expect(page).toContain("whitespace-nowrap");
     expect(page).toContain("min-h-touch");
     expect(page).toContain('aria-label="Audit log table"');
-    expect(read("components/audit-log-filters.tsx")).toContain("controlClassName");
+    expect(read("components/audit-log-filters.tsx")).toContain("Select");
     expect(read("components/audit-log-export.tsx")).toContain("Button");
   });
 });

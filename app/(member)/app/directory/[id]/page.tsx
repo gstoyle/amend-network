@@ -3,10 +3,14 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { MemberInitials } from "@/components/member-initials";
+import { PageHeader } from "@/components/page-header";
+import { buttonVariants } from "@/components/ui/button";
+import { cardClassName } from "@/components/ui/card";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, isPendingSession, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
 import { getDirectoryProfile } from "@/lib/directory/profile";
+import { cn } from "@/lib/utils";
 
 export default async function DirectoryProfilePage({
   params,
@@ -47,19 +51,41 @@ export default async function DirectoryProfilePage({
     notFound();
   }
 
+  const details = [
+    { label: "Network", value: member.networkLabel },
+    { label: "Title", value: member.title },
+    { label: "DOC affiliation", value: member.docLabel },
+    { label: "Email", value: member.email },
+  ].filter((row): row is { label: string; value: string } => Boolean(row.value));
+
   return (
-    <div className="flex flex-col gap-4 p-6 text-foreground">
+    <div className="flex flex-col gap-6 lg:gap-8">
       <p>
-        <Link className="inline-flex min-h-touch items-center underline" href="/app/directory">
+        <Link
+          className={cn(buttonVariants({ variant: "ghost" }), "px-0")}
+          href="/app/directory"
+        >
           Back to directory
         </Link>
       </p>
-      <MemberInitials initials={member.initials} />
-      <h1 className="text-2xl font-medium">{member.displayName}</h1>
-      <p>{member.networkLabel}</p>
-      {member.title ? <p>{member.title}</p> : null}
-      {member.docLabel ? <p>{member.docLabel}</p> : null}
-      {member.email ? <p>{member.email}</p> : null}
+      <div className="flex items-start gap-4">
+        <MemberInitials initials={member.initials} size="lg" />
+        <PageHeader
+          description={member.networkLabel}
+          eyebrow="Directory"
+          title={member.displayName}
+        />
+      </div>
+      {details.length > 0 ? (
+        <dl className={cn(cardClassName, "divide-y divide-border overflow-hidden")}>
+          {details.map((row) => (
+            <div className="px-4 py-3.5" key={row.label}>
+              <dt className="eyebrow text-muted-foreground">{row.label}</dt>
+              <dd className="mt-1 text-sm text-foreground">{row.value}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
     </div>
   );
 }

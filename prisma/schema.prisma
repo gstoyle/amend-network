@@ -358,3 +358,92 @@ model VisibilityRecord {
   @@index([visibility], type: Gin)
   @@map("visibility_records")
 }
+
+model ForumCategory {
+  id          String        @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String        @unique
+  description String
+  visibility  String[]
+  sortOrder   Int           @map("sort_order")
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  createdBy   String?       @map("created_by") @db.Uuid
+  threads     ForumThread[]
+
+  @@index([visibility], type: Gin)
+  @@map("forum_categories")
+}
+
+model ForumThread {
+  id           String              @id @default(uuid()) @db.Uuid
+  categoryId   String              @map("category_id") @db.Uuid
+  authorId     String              @map("author_id") @db.Uuid
+  authorLabel  String              @map("author_label")
+  title        String
+  pinned       Boolean             @default(false)
+  locked       Boolean             @default(false)
+  lastPostedAt DateTime            @map("last_posted_at") @db.Timestamptz(6)
+  createdAt    DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  hiddenAt     DateTime?           @map("hidden_at") @db.Timestamptz(6)
+  deletedAt    DateTime?           @map("deleted_at") @db.Timestamptz(6)
+  category     ForumCategory       @relation(fields: [categoryId], references: [id])
+  posts        ForumPost[]
+  subscriptions ForumSubscription[]
+
+  @@index([categoryId, lastPostedAt])
+  @@map("forum_threads")
+}
+
+model ForumPost {
+  id          String      @id @default(uuid()) @db.Uuid
+  threadId    String      @map("thread_id") @db.Uuid
+  authorId    String      @map("author_id") @db.Uuid
+  authorLabel String      @map("author_label")
+  body        String
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  editedAt    DateTime?   @map("edited_at") @db.Timestamptz(6)
+  hiddenAt    DateTime?   @map("hidden_at") @db.Timestamptz(6)
+  deletedAt   DateTime?   @map("deleted_at") @db.Timestamptz(6)
+  thread      ForumThread @relation(fields: [threadId], references: [id])
+  flags       ForumFlag[]
+
+  @@index([threadId, createdAt])
+  @@map("forum_posts")
+}
+
+model ForumFlag {
+  id         String    @id @default(uuid()) @db.Uuid
+  postId     String    @map("post_id") @db.Uuid
+  reporterId String    @map("reporter_id") @db.Uuid
+  reason     String
+  status     String
+  resolverId String?   @map("resolver_id") @db.Uuid
+  resolvedAt DateTime? @map("resolved_at") @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  post       ForumPost @relation(fields: [postId], references: [id])
+
+  @@index([status, createdAt])
+  @@map("forum_flags")
+}
+
+model ForumSubscription {
+  userId    String      @map("user_id") @db.Uuid
+  threadId  String      @map("thread_id") @db.Uuid
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  thread    ForumThread @relation(fields: [threadId], references: [id])
+
+  @@id([userId, threadId])
+  @@map("forum_subscriptions")
+}
+
+model ForumPostThrottle {
+  userId                 String   @id @map("user_id") @db.Uuid
+  windowStartedAt        DateTime @map("window_started_at") @db.Timestamptz(6)
+  postCount              Int      @map("post_count")
+  threadWindowStartedAt  DateTime @map("thread_window_started_at") @db.Timestamptz(6)
+  threadCount            Int      @map("thread_count")
+  hourWindowStartedAt    DateTime @map("hour_window_started_at") @db.Timestamptz(6)
+  hourCount              Int      @map("hour_count")
+
+  @@map("forum_post_throttle")
+}

@@ -15,6 +15,8 @@ import { grantDownload } from "@/lib/resources/download";
 import { listResources } from "@/lib/resources/list";
 import { mintIngestSlots } from "@/lib/resources/publish";
 import { loadAdminAnalytics } from "@/lib/admin-analytics/load";
+import { listForumCategories } from "@/lib/forum/list";
+import { FORUM_STAFF_ROLES } from "@/lib/forum/staff";
 import {
   CAPABILITIES,
   EXPECTED_VISIBLE_TITLES,
@@ -44,10 +46,10 @@ function isBuilt(_capability: Capability): boolean {
     case "appear_in_directory":
     case "view_directory":
     case "view_analytics":
-      return true;
     case "view_forum":
     case "post_forum":
     case "moderate_forum":
+      return true;
     case "assign_change_roles":
     case "change_system_configuration":
       return false;
@@ -198,9 +200,33 @@ async function appAllows(role: MatrixRole, capability: Capability): Promise<bool
         return false;
       }
     }
-    case "view_forum":
-    case "post_forum":
-    case "moderate_forum":
+    case "view_forum": {
+      try {
+        await listForumCategories(session);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+    case "post_forum": {
+      try {
+        requireRole(session);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+    case "moderate_forum": {
+      try {
+        requireRole(session ? { ...session, mfaSatisfied: true } : null, {
+          admin: [...FORUM_STAFF_ROLES],
+          mfa: true,
+        });
+        return true;
+      } catch {
+        return false;
+      }
+    }
     case "assign_change_roles":
     case "change_system_configuration":
       return false;

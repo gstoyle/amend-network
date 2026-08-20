@@ -59,6 +59,12 @@ export default async function AdminPage() {
         <Link className="inline-flex min-h-touch items-center text-foreground underline" href="/admin/events">
           Events
         </Link>
+        <Link className="inline-flex min-h-touch items-center text-foreground underline" href="/admin/forum">
+          Forum
+        </Link>
+        <Link className="inline-flex min-h-touch items-center text-foreground underline" href="/admin/forum/flags">
+          Forum flags
+        </Link>
       </nav>
     </div>
   );

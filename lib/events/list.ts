@@ -2,7 +2,10 @@ import { track } from "@/lib/analytics/track";
 import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
 import { withRls } from "@/lib/db/rls";
-import { visibilityTokens } from "@/lib/db/visibility";
+import { type AudienceMarker, audienceLabel, visibilityTokens } from "@/lib/db/visibility";
+import type { StoredRsvpStatus } from "@/lib/events/rsvp";
+
+const STORED_RSVP_STATUSES: readonly StoredRsvpStatus[] = ["yes", "no", "maybe", "waitlist"];
 
 const MEMBER_EVENT_SELECT = {
   id: true,
@@ -14,6 +17,7 @@ const MEMBER_EVENT_SELECT = {
   location: true,
   isVirtual: true,
   capacity: true,
+  visibility: true,
 } as const;
 
 export type MemberEvent = {
@@ -26,7 +30,18 @@ export type MemberEvent = {
   location: string | null;
   isVirtual: boolean;
   capacity: number | null;
+  audience: AudienceMarker;
+  /** The caller's own RSVP only. RLS on event_rsvps permits no other row. */
+  viewerRsvpStatus: StoredRsvpStatus | null;
+  /** Confirmed attendees, via the visibility-gated event_yes_count function. */
+  confirmedCount: number;
 };
+
+function asStoredStatus(value: string | undefined): StoredRsvpStatus | null {
+  return value && (STORED_RSVP_STATUSES as readonly string[]).includes(value)
+    ? (value as StoredRsvpStatus)
+    : null;
+}
 
 export type CalendarView = "month" | "list";
 
@@ -50,17 +65,22 @@ export function parseCalendarQuery(input: {
   };
 }
 
-function toMemberEvent(row: {
-  id: string;
-  title: string;
-  description: string;
-  startsAt: Date;
-  endsAt: Date;
-  timezoneHint: string | null;
-  location: string | null;
-  isVirtual: boolean;
-  capacity: number | null;
-}): MemberEvent {
+function toMemberEvent(
+  row: {
+    id: string;
+    title: string;
+    description: string;
+    startsAt: Date;
+    endsAt: Date;
+    timezoneHint: string | null;
+    location: string | null;
+    isVirtual: boolean;
+    capacity: number | null;
+    visibility: string[];
+    rsvps: { status: string }[];
+  },
+  confirmedCount: number,
+): MemberEvent {
   return {
     id: row.id,
     title: row.title,
@@ -71,6 +91,9 @@ function toMemberEvent(row: {
     location: row.location,
     isVirtual: row.isVirtual,
     capacity: row.capacity,
+    audience: audienceLabel(row.visibility),
+    viewerRsvpStatus: asStoredStatus(row.rsvps[0]?.status),
+    confirmedCount,
   };
 }
 
@@ -83,15 +106,15 @@ async function loadVisibleEvents(
     return [];
   }
   const now = new Date();
-  const rows = await withRls(
+  return withRls(
     {
       userId: claims.userId,
       programRole: claims.programRole,
       adminRole: claims.adminRole,
       status: claims.status,
     },
-    (tx) =>
-      tx.event.findMany({
+    async (tx) => {
+      const rows = await tx.event.findMany({
         where: {
           cancelledAt: null,
           visibility: { hasSome: tokens },
@@ -99,10 +122,25 @@ async function loadVisibleEvents(
           ...(extra.upcoming ? { startsAt: { gte: now } } : {}),
         },
         orderBy: [{ startsAt: "asc" }, { id: "asc" }],
-        select: MEMBER_EVENT_SELECT,
-      }),
+        select: {
+          ...MEMBER_EVENT_SELECT,
+          rsvps: { where: { userId: claims.userId }, select: { status: true } },
+        },
+      });
+      if (rows.length === 0) {
+        return [];
+      }
+      // event_yes_count is SECURITY DEFINER and gated on event_visible_core, so a
+      // member gets the tally without event_rsvps ever yielding another member's row.
+      const counts = await tx.$queryRaw<{ id: string; n: number }[]>`
+        SELECT e.id::text AS id, event_yes_count(e.id) AS n
+        FROM events e
+        WHERE e.id = ANY(${rows.map((row) => row.id)}::uuid[])
+      `;
+      const countById = new Map(counts.map((row) => [row.id, Number(row.n)]));
+      return rows.map((row) => toMemberEvent(row, countById.get(row.id) ?? 0));
+    },
   );
-  return rows.map(toMemberEvent);
 }
 
 export async function listVisibleEvents(

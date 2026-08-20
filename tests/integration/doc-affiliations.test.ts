@@ -132,7 +132,7 @@ describe("DOC affiliation list (US1 / FR-013)", () => {
       path.join(process.cwd(), "components/register-form.tsx"),
       "utf8",
     );
-    expect(formSource).toContain("<select");
+    expect(formSource).toContain("<Select");
     expect(formSource).toContain('name="docAffiliation"');
     expect(formSource).not.toMatch(/name=["']docAffiliation["'][^>]*type=["']text["']/i);
     expect(formSource).not.toMatch(/<Input[^>]*name=["']docAffiliation["']/i);

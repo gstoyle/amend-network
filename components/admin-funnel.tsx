@@ -1,7 +1,7 @@
-import { controlClassName } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { cardClassName } from "@/components/ui/card";
+import { Select } from "@/components/ui/select";
 import type { AdminAnalyticsFunnel } from "@/lib/admin-analytics/types";
 import { cn } from "@/lib/utils";
 
@@ -26,8 +26,7 @@ export function AdminFunnel({
     <section aria-label="Join to return funnel" className="flex flex-col gap-4">
       <form action="/admin/analytics" className="flex max-w-xl flex-col gap-3" method="get">
         <Label htmlFor="analytics-network">Network</Label>
-        <select
-          className={controlClassName}
+        <Select
           defaultValue={known ? selected : "all"}
           id="analytics-network"
           name="network"
@@ -38,7 +37,7 @@ export function AdminFunnel({
               {network.name}
             </option>
           ))}
-        </select>
+        </Select>
         <Button type="submit">Apply</Button>
       </form>
       {known ? null : (

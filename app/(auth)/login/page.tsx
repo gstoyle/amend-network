@@ -1,16 +1,23 @@
 import Link from "next/link";
+import { AuthSplit, authLinkClassName } from "@/components/auth-split";
 import { LoginForm } from "@/components/login-form";
 
 export default function LoginPage() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-6 p-6">
-      <h1 className="text-2xl font-medium text-foreground">Sign in</h1>
+    <AuthSplit
+      description="Member network"
+      footer={
+        <p className="text-sm text-muted-foreground">
+          Need an account?{" "}
+          <Link className={authLinkClassName} href="/register">
+            Request access
+          </Link>
+        </p>
+      }
+      panelAction={{ href: "/register", label: "Request access" }}
+      title="Sign in to Amend"
+    >
       <LoginForm />
-      <p className="text-sm text-muted-foreground">
-        <Link className="underline" href="/forgot-password">
-          Forgot password
-        </Link>
-      </p>
-    </main>
+    </AuthSplit>
   );
 }

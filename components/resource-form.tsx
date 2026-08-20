@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { controlClassName, Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 
 export type ResourceListItem = {
   id: string;
@@ -148,8 +149,7 @@ export function ResourceForm({
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="sourceLabel">Source</Label>
-        <select
-          className={controlClassName}
+        <Select
           defaultValue={initial?.sourceLabel ?? "Amend"}
           id="sourceLabel"
           name="sourceLabel"
@@ -158,7 +158,7 @@ export function ResourceForm({
           <option value="Amend">Amend</option>
           <option value="Partner Org">Partner Org</option>
           <option value="External">External</option>
-        </select>
+        </Select>
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="tags">Tags (comma-separated, up to 10)</Label>

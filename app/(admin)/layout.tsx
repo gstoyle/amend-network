@@ -1,10 +1,24 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { LogoutButton } from "@/components/logout-button";
+import { AppShell } from "@/components/app-shell";
 import { adminMfaDestination } from "@/lib/auth/admin-mfa";
+import { AuthDeniedError } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
+import {
+  accountDestinations,
+  adminDestinations,
+  memberDestinations,
+} from "@/lib/nav/destinations";
+import { loadShellIdentity, type ShellIdentity } from "@/lib/profile/identity";
+
+const ANONYMOUS_IDENTITY: ShellIdentity = {
+  displayName: "Member",
+  initials: "—",
+  programRoleLabel: "",
+  firstName: null,
+};
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const session = await auth();
@@ -13,35 +27,28 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   if (destination) {
     redirect(destination);
   }
+  const pathname = (await headers()).get("x-pathname") ?? "";
+
+  let identity = ANONYMOUS_IDENTITY;
+  if (claims) {
+    try {
+      identity = await loadShellIdentity(claims);
+    } catch (error) {
+      if (!(error instanceof AuthDeniedError)) {
+        throw error;
+      }
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-sidebar px-gutter py-4">
-        <nav aria-label="Admin" className="flex flex-wrap gap-4">
-          <Link
-            className="inline-flex min-h-touch items-center text-foreground underline"
-            href="/admin"
-          >
-            Home
-          </Link>
-          <Link
-            className="inline-flex min-h-touch items-center text-foreground underline"
-            href="/admin/analytics"
-          >
-            Analytics
-          </Link>
-          <Link
-            className="inline-flex min-h-touch items-center text-foreground underline"
-            href="/admin/audit-log"
-          >
-            Audit log
-          </Link>
-        </nav>
-        <nav aria-label="Account">
-          <LogoutButton />
-        </nav>
-      </header>
-      <main className="px-gutter py-6">{children}</main>
-    </div>
+    <AppShell
+      account={accountDestinations(claims)}
+      admin={adminDestinations(claims)}
+      identity={identity}
+      pathname={pathname}
+      primary={memberDestinations(claims)}
+    >
+      {children}
+    </AppShell>
   );
 }

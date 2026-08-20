@@ -24,11 +24,13 @@ const config: Config = {
           foreground: "var(--primary-foreground)",
           hover: "var(--primary-hover)",
           subtle: "var(--primary-subtle)",
+          "subtle-foreground": "var(--primary-subtle-foreground)",
         },
         support: {
           DEFAULT: "var(--support)",
           foreground: "var(--support-foreground)",
           subtle: "var(--support-subtle)",
+          "subtle-foreground": "var(--support-subtle-foreground)",
         },
         secondary: {
           DEFAULT: "var(--secondary)",
@@ -68,7 +70,9 @@ const config: Config = {
           DEFAULT: "var(--sidebar)",
           foreground: "var(--sidebar-foreground)",
           primary: "var(--sidebar-primary)",
+          "primary-foreground": "var(--sidebar-primary-foreground)",
           accent: "var(--sidebar-accent)",
+          "accent-foreground": "var(--sidebar-accent-foreground)",
           border: "var(--sidebar-border)",
           ring: "var(--sidebar-ring)",
         },
@@ -129,6 +133,9 @@ const config: Config = {
       },
       maxWidth: {
         content: "var(--content-max)",
+      },
+      maxHeight: {
+        popover: "var(--popover-max-h)",
       },
       borderRadius: {
         xs: "var(--radius-xs)",

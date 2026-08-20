@@ -1,6 +1,9 @@
 /* Theme token manifest — "Quiet Institution". Swap this file to re-theme. */
 
 :root {
+  /* Single light appearance (012 FR-028). Declared so native controls,
+     select popups, and scrollbars stay light on a dark-set OS. */
+  color-scheme: light;
   /* ---------- Layer 1: primitives ---------- */
   --stone-50: #faf8f5;
   --stone-100: #f4f1eb;
@@ -127,6 +130,7 @@
   --gutter: var(--space-4);
   --gutter-lg: var(--space-8);
   --content-max: 78rem;
+  --popover-max-h: 16rem;
   /* ---------- Layer 2: semantic — radius ---------- */
   --radius-xs: 0.125rem;
   --radius-sm: 0.25rem;
@@ -149,44 +153,4 @@
   --duration-fast: 120ms;
   --duration-base: 180ms;
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: var(--stone-900);
-    --foreground: var(--stone-50);
-    --card: #26231f;
-    --card-foreground: var(--stone-50);
-    --popover: #26231f;
-    --popover-foreground: var(--stone-50);
-    --primary: var(--evergreen-300);
-    --primary-hover: #a6c4b7;
-    --primary-foreground: var(--stone-900);
-    --primary-subtle: #22322c;
-    --primary-subtle-foreground: var(--evergreen-300);
-    --support: #e0b090;
-    --support-foreground: var(--stone-900);
-    --support-subtle: #33261d;
-    --support-subtle-foreground: #e0b090;
-    --secondary: var(--stone-800);
-    --secondary-foreground: var(--stone-50);
-    --muted: var(--stone-800);
-    --muted-foreground: var(--stone-400);
-    --accent: var(--stone-800);
-    --accent-foreground: var(--stone-50);
-    --border: #3a352f;
-    --border-strong: var(--stone-500);
-    --input: var(--stone-600);
-    --ring: var(--evergreen-300);
-    --sidebar: #26231f;
-    --sidebar-foreground: var(--stone-50);
-    --sidebar-primary: var(--evergreen-300);
-    --sidebar-primary-foreground: var(--stone-900);
-    --sidebar-accent: var(--stone-800);
-    --sidebar-accent-foreground: var(--stone-50);
-    --sidebar-border: #3a352f;
-    --success-subtle: #1e2b25;
-    --warning-subtle: #2e2618;
-    --info-subtle: #1c262e;
-  }
 }

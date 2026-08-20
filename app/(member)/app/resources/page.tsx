@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { PageHeader } from "@/components/page-header";
 import { ResourceFilters } from "@/components/resource-filters";
 import { ResourceList } from "@/components/resource-list";
 import { AuthDeniedError, isPendingSession, requireRole } from "@/lib/auth/requireRole";
@@ -39,17 +40,34 @@ export default async function MemberResourcesPage({
   }
 
   const tags = [...new Set(catalog.flatMap((row) => row.tags))].sort();
+  const filtersActive =
+    Boolean(query.q) || Boolean(query.source) || (query.tags?.length ?? 0) > 0;
 
   return (
-    <div className="flex flex-col gap-4 p-6">
-      <h1 className="text-2xl font-medium text-foreground">Resources</h1>
-      <p>
-        <Link className="text-foreground underline" href="/app">
-          Home
-        </Link>
-      </p>
+    <div className="flex flex-col gap-6 lg:gap-8">
+      <PageHeader
+        description="Curriculum, practice tools, and templates. Each item shows who it is available to."
+        eyebrow="Library"
+        title="Resources"
+      />
+
       <ResourceFilters query={query} tags={tags} />
-      <ResourceList resources={resources} />
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p aria-live="polite" className="text-sm text-muted-foreground">
+          {resources.length} of {catalog.length} resources
+        </p>
+        {filtersActive ? (
+          <Link
+            className="inline-flex min-h-touch items-center rounded-sm px-2 text-sm font-medium text-foreground underline decoration-border-strong underline-offset-4"
+            href="/app/resources"
+          >
+            Clear filters
+          </Link>
+        ) : null}
+      </div>
+
+      <ResourceList filtersActive={filtersActive} resources={resources} />
     </div>
   );
 }

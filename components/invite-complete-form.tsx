@@ -2,8 +2,9 @@
 
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
-import { controlClassName, Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 
 export type InviteCompleteFormState = {
   message?: string;
@@ -72,8 +73,7 @@ export function InviteCompleteForm({
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="docAffiliation">DOC affiliation</Label>
-        <select
-          className={controlClassName}
+        <Select
           defaultValue={docAffiliationId ?? ""}
           id="docAffiliation"
           name="docAffiliation"
@@ -85,7 +85,7 @@ export function InviteCompleteForm({
               {row.label}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="password">Password</Label>

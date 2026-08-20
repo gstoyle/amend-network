@@ -35,6 +35,16 @@ describe("shared chrome (008 US1)", () => {
     expect(source).not.toMatch(forbiddenLiteral);
   });
 
+  it("select listbox uses the same field tokens as the trigger", () => {
+    const source = read("components/ui/select.tsx");
+    expect(source).toContain("controlClassName");
+    expect(source).toContain('role="listbox"');
+    expect(source).toContain("border-input");
+    expect(source).toContain("bg-background");
+    expect(source).toContain("bg-muted");
+    expect(source).not.toMatch(forbiddenLiteral);
+  });
+
   it("label uses token type and color", () => {
     const source = read("components/ui/label.tsx");
     expect(source).toContain("text-sm");
@@ -61,44 +71,62 @@ describe("shared chrome (008 US1)", () => {
     expect(source).toContain("<article");
     expect(source).toContain("<Link");
     expect(source).toContain("<img");
-    expect(source).toContain("<h2");
+    // 012 put the card under a section heading, so the title dropped to h3.
+    expect(source).toContain("<h3");
     expect(source).toContain("href={`/app/resources/${resource.id}`}");
   });
 
-  it("announcement banners apply card tokens on the existing article", () => {
+  // 012 made the announcement an emphasis surface rather than a neutral card, so
+  // it carries the support tokens instead of cardClassName.
+  it("announcement banners apply emphasis tokens on the existing article", () => {
     const source = read("components/announcement-banners.tsx");
-    expect(source).toContain("cardClassName");
-    expect(source).toContain("@/components/ui/card");
+    expect(source).toContain("border-support");
+    expect(source).toContain("bg-support-subtle");
     expect(source).toContain("<article");
     expect(source).toContain("Button");
     expect(source).toContain("cta/primary");
   });
 
-  it("member layout uses token chrome and keeps the same nav links", () => {
+  // 011-app-shell moved the member and admin chrome into AppShell. The link
+  // hrefs these two cases used to pin now live in lib/nav/destinations.ts,
+  // which is their single source; the token assertions moved with them.
+  it("member layout delegates chrome to the shell", () => {
     const source = read("app/(member)/layout.tsx");
-    expect(source).toContain("bg-background");
-    expect(source).toContain("bg-sidebar");
-    expect(source).toContain("border-border");
-    expect(source).toContain("px-gutter");
-    expect(source).toContain('href="/app"');
-    expect(source).toContain('href="/app/resources"');
-    expect(source).toContain('href="/app/events"');
-    expect(source).toContain('href="/app/directory"');
-    expect(source).toContain('href="/app/profile/privacy"');
-    expect(source).toContain("min-h-touch");
-    expect(source).not.toMatch(/PortalShell|BottomTabBar|DesktopSidebar/);
+    expect(source).toContain("AppShell");
+    expect(source).toContain("memberDestinations");
     expect(source).not.toMatch(forbiddenLiteral);
   });
 
-  it("admin layout uses the same token chrome set", () => {
+  it("admin layout delegates chrome to the same shell", () => {
     const source = read("app/(admin)/layout.tsx");
-    expect(source).toContain("bg-background");
-    expect(source).toContain("bg-sidebar");
-    expect(source).toContain("border-border");
-    expect(source).toContain("px-gutter");
-    expect(source).toContain('aria-label="Account"');
-    expect(source).toContain("LogoutButton");
-    expect(source).not.toMatch(/PortalShell|BottomTabBar|DesktopSidebar/);
+    expect(source).toContain("AppShell");
+    expect(source).toContain("adminDestinations");
     expect(source).not.toMatch(forbiddenLiteral);
+  });
+
+  it("the shell keeps the token chrome the member header used to carry", () => {
+    const shell = read("components/app-shell.tsx");
+    const sidebar = read("components/shell/desktop-sidebar.tsx");
+    expect(shell).toContain("bg-background");
+    expect(shell).toContain("px-gutter");
+    expect(sidebar).toContain("bg-sidebar");
+    expect(sidebar).toContain("border-sidebar-border");
+    expect(sidebar).toContain("min-h-touch");
+    expect(sidebar).toContain("LogoutButton");
+    expect(sidebar).toContain('aria-label="Account"');
+  });
+
+  it("the destination module owns the member link set", () => {
+    const source = read("lib/nav/destinations.ts");
+    for (const href of [
+      '"/app"',
+      '"/app/resources"',
+      '"/app/events"',
+      '"/app/directory"',
+      '"/app/guide"',
+      '"/app/profile/privacy"',
+    ]) {
+      expect(source, href).toContain(href);
+    }
   });
 });

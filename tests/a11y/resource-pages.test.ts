@@ -25,6 +25,7 @@ describe("axe-core on resource library pages (T044)", () => {
       </header>
       <main>
         <h1>Resources</h1>
+        <h2>Filter resources</h2>
         <form method="get">
           <label for="resource-q">Search</label>
           <input id="resource-q" name="q" type="search" />
@@ -48,11 +49,15 @@ describe("axe-core on resource library pages (T044)", () => {
         <ul>
           <li>
             <article>
-              <a href="/app/resources/example">
-                <img alt="" src="/app/resources/example/thumbnail" />
-                <h2>Example resource</h2>
-                <p>Preview text</p>
-              </a>
+              <img alt="" src="/app/resources/example/thumbnail" />
+              <span aria-hidden="true">PDF</span>
+              <p>National office</p>
+              <h3><a href="/app/resources/example">Example resource</a></h3>
+              <p>Preview text</p>
+              <ul aria-label="Tags"><li><span>guide</span></li></ul>
+              <p>Updated 6 August 2026</p>
+              <p>PDF · 4.2 MB <span>All members</span></p>
+              <a href="/app/resources/example">Download<span> Example resource</span></a>
             </article>
           </li>
         </ul>

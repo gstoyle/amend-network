@@ -24,11 +24,13 @@ const duplicatedControl =
   /border-input[\s\S]{0,80}bg-background|bg-background[\s\S]{0,80}border-input/;
 
 describe("control class reuse (008 US2)", () => {
-  it.each(FORMS)("%s imports controlClassName and does not duplicate field chrome", (relative) => {
+  it.each(FORMS)("%s uses shared control chrome and does not duplicate it", (relative) => {
     const source = read(relative);
-    expect(source).toMatch(
-      /import\s*\{[^}]*\bcontrolClassName\b[^}]*\}\s*from\s*"@\/components\/ui\/input"/,
-    );
+    expect(
+      /import\s*\{[^}]*\bcontrolClassName\b[^}]*\}\s*from\s*"@\/components\/ui\/input"/.test(
+        source,
+      ) || source.includes('from "@/components/ui/select"'),
+    ).toBe(true);
     expect(source).not.toMatch(duplicatedControl);
   });
 });

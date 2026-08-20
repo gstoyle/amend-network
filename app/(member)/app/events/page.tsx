@@ -1,7 +1,8 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { EventCalendar } from "@/components/event-calendar";
+import { EventRow } from "@/components/event-row";
+import { PageHeader } from "@/components/page-header";
 import { AuthDeniedError, isPendingSession, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
 import { listVisibleEvents, parseCalendarQuery } from "@/lib/events/list";
@@ -32,23 +33,37 @@ export default async function MemberEventsPage({
     throw error;
   }
 
+  const rows = events.map((event) => ({
+    ...event,
+    startsAt: event.startsAt.toISOString(),
+    endsAt: event.endsAt.toISOString(),
+  }));
+
   return (
-    <div className="flex flex-col gap-4 p-6">
-      <h1 className="text-2xl font-medium text-foreground">Events</h1>
-      <p>
-        <Link className="text-foreground underline" href="/app">
-          Home
-        </Link>
-      </p>
+    <div className="flex flex-col gap-6 lg:gap-8">
+      <PageHeader
+        description="Sessions, clinics, and regional gatherings open to your membership."
+        eyebrow="Training calendar"
+        title="Events"
+      />
       <EventCalendar
-        events={events.map((event) => ({
+        events={rows.map((event) => ({
           id: event.id,
           title: event.title,
-          startsAt: event.startsAt.toISOString(),
-          endsAt: event.endsAt.toISOString(),
+          startsAt: event.startsAt,
+          endsAt: event.endsAt,
           location: event.location,
           isVirtual: event.isVirtual,
         }))}
+        listSlot={
+          <ul className="flex flex-col gap-3">
+            {rows.map((event) => (
+              <li key={event.id}>
+                <EventRow event={event} />
+              </li>
+            ))}
+          </ul>
+        }
         month={month}
         view={query.view}
       />

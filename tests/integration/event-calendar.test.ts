@@ -122,6 +122,48 @@ describe("member event calendar (US2)", () => {
     expect(JSON.stringify(visibleVirtual)).not.toContain("meet.example.test");
   });
 
+  it("list rows carry only the caller's own RSVP and a yes-only confirmed count", async () => {
+    const eventId = await insertEvent({
+      title: `${MARKER}-rsvp-fields`,
+      visibility: ["all_authenticated"],
+    });
+    const registered = memberSession("pathways");
+    const waitlisted = memberSession("pathways");
+    const bystander = memberSession("pathways");
+
+    await migrator.eventRsvp.createMany({
+      data: [
+        { userId: registered.userId, eventId, status: "yes" },
+        { userId: randomUUID(), eventId, status: "yes" },
+        { userId: waitlisted.userId, eventId, status: "waitlist" },
+        { userId: randomUUID(), eventId, status: "no" },
+      ],
+    });
+
+    const rowFor = async (session: ReturnType<typeof memberSession>) => {
+      const rows = await listVisibleEvents(session);
+      const row = rows.find((candidate) => candidate.id === eventId);
+      expect(row, "the event must stay visible to a Pathways member").toBeDefined();
+      return row!;
+    };
+
+    expect((await rowFor(registered)).viewerRsvpStatus).toBe("yes");
+    expect((await rowFor(waitlisted)).viewerRsvpStatus).toBe("waitlist");
+    expect((await rowFor(bystander)).viewerRsvpStatus).toBeNull();
+
+    // Two yes rows; the waitlist and no rows must not be counted.
+    for (const session of [registered, waitlisted, bystander]) {
+      expect((await rowFor(session)).confirmedCount).toBe(2);
+    }
+
+    // The new fields must not change which events a role receives.
+    const leadTitles = (await listVisibleEvents(memberSession("lead"))).map((row) => row.title);
+    expect(leadTitles).toContain(`${MARKER}-rsvp-fields`);
+    await expect(listVisibleEvents(claimsFor("pending"))).rejects.toThrowError(
+      AUTH_FAILURE_MESSAGE,
+    );
+  });
+
   it("month and list use the same visible uncancelled set; unsigned requests are denied at layer 1", async () => {
     await insertEvent({
       title: `${MARKER}-both-views`,

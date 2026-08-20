@@ -31,10 +31,10 @@ function isBuilt(capability: Capability): boolean {
     case "appear_in_directory":
     case "view_directory":
     case "view_analytics":
-      return true;
     case "view_forum":
     case "post_forum":
     case "moderate_forum":
+      return true;
     case "assign_change_roles":
     case "change_system_configuration":
       return false;
@@ -417,6 +417,104 @@ async function rlsCanViewAnalytics(role: MatrixRole): Promise<boolean> {
   return "kpis" in parsed;
 }
 
+function rlsCtx(role: MatrixRole) {
+  const session = claimsFor(role);
+  return session
+    ? {
+        userId: session.userId,
+        programRole: session.programRole,
+        adminRole: session.adminRole,
+        status: session.status,
+      }
+    : {};
+}
+
+async function rlsCanSeeForumCategory(role: MatrixRole): Promise<boolean> {
+  const id = randomUUID();
+  await migrator.$executeRaw`
+    INSERT INTO forum_categories (id, name, slug, description, visibility, sort_order)
+    VALUES (
+      ${id}::uuid, ${`matrix-forum-${id}`}, ${`matrix-${id.slice(0, 8)}`},
+      'matrix', '{all_authenticated}', 90
+    )
+  `;
+  try {
+    const rows = await withRls(rlsCtx(role), (tx) =>
+      tx.forumCategory.findMany({ where: { id } }),
+    );
+    return rows.length > 0;
+  } finally {
+    await migrator.$executeRaw`DELETE FROM forum_categories WHERE id = ${id}::uuid`;
+  }
+}
+
+async function rlsCanInsertForumThread(role: MatrixRole): Promise<boolean> {
+  const categoryId = randomUUID();
+  await migrator.$executeRaw`
+    INSERT INTO forum_categories (id, name, slug, description, visibility, sort_order)
+    VALUES (
+      ${categoryId}::uuid, ${`matrix-forum-${categoryId}`}, ${`matrix-${categoryId.slice(0, 8)}`},
+      'matrix', '{all_authenticated}', 91
+    )
+  `;
+  try {
+    await withRls(rlsCtx(role), (tx) =>
+      tx.forumThread.create({
+        data: {
+          categoryId,
+          authorId: claimsFor(role)?.userId ?? randomUUID(),
+          authorLabel: "Matrix",
+          title: "Matrix thread",
+          lastPostedAt: new Date(),
+        },
+      }),
+    );
+    return true;
+  } catch {
+    return false;
+  } finally {
+    await migrator.$executeRaw`DELETE FROM forum_posts WHERE thread_id IN (
+      SELECT id FROM forum_threads WHERE category_id = ${categoryId}::uuid
+    )`;
+    await migrator.$executeRaw`DELETE FROM forum_threads WHERE category_id = ${categoryId}::uuid`;
+    await migrator.$executeRaw`DELETE FROM forum_categories WHERE id = ${categoryId}::uuid`;
+  }
+}
+
+async function rlsCanHideForumPost(role: MatrixRole): Promise<boolean> {
+  const categoryId = randomUUID();
+  const threadId = randomUUID();
+  const postId = randomUUID();
+  const authorId = randomUUID();
+  await migrator.$executeRaw`
+    INSERT INTO forum_categories (id, name, slug, description, visibility, sort_order)
+    VALUES (
+      ${categoryId}::uuid, ${`matrix-forum-${categoryId}`}, ${`matrix-${categoryId.slice(0, 8)}`},
+      'matrix', '{all_authenticated}', 92
+    )
+  `;
+  await migrator.$executeRaw`
+    INSERT INTO forum_threads (id, category_id, author_id, author_label, title, last_posted_at)
+    VALUES (${threadId}::uuid, ${categoryId}::uuid, ${authorId}::uuid, 'Matrix', 'T', CURRENT_TIMESTAMP)
+  `;
+  await migrator.$executeRaw`
+    INSERT INTO forum_posts (id, thread_id, author_id, author_label, body)
+    VALUES (${postId}::uuid, ${threadId}::uuid, ${authorId}::uuid, 'Matrix', 'body')
+  `;
+  try {
+    await withRls(rlsCtx(role), (tx) =>
+      tx.forumPost.update({ where: { id: postId }, data: { hiddenAt: new Date() } }),
+    );
+    return true;
+  } catch {
+    return false;
+  } finally {
+    await migrator.$executeRaw`DELETE FROM forum_posts WHERE id = ${postId}::uuid`;
+    await migrator.$executeRaw`DELETE FROM forum_threads WHERE id = ${threadId}::uuid`;
+    await migrator.$executeRaw`DELETE FROM forum_categories WHERE id = ${categoryId}::uuid`;
+  }
+}
+
 function rlsVerdict(
   role: MatrixRole,
   capability: Capability,
@@ -529,6 +627,20 @@ describe("RLS permission matrix (GUCs only, no requireRole)", () => {
       const analyticsVisible =
         capability === "view_analytics" ? await rlsCanViewAnalytics(role) : false;
       const expected = PRD_MATRIX[capability][role];
+      if (
+        capability === "view_forum" ||
+        capability === "post_forum" ||
+        capability === "moderate_forum"
+      ) {
+        const allowed =
+          capability === "view_forum"
+            ? await rlsCanSeeForumCategory(role)
+            : capability === "post_forum"
+              ? await rlsCanInsertForumThread(role)
+              : await rlsCanHideForumPost(role);
+        expect(allowed ? "allow" : "deny").toBe(expected);
+        return;
+      }
       if (!isBuilt(capability)) {
         expect(["deny", "fail-closed"]).toContain(expected);
         expect(expected).not.toBe("allow");

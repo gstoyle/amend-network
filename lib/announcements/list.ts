@@ -11,6 +11,9 @@ export type MemberBanner = {
   dismissible: boolean;
   ctaPrimaryLabel: string | null;
   ctaSecondaryLabel: string | null;
+  /** When the announcement became visible, which is what a reader understands
+   * as its posted date. Authoring time would mislead on a scheduled banner. */
+  postedAt: Date;
 };
 
 export async function listEligibleBanners(
@@ -47,6 +50,7 @@ export async function listEligibleBanners(
           dismissible: true,
           ctaPrimaryLabel: true,
           ctaSecondaryLabel: true,
+          activatesAt: true,
         },
       });
       for (const row of found) {
@@ -67,5 +71,5 @@ export async function listEligibleBanners(
       return found;
     },
   );
-  return rows;
+  return rows.map(({ activatesAt, ...banner }) => ({ ...banner, postedAt: activatesAt }));
 }

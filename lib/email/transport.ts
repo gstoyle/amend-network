@@ -190,3 +190,11 @@ export async function sendEventEmail(input: EventEmailInput): Promise<void> {
   const copy = eventCopy(input.kind, input.vars ?? {});
   await sendMail({ to: input.to, subject: copy.subject, text: copy.text });
 }
+
+export async function sendForumEmail(input: {
+  to: string;
+  subject: string;
+  text: string;
+}): Promise<void> {
+  await sendMail(input);
+}

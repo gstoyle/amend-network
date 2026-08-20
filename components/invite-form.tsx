@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { controlClassName, Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 export type InviteListItem = {
@@ -62,14 +63,14 @@ export function InviteForm({
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="networkId">Network</Label>
-          <select className={controlClassName} id="networkId" name="networkId" required>
+          <Select id="networkId" name="networkId" required>
             <option value="">Select a network</option>
             {networks.map((row) => (
               <option key={row.id} value={row.id}>
                 {row.name}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="title">Title / role (optional)</Label>

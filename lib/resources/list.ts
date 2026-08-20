@@ -3,15 +3,63 @@ import type { Prisma } from "@prisma/client";
 import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
 import { withRls } from "@/lib/db/rls";
-import { visibilityTokens } from "@/lib/db/visibility";
+import { type AudienceMarker, audienceLabel, visibilityTokens } from "@/lib/db/visibility";
 import { presignGet } from "@/lib/storage/client";
 
 const THUMBNAIL_EXPIRES_SECONDS = 120;
 const SOURCE_LABELS = ["Amend", "Partner Org", "External"] as const;
 const RESOURCE_SORTS = ["newest", "downloads", "title"] as const;
+const KIB = 1024;
 
 export type ResourceSort = (typeof RESOURCE_SORTS)[number];
 export type ResourceSource = (typeof SOURCE_LABELS)[number];
+export type ResourceFormat = "PDF" | "Video" | "Slides" | "Template" | "Toolkit";
+
+const FORMAT_BY_MIME_TYPE: Record<string, ResourceFormat> = {
+  "application/pdf": "PDF",
+  "video/mp4": "Video",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation": "Slides",
+  "application/vnd.ms-powerpoint": "Slides",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "Template",
+  "application/msword": "Template",
+  "text/markdown": "Template",
+  "application/zip": "Toolkit",
+};
+
+/** An unrecognised type yields null so the card omits the format entirely. */
+export function resourceFormatLabel(mimeType: string): ResourceFormat | null {
+  const essence = mimeType.split(";")[0]?.trim().toLowerCase() ?? "";
+  return FORMAT_BY_MIME_TYPE[essence] ?? null;
+}
+
+function oneDecimal(value: number, unit: string): string {
+  const rounded = Math.round(value * 10) / 10;
+  return `${Number.isInteger(rounded) ? rounded : rounded.toFixed(1)} ${unit}`;
+}
+
+/**
+ * Converts the stored BigInt once, here, because a BigInt cannot cross the
+ * server-to-component boundary.
+ */
+export function resourceSizeLabel(bytes: bigint | number | null | undefined): string | null {
+  if (bytes === null || bytes === undefined) {
+    return null;
+  }
+  const size = Number(bytes);
+  if (!Number.isFinite(size) || size <= 0) {
+    return null;
+  }
+  if (size < KIB) {
+    return `${size} ${size === 1 ? "byte" : "bytes"}`;
+  }
+  if (size < KIB ** 2) {
+    return `${Math.round(size / KIB)} KB`;
+  }
+  if (size < KIB ** 3) {
+    return oneDecimal(size / KIB ** 2, "MB");
+  }
+  return oneDecimal(size / KIB ** 3, "GB");
+}
 
 export type ResourceListQuery = {
   q?: string;
@@ -32,6 +80,9 @@ export type MemberResource = {
   thumbnailHref: string;
   fileMimeType: string;
   playbackHref: string | null;
+  formatLabel: ResourceFormat | null;
+  sizeLabel: string | null;
+  audience: AudienceMarker;
 };
 
 function authorizeMember(
@@ -107,6 +158,8 @@ function toMemberResource(row: {
   tags: string[];
   updatedAt: Date;
   fileMimeType: string;
+  fileSizeBytes: bigint;
+  visibility: string[];
 }): MemberResource {
   const isVideo = row.fileMimeType === "video/mp4";
   return {
@@ -119,6 +172,9 @@ function toMemberResource(row: {
     thumbnailHref: `/app/resources/${row.id}/thumbnail`,
     fileMimeType: row.fileMimeType,
     playbackHref: isVideo ? `/app/resources/${row.id}/file` : null,
+    formatLabel: resourceFormatLabel(row.fileMimeType),
+    sizeLabel: resourceSizeLabel(row.fileSizeBytes),
+    audience: audienceLabel(row.visibility),
   };
 }
 
@@ -175,6 +231,8 @@ async function loadLiveVisible(
           updatedAt: true,
           thumbnailObjectKey: true,
           fileMimeType: true,
+          fileSizeBytes: true,
+          visibility: true,
         },
       }),
   );
