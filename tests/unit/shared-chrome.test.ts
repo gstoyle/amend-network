@@ -35,13 +35,13 @@ describe("shared chrome (008 US1)", () => {
     expect(source).not.toMatch(forbiddenLiteral);
   });
 
-  it("select keeps native semantics and reuses the shared field chrome", () => {
+  it("select listbox matches the shared field chrome", () => {
     const source = read("components/ui/select.tsx");
     expect(source).toContain("controlClassName");
-    expect(source).toContain("<select");
-    expect(source).not.toContain('"use client"');
-    expect(source).not.toContain('role="listbox"');
-    expect(source).not.toContain('aria-hidden="true"');
+    expect(source).toContain('role="listbox"');
+    expect(source).toContain("border-border-strong");
+    expect(source).toContain("rounded-md");
+    expect(source).toContain("bg-background");
     expect(source).not.toMatch(forbiddenLiteral);
   });
 
