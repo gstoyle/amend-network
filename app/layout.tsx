@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   description: "Private, role-gated member platform",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({
   children,
 }: Readonly<{
