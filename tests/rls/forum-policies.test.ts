@@ -111,6 +111,27 @@ describe("forum RLS", () => {
     expect(rows).toEqual([]);
   });
 
+  it("forum definer helpers turn row security off so FORCE RLS owners can read", async () => {
+    const rows = await migrator.$queryRaw<{ name: string; config: string[] | null }[]>`
+      SELECT p.proname AS name, p.proconfig AS config
+      FROM pg_proc p
+      JOIN pg_namespace n ON n.oid = p.pronamespace
+      WHERE n.nspname = 'public'
+        AND p.proname IN (
+          'forum_category_visible_core',
+          'forum_thread_member_visible',
+          'forum_thread_writable',
+          'forum_post_member_visible',
+          'forum_thread_subscriber_emails',
+          'forum_bump_last_posted'
+        )
+    `;
+    expect(rows).toHaveLength(6);
+    for (const row of rows) {
+      expect(row.config?.includes("row_security=off"), row.name).toBe(true);
+    }
+  });
+
   it("staff selects every category", async () => {
     const lead = await insertCategory(["lead"]);
     categoryIds.push(lead);
