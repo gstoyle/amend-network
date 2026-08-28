@@ -273,6 +273,33 @@ GRANT EXECUTE ON FUNCTION forum_thread_subscriber_emails(uuid) TO amend_app;
 GRANT EXECUTE ON FUNCTION forum_member_post_update_guard() TO amend_app;
 GRANT EXECUTE ON FUNCTION forum_bump_last_posted() TO amend_app;
 
+INSERT INTO "forum_categories" ("id", "name", "slug", "description", "visibility", "sort_order")
+VALUES
+  (
+    '11111111-1111-4111-8111-111111111111',
+    'Pathways — Welcome',
+    'pathways-welcome',
+    'A room for Pathways members to introduce themselves and share what is working.',
+    ARRAY['pathways']::text[],
+    10
+  ),
+  (
+    '22222222-2222-4222-8222-222222222222',
+    'LEAD — Welcome',
+    'lead-welcome',
+    'A room for LEAD members to introduce themselves and share what is working.',
+    ARRAY['lead']::text[],
+    20
+  ),
+  (
+    '33333333-3333-4333-8333-333333333333',
+    'All members — General',
+    'all-members-general',
+    'Cross-programme discussion visible to every active member.',
+    ARRAY['all_authenticated']::text[],
+    30
+  );
+
 ALTER TABLE "forum_categories" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "forum_categories" FORCE ROW LEVEL SECURITY;
 ALTER TABLE "forum_threads" ENABLE ROW LEVEL SECURITY;
@@ -412,30 +439,3 @@ GRANT SELECT, INSERT, DELETE ON TABLE "forum_subscriptions" TO amend_app;
 REVOKE UPDATE, TRUNCATE ON TABLE "forum_subscriptions" FROM amend_app;
 GRANT SELECT, INSERT, UPDATE ON TABLE "forum_post_throttle" TO amend_app;
 REVOKE DELETE, TRUNCATE ON TABLE "forum_post_throttle" FROM amend_app;
-
-INSERT INTO "forum_categories" ("id", "name", "slug", "description", "visibility", "sort_order")
-VALUES
-  (
-    '11111111-1111-4111-8111-111111111111',
-    'Pathways — Welcome',
-    'pathways-welcome',
-    'A room for Pathways members to introduce themselves and share what is working.',
-    ARRAY['pathways']::text[],
-    10
-  ),
-  (
-    '22222222-2222-4222-8222-222222222222',
-    'LEAD — Welcome',
-    'lead-welcome',
-    'A room for LEAD members to introduce themselves and share what is working.',
-    ARRAY['lead']::text[],
-    20
-  ),
-  (
-    '33333333-3333-4333-8333-333333333333',
-    'All members — General',
-    'all-members-general',
-    'Cross-programme discussion visible to every active member.',
-    ARRAY['all_authenticated']::text[],
-    30
-  );
