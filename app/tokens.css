@@ -63,6 +63,7 @@
   --border: var(--stone-200);
   --border-strong: var(--stone-500);
   --input: var(--stone-400);
+  --field: var(--stone-50);
   --ring: var(--evergreen-700);
   --sidebar: var(--stone-50);
   --sidebar-foreground: var(--stone-800);

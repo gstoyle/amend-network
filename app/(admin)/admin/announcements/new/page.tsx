@@ -9,7 +9,7 @@ import {
 } from "@/components/announcement-form";
 import { PageHeader } from "@/components/page-header";
 import { buttonVariants } from "@/components/ui/button";
-import { cardClassName } from "@/components/ui/card";
+import { formSurfaceClassName } from "@/components/ui/card";
 import { createAnnouncement } from "@/lib/announcements/publish";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
@@ -82,7 +82,7 @@ export default async function NewAnnouncementPage() {
         eyebrow="Announcement management"
         title="New announcement"
       />
-      <section className={cn(cardClassName, "p-4 lg:p-6")} aria-label="Announcement details">
+      <section className={formSurfaceClassName} aria-label="Announcement details">
         <AnnouncementForm action={createAction} submitLabel="Publish announcement" />
       </section>
     </div>

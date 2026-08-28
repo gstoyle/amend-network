@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/page-header";
 import { ResourceForm, type ResourceFormState } from "@/components/resource-form";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { cardClassName } from "@/components/ui/card";
+import { cardClassName, formSurfaceClassName } from "@/components/ui/card";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
@@ -170,7 +170,7 @@ export default async function AdminResourceEditPage({
         </section>
       ) : (
         <>
-          <section className={cn(cardClassName, "p-4 lg:p-6")} aria-label="Resource details">
+          <section className={formSurfaceClassName} aria-label="Resource details">
             <ResourceForm
               initial={{
                 id: resource.id,

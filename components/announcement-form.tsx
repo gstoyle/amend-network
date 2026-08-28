@@ -2,8 +2,14 @@
 
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
-import { controlClassName, Input } from "@/components/ui/input";
+import {
+  formFieldClassName,
+  formGridClassName,
+  formInsetClassName,
+} from "@/components/ui/card";
+import { checkboxClassName, controlClassName, Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 export type AnnouncementFormState = {
   error?: string;
@@ -37,17 +43,17 @@ const VISIBILITY_OPTIONS = [
 export function AnnouncementForm({ action, initial, submitLabel }: AnnouncementFormProps) {
   const [state, formAction, pending] = useActionState(action, {});
   return (
-    <form action={formAction} className="flex max-w-2xl flex-col gap-6">
+    <form action={formAction} className={formGridClassName}>
       {state.error ? (
-        <p className="text-sm text-destructive" role="alert">
+        <p className="text-sm text-destructive lg:col-span-2" role="alert">
           {state.error}
         </p>
       ) : null}
-      <div className="flex flex-col gap-2">
+      <div className={cn(formFieldClassName, "lg:col-span-2")}>
         <Label htmlFor="headline">Headline</Label>
         <Input defaultValue={initial?.headline} id="headline" maxLength={120} name="headline" required />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className={cn(formFieldClassName, "lg:col-span-2")}>
         <Label htmlFor="body">Body</Label>
         <textarea
           className={controlClassName}
@@ -59,46 +65,46 @@ export function AnnouncementForm({ action, initial, submitLabel }: AnnouncementF
           rows={5}
         />
       </div>
-      <fieldset className="flex flex-col gap-2">
+      <fieldset className={cn(formInsetClassName, "lg:col-span-2")}>
         <legend className="text-sm font-medium text-foreground">Visibility</legend>
-        {VISIBILITY_OPTIONS.map((option) => (
-          <label className="flex min-h-touch items-center gap-2 text-foreground" key={option.value}>
-            <input
-              className="size-4 accent-primary"
-              defaultChecked={initial?.visibility.includes(option.value) ?? option.value === "all_authenticated"}
-              name="visibility"
-              type="checkbox"
-              value={option.value}
-            />
-            {option.label}
-          </label>
-        ))}
+        <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1">
+          {VISIBILITY_OPTIONS.map((option) => (
+            <label className="flex min-h-touch items-center gap-2 text-sm text-foreground" key={option.value}>
+              <input
+                className={checkboxClassName}
+                defaultChecked={initial?.visibility.includes(option.value) ?? option.value === "all_authenticated"}
+                name="visibility"
+                type="checkbox"
+                value={option.value}
+              />
+              {option.label}
+            </label>
+          ))}
+        </div>
       </fieldset>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="activatesAt">Activates</Label>
-          <Input
-            defaultValue={initial?.activatesAt}
-            id="activatesAt"
-            name="activatesAt"
-            required
-            type="datetime-local"
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="expiresAt">Expires</Label>
-          <Input
-            defaultValue={initial?.expiresAt}
-            id="expiresAt"
-            name="expiresAt"
-            required
-            type="datetime-local"
-          />
-        </div>
+      <div className={formFieldClassName}>
+        <Label htmlFor="activatesAt">Activates</Label>
+        <Input
+          defaultValue={initial?.activatesAt}
+          id="activatesAt"
+          name="activatesAt"
+          required
+          type="datetime-local"
+        />
       </div>
-      <label className="flex min-h-touch items-center gap-2 text-foreground">
+      <div className={formFieldClassName}>
+        <Label htmlFor="expiresAt">Expires</Label>
+        <Input
+          defaultValue={initial?.expiresAt}
+          id="expiresAt"
+          name="expiresAt"
+          required
+          type="datetime-local"
+        />
+      </div>
+      <label className={cn(formInsetClassName, "flex min-h-touch items-center gap-3 text-sm text-foreground lg:col-span-2")}>
         <input
-          className="size-4 accent-primary"
+          className={checkboxClassName}
           defaultChecked={initial?.dismissible ?? true}
           name="dismissible"
           type="checkbox"
@@ -106,23 +112,23 @@ export function AnnouncementForm({ action, initial, submitLabel }: AnnouncementF
         />
         Members may dismiss this banner
       </label>
-      <div className="flex flex-col gap-2">
+      <div className={formFieldClassName}>
         <Label htmlFor="ctaPrimaryLabel">First button label</Label>
         <Input defaultValue={initial?.ctaPrimaryLabel} id="ctaPrimaryLabel" maxLength={40} name="ctaPrimaryLabel" />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className={formFieldClassName}>
         <Label htmlFor="ctaPrimaryUrl">First button destination</Label>
         <Input defaultValue={initial?.ctaPrimaryUrl} id="ctaPrimaryUrl" name="ctaPrimaryUrl" />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className={formFieldClassName}>
         <Label htmlFor="ctaSecondaryLabel">Second button label</Label>
         <Input defaultValue={initial?.ctaSecondaryLabel} id="ctaSecondaryLabel" maxLength={40} name="ctaSecondaryLabel" />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className={formFieldClassName}>
         <Label htmlFor="ctaSecondaryUrl">Second button destination</Label>
         <Input defaultValue={initial?.ctaSecondaryUrl} id="ctaSecondaryUrl" name="ctaSecondaryUrl" />
       </div>
-      <Button disabled={pending} type="submit">
+      <Button className="justify-self-start lg:col-span-2" disabled={pending} type="submit">
         {pending ? "Saving…" : submitLabel}
       </Button>
     </form>

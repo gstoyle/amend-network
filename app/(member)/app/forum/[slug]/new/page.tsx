@@ -3,12 +3,18 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { createThreadAction } from "@/app/(member)/app/forum/actions";
 import { PageHeader } from "@/components/page-header";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  formFieldClassName,
+  formGridClassName,
+  formSurfaceClassName,
+} from "@/components/ui/card";
 import { controlClassName, Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthDeniedError, isPendingSession, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
 import { getForumCategory } from "@/lib/forum/list";
+import { cn } from "@/lib/utils";
 
 export default async function NewForumThreadPage({
   params,
@@ -42,7 +48,7 @@ export default async function NewForumThreadPage({
     <div className="flex flex-col gap-6 lg:gap-8">
       <p>
         <Link
-          className="inline-flex min-h-touch items-center text-sm font-medium text-foreground underline decoration-border-strong underline-offset-4"
+          className={cn(buttonVariants({ variant: "ghost" }), "px-0")}
           href={`/app/forum/${category.slug}`}
         >
           Back to {category.name}
@@ -62,13 +68,16 @@ export default async function NewForumThreadPage({
         title="Start a thread"
       />
       {query.error ? <p className="text-sm text-destructive">{query.error}</p> : null}
-      <form action={createThreadAction} className="flex max-w-xl flex-col gap-4">
+      <form
+        action={createThreadAction}
+        className={cn(formSurfaceClassName, formGridClassName)}
+      >
         <input name="slug" type="hidden" value={category.slug} />
-        <div className="flex flex-col gap-2">
+        <div className={cn(formFieldClassName, "lg:col-span-2")}>
           <Label htmlFor="title">Title</Label>
           <Input id="title" maxLength={120} name="title" required />
         </div>
-        <div className="flex flex-col gap-2">
+        <div className={cn(formFieldClassName, "lg:col-span-2")}>
           <Label htmlFor="body">First post</Label>
           <textarea
             className={controlClassName}
@@ -79,7 +88,9 @@ export default async function NewForumThreadPage({
             rows={8}
           />
         </div>
-        <Button type="submit">Post thread</Button>
+        <Button className="justify-self-start lg:col-span-2" type="submit">
+          Post thread
+        </Button>
       </form>
     </div>
   );

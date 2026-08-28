@@ -2,8 +2,14 @@
 
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
-import { controlClassName, Input } from "@/components/ui/input";
+import {
+  formFieldClassName,
+  formGridClassName,
+  formInsetClassName,
+} from "@/components/ui/card";
+import { checkboxClassName, controlClassName, Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 export type EventFormState = {
   error?: string;
@@ -45,17 +51,17 @@ export function EventForm({
 }: EventFormProps) {
   const [state, formAction, pending] = useActionState(action, {});
   return (
-    <form action={formAction} className="flex max-w-2xl flex-col gap-6">
+    <form action={formAction} className={formGridClassName}>
       {state.error ? (
-        <p className="text-sm text-destructive" role="alert">
+        <p className="text-sm text-destructive lg:col-span-2" role="alert">
           {state.error}
         </p>
       ) : null}
-      <div className="flex flex-col gap-2">
+      <div className={cn(formFieldClassName, "lg:col-span-2")}>
         <Label htmlFor="title">Title</Label>
         <Input defaultValue={initial?.title} id="title" maxLength={120} name="title" required />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className={cn(formFieldClassName, "lg:col-span-2")}>
         <Label htmlFor="description">Description</Label>
         <textarea
           className={controlClassName}
@@ -67,54 +73,54 @@ export function EventForm({
           rows={5}
         />
       </div>
-      <fieldset className="flex flex-col gap-2">
+      <fieldset className={cn(formInsetClassName, "lg:col-span-2")}>
         <legend className="text-sm font-medium text-foreground">Visibility</legend>
-        {VISIBILITY_OPTIONS.map((option) => (
-          <label className="flex min-h-touch items-center gap-2 text-foreground" key={option.value}>
-            <input
-              className="size-4 accent-primary"
-              defaultChecked={initial?.visibility.includes(option.value) ?? option.value === "all_authenticated"}
-              name="visibility"
-              type="checkbox"
-              value={option.value}
-            />
-            {option.label}
-          </label>
-        ))}
+        <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1">
+          {VISIBILITY_OPTIONS.map((option) => (
+            <label className="flex min-h-touch items-center gap-2 text-sm text-foreground" key={option.value}>
+              <input
+                className={checkboxClassName}
+                defaultChecked={initial?.visibility.includes(option.value) ?? option.value === "all_authenticated"}
+                name="visibility"
+                type="checkbox"
+                value={option.value}
+              />
+              {option.label}
+            </label>
+          ))}
+        </div>
       </fieldset>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="startsAt">Starts</Label>
-          <Input
-            defaultValue={initial?.startsAt}
-            id="startsAt"
-            name="startsAt"
-            required
-            type="datetime-local"
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="endsAt">Ends</Label>
-          <Input
-            defaultValue={initial?.endsAt}
-            id="endsAt"
-            name="endsAt"
-            required
-            type="datetime-local"
-          />
-        </div>
+      <div className={formFieldClassName}>
+        <Label htmlFor="startsAt">Starts</Label>
+        <Input
+          defaultValue={initial?.startsAt}
+          id="startsAt"
+          name="startsAt"
+          required
+          type="datetime-local"
+        />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className={formFieldClassName}>
+        <Label htmlFor="endsAt">Ends</Label>
+        <Input
+          defaultValue={initial?.endsAt}
+          id="endsAt"
+          name="endsAt"
+          required
+          type="datetime-local"
+        />
+      </div>
+      <div className={formFieldClassName}>
         <Label htmlFor="timezoneHint">Timezone hint</Label>
         <Input defaultValue={initial?.timezoneHint} id="timezoneHint" name="timezoneHint" />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className={formFieldClassName}>
         <Label htmlFor="location">Location</Label>
         <Input defaultValue={initial?.location} id="location" maxLength={200} name="location" />
       </div>
-      <label className="flex min-h-touch items-center gap-2 text-foreground">
+      <label className={cn(formInsetClassName, "flex min-h-touch items-center gap-3 text-sm text-foreground lg:col-span-2")}>
         <input
-          className="size-4 accent-primary"
+          className={checkboxClassName}
           defaultChecked={initial?.isVirtual}
           name="isVirtual"
           type="checkbox"
@@ -122,18 +128,18 @@ export function EventForm({
         />
         Virtual meeting
       </label>
-      <div className="flex flex-col gap-2">
+      <div className={formFieldClassName}>
         <Label htmlFor="joinUrl">Join URL</Label>
         <Input defaultValue={initial?.joinUrl} id="joinUrl" name="joinUrl" />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className={formFieldClassName}>
         <Label htmlFor="capacity">Capacity (optional)</Label>
         <Input defaultValue={initial?.capacity} id="capacity" min={1} name="capacity" type="number" />
       </div>
       {capacityConfirm ? (
-        <label className="flex min-h-touch items-center gap-2 text-foreground">
+        <label className={cn(formInsetClassName, "flex min-h-touch items-center gap-3 text-sm text-foreground lg:col-span-2")}>
           <input
-            className="size-4 accent-primary"
+            className={checkboxClassName}
             name="confirmCapacityShrink"
             type="checkbox"
             value="true"
@@ -143,16 +149,16 @@ export function EventForm({
       ) : null}
       {notifyRsvps ? (
         <>
-          <label className="flex min-h-touch items-center gap-2 text-foreground">
+          <label className={cn(formInsetClassName, "flex min-h-touch items-center gap-3 text-sm text-foreground lg:col-span-2")}>
             <input
-              className="size-4 accent-primary"
+              className={checkboxClassName}
               name="notifyRsvps"
               type="checkbox"
               value="true"
             />
             Email people who RSVPed if the start or end time changes
           </label>
-          <div className="flex flex-col gap-2">
+          <div className={cn(formFieldClassName, "lg:col-span-2")}>
             <Label htmlFor="notifyMessage">Optional message</Label>
             <textarea
               className={controlClassName}
@@ -164,7 +170,7 @@ export function EventForm({
           </div>
         </>
       ) : null}
-      <Button disabled={pending} type="submit">
+      <Button className="justify-self-start lg:col-span-2" disabled={pending} type="submit">
         {pending ? "Saving…" : submitLabel}
       </Button>
     </form>

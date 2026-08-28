@@ -7,7 +7,7 @@ import { EventForm, type EventFormState } from "@/components/event-form";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { cardClassName } from "@/components/ui/card";
+import { formSurfaceClassName } from "@/components/ui/card";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
@@ -122,7 +122,7 @@ export default async function EditEventPage({
         eyebrow="Event management"
         title={item.title}
       />
-      <section className={cn(cardClassName, "p-4 lg:p-6")} aria-label="Event details">
+      <section className={formSurfaceClassName} aria-label="Event details">
         <EventForm
           action={boundSave}
           capacityConfirm

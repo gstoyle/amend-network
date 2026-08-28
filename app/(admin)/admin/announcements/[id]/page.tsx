@@ -10,7 +10,7 @@ import {
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { cardClassName } from "@/components/ui/card";
+import { formSurfaceClassName } from "@/components/ui/card";
 import { updateAnnouncement, withdrawAnnouncement } from "@/lib/announcements/edit";
 import { getAdminAnnouncement } from "@/lib/announcements/publish";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
@@ -119,7 +119,7 @@ export default async function EditAnnouncementPage({
         eyebrow="Announcement management"
         title={item.headline}
       />
-      <section className={cn(cardClassName, "p-4 lg:p-6")} aria-label="Announcement details">
+      <section className={formSurfaceClassName} aria-label="Announcement details">
         <AnnouncementForm
           action={boundSave}
           initial={{

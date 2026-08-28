@@ -65,6 +65,7 @@ const config: Config = {
           strong: "var(--border-strong)",
         },
         input: "var(--input)",
+        field: "var(--field)",
         ring: "var(--ring)",
         sidebar: {
           DEFAULT: "var(--sidebar)",

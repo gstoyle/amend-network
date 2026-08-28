@@ -3,10 +3,17 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { createCategoryAction } from "@/app/(admin)/admin/forum/actions";
 import { PageHeader } from "@/components/page-header";
+import { SectionHeader } from "@/components/section-header";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { cardClassName } from "@/components/ui/card";
-import { controlClassName, Input } from "@/components/ui/input";
+import {
+  cardClassName,
+  formFieldClassName,
+  formGridClassName,
+  formInsetClassName,
+  formSurfaceClassName,
+} from "@/components/ui/card";
+import { checkboxClassName, controlClassName, Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
@@ -55,8 +62,8 @@ export default async function AdminForumPage({
             className={buttonVariants({ variant: "outline" })}
             href="/admin/forum/flags"
           >
-          Open flags
-        </Link>
+            Open flags
+          </Link>
         }
         description="Manage discussion categories and review member-reported content."
         eyebrow="Administration"
@@ -71,23 +78,23 @@ export default async function AdminForumPage({
         <>
           <form
             action={createCategoryAction}
-            className={cn(cardClassName, "flex max-w-2xl flex-col gap-4 p-4 lg:p-6")}
+            className={cn(formSurfaceClassName, formGridClassName)}
           >
-            <div>
+            <div className="lg:col-span-2">
               <h2 className="text-lg font-semibold text-foreground">Create a category</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Choose a short name, URL slug, description, and member audience.
               </p>
             </div>
-            <div className="flex flex-col gap-2">
+            <div className={formFieldClassName}>
               <Label htmlFor="name">Name</Label>
               <Input id="name" maxLength={80} name="name" required />
             </div>
-            <div className="flex flex-col gap-2">
+            <div className={formFieldClassName}>
               <Label htmlFor="slug">Slug</Label>
               <Input id="slug" maxLength={80} name="slug" required />
             </div>
-            <div className="flex flex-col gap-2">
+            <div className={cn(formFieldClassName, "lg:col-span-2")}>
               <Label htmlFor="description">Description</Label>
               <textarea
                 className={controlClassName}
@@ -98,35 +105,39 @@ export default async function AdminForumPage({
                 rows={3}
               />
             </div>
-            <fieldset className="flex flex-col gap-2">
+            <fieldset className={cn(formInsetClassName, "lg:col-span-2")}>
               <legend className="text-sm font-medium text-foreground">Visibility</legend>
-              {VISIBILITY_OPTIONS.map((option) => (
-                <label className="flex min-h-touch items-center gap-2 text-foreground" key={option.value}>
-                  <input
-                    defaultChecked={option.value === "all_authenticated"}
-                    name="visibility"
-                    type="checkbox"
-                    value={option.value}
-                  />
-                  {option.label}
-                </label>
-              ))}
+              <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1">
+                {VISIBILITY_OPTIONS.map((option) => (
+                  <label className="flex min-h-touch items-center gap-2 text-sm text-foreground" key={option.value}>
+                    <input
+                      className={checkboxClassName}
+                      defaultChecked={option.value === "all_authenticated"}
+                      name="visibility"
+                      type="checkbox"
+                      value={option.value}
+                    />
+                    {option.label}
+                  </label>
+                ))}
+              </div>
             </fieldset>
-            <Button type="submit">Create category</Button>
+            <Button className="justify-self-start lg:col-span-2" type="submit">
+              Create category
+            </Button>
           </form>
           <section aria-labelledby="forum-categories-heading">
-            <h2
-              className="mb-3 text-lg font-semibold text-foreground"
+            <SectionHeader
+              eyebrow="Administration"
               id="forum-categories-heading"
-            >
-              Categories
-            </h2>
+              title="Categories"
+            />
             {categories.length === 0 ? (
               <div className={cn(cardClassName, "border-dashed p-6 text-center")}>
                 <p className="text-sm text-muted-foreground">No categories yet.</p>
               </div>
             ) : (
-              <ul className="grid gap-3 sm:grid-cols-2">
+              <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {categories.map((category) => {
                   const audience = audienceLabel(category.visibility);
                   return (

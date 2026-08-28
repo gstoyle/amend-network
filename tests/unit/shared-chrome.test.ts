@@ -41,7 +41,7 @@ describe("shared chrome (008 US1)", () => {
     expect(source).toContain('role="listbox"');
     expect(source).toContain("border-border-strong");
     expect(source).toContain("rounded-md");
-    expect(source).toContain("bg-background");
+    expect(source).toContain("bg-popover");
     expect(source).not.toMatch(forbiddenLiteral);
   });
 

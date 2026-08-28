@@ -2,7 +2,8 @@
 
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
-import { cardClassName } from "@/components/ui/card";
+import { formSurfaceClassName } from "@/components/ui/card";
+import { checkboxClassName } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 export type DirectoryPrivacyFormState = {
@@ -23,9 +24,9 @@ function ToggleRow({
   name: string;
 }) {
   return (
-    <label className="flex min-h-touch cursor-pointer items-start gap-3 rounded-md border border-border bg-background px-3 py-3">
+    <label className="flex min-h-touch cursor-pointer items-start gap-3 rounded-md border border-border bg-field px-3 py-3 shadow-xs transition-colors duration-fast ease-standard hover:border-border-strong">
       <input
-        className="mt-0.5 min-h-touch min-w-touch shrink-0 accent-primary"
+        className={cn(checkboxClassName, "mt-0.5")}
         defaultChecked={defaultChecked}
         name={name}
         type="checkbox"
@@ -66,7 +67,10 @@ export function DirectoryPrivacyForm({
   const [state, formAction] = useActionState(action, INITIAL);
 
   return (
-    <form action={formAction} className="flex max-w-2xl flex-col gap-6">
+    <form
+      action={formAction}
+      className={cn(formSurfaceClassName, "flex max-w-4xl flex-col gap-6")}
+    >
       <p className="text-sm text-muted-foreground">
         If you appear in the directory, members in your same program can see you.
         Super Admin, Admin, and Moderator can see listed members of both programs.
@@ -80,7 +84,7 @@ export function DirectoryPrivacyForm({
           Staff-only accounts are not listed.
         </p>
       )}
-      <div className={cn(cardClassName, "flex flex-col gap-3 p-4")}>
+      <div className="flex flex-col gap-3">
         <ToggleRow
           defaultChecked={listing}
           label="Appear in the member directory"
@@ -115,9 +119,9 @@ export function DirectoryPrivacyForm({
           {state.error}
         </p>
       ) : null}
-      <div>
-        <Button type="submit">Save privacy settings</Button>
-      </div>
+      <Button className="self-start" type="submit">
+        Save privacy settings
+      </Button>
     </form>
   );
 }

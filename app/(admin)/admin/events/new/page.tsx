@@ -6,7 +6,7 @@ import { auth } from "@/auth";
 import { EventForm, type EventFormState } from "@/components/event-form";
 import { PageHeader } from "@/components/page-header";
 import { buttonVariants } from "@/components/ui/button";
-import { cardClassName } from "@/components/ui/card";
+import { formSurfaceClassName } from "@/components/ui/card";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
@@ -78,7 +78,7 @@ export default async function NewEventPage() {
         eyebrow="Event management"
         title="New event"
       />
-      <section className={cn(cardClassName, "p-4 lg:p-6")} aria-label="Event details">
+      <section className={formSurfaceClassName} aria-label="Event details">
         <EventForm action={createAction} submitLabel="Publish event" />
       </section>
     </div>

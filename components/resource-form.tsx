@@ -2,9 +2,15 @@
 
 import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { controlClassName, Input } from "@/components/ui/input";
+import {
+  formFieldClassName,
+  formGridClassName,
+  formInsetClassName,
+} from "@/components/ui/card";
+import { checkboxClassName, controlClassName, Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 export type ResourceListItem = {
   id: string;
@@ -129,13 +135,13 @@ export function ResourceForm({
   const selected = new Set(initial?.visibility ?? []);
 
   return (
-    <form action={formAction} className="flex max-w-2xl flex-col gap-6">
+    <form action={formAction} className={formGridClassName}>
       {initial ? <input name="resourceId" type="hidden" value={initial.id} /> : null}
-      <div className="flex flex-col gap-2">
+      <div className={cn(formFieldClassName, "lg:col-span-2")}>
         <Label htmlFor="title">Title</Label>
         <Input defaultValue={initial?.title ?? ""} id="title" name="title" required type="text" />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className={cn(formFieldClassName, "lg:col-span-2")}>
         <Label htmlFor="previewText">Preview text</Label>
         <textarea
           className={controlClassName}
@@ -147,7 +153,7 @@ export function ResourceForm({
           rows={4}
         />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className={formFieldClassName}>
         <Label htmlFor="sourceLabel">Source</Label>
         <Select
           defaultValue={initial?.sourceLabel ?? "Amend"}
@@ -160,7 +166,7 @@ export function ResourceForm({
           <option value="External">External</option>
         </Select>
       </div>
-      <div className="flex flex-col gap-2">
+      <div className={formFieldClassName}>
         <Label htmlFor="tags">Tags (comma-separated, up to 10)</Label>
         <Input
           defaultValue={initial?.tags.join(", ") ?? ""}
@@ -169,22 +175,24 @@ export function ResourceForm({
           type="text"
         />
       </div>
-      <fieldset className="flex flex-col gap-2">
+      <fieldset className={cn(formInsetClassName, "lg:col-span-2")}>
         <legend className="text-sm font-medium text-foreground">Visibility</legend>
-        {VISIBILITY_OPTIONS.map((option) => (
-          <label className="flex min-h-touch items-center gap-2 text-sm text-foreground" key={option.value}>
-            <input
-              className="size-4 accent-primary"
-              defaultChecked={selected.has(option.value)}
-              name="visibility"
-              type="checkbox"
-              value={option.value}
-            />
-            {option.label}
-          </label>
-        ))}
+        <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1">
+          {VISIBILITY_OPTIONS.map((option) => (
+            <label className="flex min-h-touch items-center gap-2 text-sm text-foreground" key={option.value}>
+              <input
+                className={checkboxClassName}
+                defaultChecked={selected.has(option.value)}
+                name="visibility"
+                type="checkbox"
+                value={option.value}
+              />
+              {option.label}
+            </label>
+          ))}
+        </div>
       </fieldset>
-      <div className="flex flex-col gap-2">
+      <div className={formFieldClassName}>
         <Label htmlFor="file">{isEdit ? "Replacement file (optional)" : "File"}</Label>
         <Input
           accept=".pdf,.docx,.xlsx,.pptx,.jpg,.jpeg,.png,.mp4,application/pdf,image/jpeg,image/png,video/mp4"
@@ -194,7 +202,7 @@ export function ResourceForm({
           type="file"
         />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className={formFieldClassName}>
         <Label htmlFor="thumbnail">{isEdit ? "Replacement thumbnail (optional)" : "Thumbnail"}</Label>
         <Input
           accept="image/jpeg,image/png"
@@ -205,16 +213,16 @@ export function ResourceForm({
         />
       </div>
       {error ? (
-        <p className="text-sm text-destructive" role="alert">
+        <p className="text-sm text-destructive lg:col-span-2" role="alert">
           {error}
         </p>
       ) : null}
       {state.message ? (
-        <p className="text-sm text-foreground" role="status">
+        <p className="text-sm text-foreground lg:col-span-2" role="status">
           {state.message}
         </p>
       ) : null}
-      <Button disabled={pending} type="submit">
+      <Button className="justify-self-start lg:col-span-2" disabled={pending} type="submit">
         {pending ? (isEdit ? "Saving…" : "Publishing…") : isEdit ? "Save" : "Publish resource"}
       </Button>
     </form>

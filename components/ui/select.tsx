@@ -234,7 +234,7 @@ export function Select({
         <ul
           aria-activedescendant={`${triggerId}-opt-${activeIndex}`}
           aria-labelledby={triggerId}
-          className="absolute z-20 mt-1 max-h-popover w-full overflow-y-auto rounded-md border border-border-strong bg-background py-1 shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="absolute z-20 mt-1 max-h-popover w-full overflow-y-auto rounded-md border border-border-strong bg-popover py-1 shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           id={listId}
           ref={listRef}
           role="listbox"

@@ -10,7 +10,7 @@ export type PageHeaderProps = {
 
 export function PageHeader({ actions, description, eyebrow, title }: PageHeaderProps) {
   return (
-    <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <header className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between lg:pb-6">
       <div className="min-w-0">
         <p className="eyebrow text-muted-foreground">{eyebrow}</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground lg:text-3xl">
@@ -20,7 +20,7 @@ export function PageHeader({ actions, description, eyebrow, title }: PageHeaderP
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{description}</p>
         ) : null}
       </div>
-      {actions ? <div className="flex shrink-0 flex-wrap gap-2">{actions}</div> : null}
+      {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
     </header>
   );
 }
