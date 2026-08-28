@@ -1,0 +1,63 @@
+# Temporary Render preview host. ADR-0001 still names DreamHost for production.
+# Secrets (sync: false) are filled in the Dashboard before Apply. Never commit values.
+
+databases:
+  - name: amend-network-db
+    databaseName: amend
+    user: amend_owner
+    plan: basic-256mb
+    postgresMajorVersion: "16"
+    region: oregon
+    ipAllowList: []
+
+services:
+  - type: web
+    name: amend-network
+    runtime: node
+    plan: starter
+    region: oregon
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /
+    buildCommand: pnpm install --frozen-lockfile && pnpm db:generate && pnpm build && node scripts/render.mjs copy-standalone
+    preDeployCommand: node scripts/render.mjs bootstrap
+    startCommand: node scripts/render.mjs start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "24"
+      - key: HOSTNAME
+        value: "0.0.0.0"
+      - key: EMAIL_TRANSPORT
+        value: json
+      - key: EMAIL_JSON_DIR
+        value: /tmp/amend-mail
+      - key: DATABASE_URL
+        fromDatabase:
+          name: amend-network-db
+          property: connectionString
+      - key: DATABASE_URL_MIGRATE
+        fromDatabase:
+          name: amend-network-db
+          property: connectionString
+      - key: AMEND_APP_PASSWORD
+        generateValue: true
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: SEED_PASSWORD
+        generateValue: true
+      - key: PII_ENCRYPTION_KEY
+        sync: false
+      - key: EMAIL_LOOKUP_KEY
+        sync: false
+      - key: S3_ENDPOINT
+        sync: false
+      - key: S3_REGION
+        sync: false
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false

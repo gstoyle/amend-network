@@ -53,9 +53,16 @@ function applyNonProductionStorageFallbacks(): void {
   process.env.S3_SECRET_ACCESS_KEY ||= "minioadmin";
 }
 
+function applyRuntimeUrlFallbacks(): void {
+  if (!process.env.AUTH_URL?.trim() && process.env.RENDER_EXTERNAL_URL?.trim()) {
+    process.env.AUTH_URL = process.env.RENDER_EXTERNAL_URL.trim();
+  }
+}
+
 export function env(): AppEnv {
   if (!cached) {
     applyNonProductionStorageFallbacks();
+    applyRuntimeUrlFallbacks();
     cached = envSchema.parse(process.env);
   }
   return cached;
