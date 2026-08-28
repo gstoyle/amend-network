@@ -8,7 +8,7 @@ const MARKER = `forum-rls-${randomUUID()}`;
 
 function isRlsDenied(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
-  return /row-level security policy|permission denied/i.test(message);
+  return /row-level security policy|permission denied|members may only edit body/i.test(message);
 }
 
 async function insertCategory(visibility: string[]): Promise<string> {
@@ -60,7 +60,7 @@ async function insertPost(threadId: string, authorId: string): Promise<string> {
   return id;
 }
 
-function ctx(role: "pathways" | "lead" | "moderator" | "pending") {
+function ctx(role: "super_admin" | "pathways" | "lead" | "moderator" | "pending") {
   const session = claimsFor(role)!;
   return {
     userId: session.userId,
@@ -118,6 +118,56 @@ describe("forum RLS", () => {
       tx.forumCategory.findMany({ where: { id: lead } }),
     );
     expect(rows).toHaveLength(1);
+  });
+
+  it("staff without a program role can start a thread in a restricted category", async () => {
+    const categoryId = await insertCategory(["lead"]);
+    categoryIds.push(categoryId);
+    const session = claimsFor("super_admin")!;
+    const threadId = randomUUID();
+    const postId = randomUUID();
+
+    await withRls(ctx("super_admin"), async (tx) => {
+      await tx.forumThread.create({
+        data: {
+          id: threadId,
+          categoryId,
+          authorId: session.userId,
+          authorLabel: "Staff member",
+          title: "Staff welcome",
+          lastPostedAt: new Date(),
+        },
+      });
+      await tx.forumPost.create({
+        data: {
+          id: postId,
+          threadId,
+          authorId: session.userId,
+          authorLabel: "Staff member",
+          body: "Welcome to the forum.",
+        },
+      });
+    });
+
+    await withRls(ctx("super_admin"), (tx) =>
+      tx.forumThread.update({
+        where: { id: threadId },
+        data: { locked: true },
+      }),
+    );
+    await expect(
+      withRls(ctx("super_admin"), (tx) =>
+        tx.forumPost.create({
+          data: {
+            id: randomUUID(),
+            threadId,
+            authorId: session.userId,
+            authorLabel: "Staff member",
+            body: "This locked thread must reject replies.",
+          },
+        }),
+      ),
+    ).rejects.toSatisfy(isRlsDenied);
   });
 
   it("pending selects no categories", async () => {

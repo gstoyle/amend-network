@@ -10,10 +10,12 @@ import { actorRole, isForumStaff, rlsContext } from "@/lib/forum/staff";
 import { consumeForumQuota } from "@/lib/forum/throttle";
 import {
   FORUM_EDIT_WINDOW_MS,
+  FORUM_RATE_LIMIT_MESSAGE,
   assertForumBody,
   assertForumReason,
   assertForumTitle,
   authorLabelFrom,
+  forumErrorMessage,
 } from "@/lib/forum/validate";
 
 export type ForumWriteResult = { ok: true; id: string } | { ok: false; error: string };
@@ -101,7 +103,12 @@ export async function createThread(
       });
     });
   } catch (error) {
-    return asError(error, "Could not start this thread.");
+    return {
+      ok: false,
+      error: forumErrorMessage(error, "Could not start this thread.", [
+        FORUM_RATE_LIMIT_MESSAGE,
+      ]),
+    };
   }
   track("forum_post_created", {
     distinctId: claims.userId,
@@ -157,7 +164,13 @@ export async function createPost(
       });
     });
   } catch (error) {
-    return asError(error, "Could not post this reply.");
+    return {
+      ok: false,
+      error: forumErrorMessage(error, "Could not post this reply.", [
+        FORUM_RATE_LIMIT_MESSAGE,
+        "This thread is locked.",
+      ]),
+    };
   }
   track("forum_post_created", {
     distinctId: claims.userId,
@@ -207,7 +220,12 @@ export async function editPost(
       });
     });
   } catch (error) {
-    return asError(error, "Could not save this edit.");
+    return {
+      ok: false,
+      error: forumErrorMessage(error, "Could not save this edit.", [
+        "Edits are only allowed for 15 minutes.",
+      ]),
+    };
   }
   return { ok: true, id: input.postId };
 }
@@ -254,7 +272,10 @@ export async function flagPost(
       });
     });
   } catch (error) {
-    return asError(error, "Could not flag this post.");
+    return {
+      ok: false,
+      error: forumErrorMessage(error, "Could not flag this post.", []),
+    };
   }
   track("forum_post_flagged", {
     distinctId: claims.userId,

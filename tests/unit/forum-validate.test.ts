@@ -7,6 +7,7 @@ import {
   assertForumReason,
   assertForumTitle,
   authorLabelFrom,
+  forumErrorMessage,
 } from "@/lib/forum/validate";
 
 describe("forum validate", () => {
@@ -35,5 +36,21 @@ describe("forum validate", () => {
 
   it("exports the public rate-limit copy", () => {
     expect(FORUM_RATE_LIMIT_MESSAGE).toBe("Try again later.");
+  });
+
+  it("does not expose database errors in forum form responses", () => {
+    const fallback = "Could not start this thread.";
+    const internal = new Error(
+      'Invalid `prisma.forumThread.create()` invocation: new row violates row-level security policy',
+    );
+
+    expect(forumErrorMessage(internal, fallback, [FORUM_RATE_LIMIT_MESSAGE])).toBe(fallback);
+    expect(
+      forumErrorMessage(
+        new Error(FORUM_RATE_LIMIT_MESSAGE),
+        fallback,
+        [FORUM_RATE_LIMIT_MESSAGE],
+      ),
+    ).toBe(FORUM_RATE_LIMIT_MESSAGE);
   });
 });

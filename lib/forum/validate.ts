@@ -5,6 +5,17 @@ export { parseVisibility };
 export const FORUM_RATE_LIMIT_MESSAGE = "Try again later.";
 export const FORUM_EDIT_WINDOW_MS = 15 * 60 * 1000;
 
+export function forumErrorMessage(
+  error: unknown,
+  fallback: string,
+  allowedMessages: readonly string[],
+): string {
+  if (!(error instanceof Error) || !allowedMessages.includes(error.message)) {
+    return fallback;
+  }
+  return error.message;
+}
+
 export function assertForumTitle(title: string): string {
   const trimmed = title.trim();
   if (trimmed.length < 1 || trimmed.length > 120) {
