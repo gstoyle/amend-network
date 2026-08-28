@@ -1,6 +1,10 @@
--- FORCE RLS applies to table owners. Render's migration role is not a
--- superuser, so SECURITY DEFINER helpers that read forum tables must turn
--- row security off or first-post inserts fail after the thread row exists.
+-- Render's migrate role is not a superuser and cannot BYPASSRLS. FORCE RLS
+-- therefore hides forum rows from SECURITY DEFINER helpers (and the bump
+-- trigger), so the first post after a thread insert fails.
+--
+-- SET row_security = off is not a bypass: it errors when a policy would apply
+-- (42501 check_enable_rls). Give the table owner explicit policies instead.
+-- amend_app still uses its own policies.
 
 CREATE OR REPLACE FUNCTION forum_category_visible_core(p_category_id uuid)
 RETURNS boolean
@@ -8,7 +12,6 @@ LANGUAGE sql
 STABLE
 SECURITY DEFINER
 SET search_path = pg_catalog, public
-SET row_security = off
 AS $$
   SELECT EXISTS (
     SELECT 1
@@ -24,7 +27,6 @@ LANGUAGE sql
 STABLE
 SECURITY DEFINER
 SET search_path = pg_catalog, public
-SET row_security = off
 AS $$
   SELECT EXISTS (
     SELECT 1
@@ -42,7 +44,6 @@ LANGUAGE sql
 STABLE
 SECURITY DEFINER
 SET search_path = pg_catalog, public
-SET row_security = off
 AS $$
   SELECT EXISTS (
     SELECT 1
@@ -64,7 +65,6 @@ LANGUAGE sql
 STABLE
 SECURITY DEFINER
 SET search_path = pg_catalog, public
-SET row_security = off
 AS $$
   SELECT EXISTS (
     SELECT 1
@@ -82,7 +82,6 @@ LANGUAGE sql
 STABLE
 SECURITY DEFINER
 SET search_path = pg_catalog, public
-SET row_security = off
 AS $$
   SELECT s.user_id, u.email_encrypted
   FROM forum_subscriptions s
@@ -101,7 +100,6 @@ RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = pg_catalog, public
-SET row_security = off
 AS $$
 BEGIN
   UPDATE forum_threads
@@ -111,6 +109,33 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+
+DO $owner_policies$
+DECLARE
+  owner_role text := current_user;
+BEGIN
+  EXECUTE format('DROP POLICY IF EXISTS forum_categories_owner ON forum_categories');
+  EXECUTE format(
+    'CREATE POLICY forum_categories_owner ON forum_categories FOR ALL TO %I USING (true) WITH CHECK (true)',
+    owner_role
+  );
+  EXECUTE format('DROP POLICY IF EXISTS forum_threads_owner ON forum_threads');
+  EXECUTE format(
+    'CREATE POLICY forum_threads_owner ON forum_threads FOR ALL TO %I USING (true) WITH CHECK (true)',
+    owner_role
+  );
+  EXECUTE format('DROP POLICY IF EXISTS forum_posts_owner ON forum_posts');
+  EXECUTE format(
+    'CREATE POLICY forum_posts_owner ON forum_posts FOR ALL TO %I USING (true) WITH CHECK (true)',
+    owner_role
+  );
+  EXECUTE format('DROP POLICY IF EXISTS forum_subscriptions_owner ON forum_subscriptions');
+  EXECUTE format(
+    'CREATE POLICY forum_subscriptions_owner ON forum_subscriptions FOR ALL TO %I USING (true) WITH CHECK (true)',
+    owner_role
+  );
+END
+$owner_policies$;
 
 DROP POLICY forum_posts_insert ON "forum_posts";
 

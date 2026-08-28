@@ -77,6 +77,8 @@ async function bootstrap() {
   const prisma = new PrismaClient({
     datasources: { db: { url: migrateUrl } },
   });
+  const migrateEnv = { ...process.env, DATABASE_URL: migrateUrl };
+  let rolledBackFailedDefiner = false;
 
   try {
     await prisma.$executeRawUnsafe(`CREATE EXTENSION IF NOT EXISTS pgcrypto`);
@@ -95,6 +97,18 @@ async function bootstrap() {
       `GRANT CONNECT ON DATABASE "${databaseName}" TO ${AMEND_APP_ROLE}`,
     );
     await prisma.$executeRawUnsafe(`GRANT USAGE ON SCHEMA public TO ${AMEND_APP_ROLE}`);
+    try {
+      const failed = await prisma.$queryRaw`
+        SELECT 1
+        FROM _prisma_migrations
+        WHERE migration_name = '20260828033000_forum_definer_row_security'
+          AND finished_at IS NULL
+          AND rolled_back_at IS NULL
+      `;
+      rolledBackFailedDefiner = Array.isArray(failed) && failed.length > 0;
+    } catch {
+      rolledBackFailedDefiner = false;
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : "bootstrap failed";
     process.stderr.write(`${message}\n`);
@@ -103,9 +117,27 @@ async function bootstrap() {
     await prisma.$disconnect();
   }
 
+  if (rolledBackFailedDefiner) {
+    const resolve = spawnSync(
+      "pnpm",
+      [
+        "exec",
+        "prisma",
+        "migrate",
+        "resolve",
+        "--rolled-back",
+        "20260828033000_forum_definer_row_security",
+      ],
+      { stdio: "inherit", env: migrateEnv },
+    );
+    if (resolve.status !== 0) {
+      process.exit(resolve.status ?? 1);
+    }
+  }
+
   const migrate = spawnSync("pnpm", ["exec", "prisma", "migrate", "deploy"], {
     stdio: "inherit",
-    env: { ...process.env, DATABASE_URL: migrateUrl },
+    env: migrateEnv,
   });
   if (migrate.status !== 0) {
     process.exit(migrate.status ?? 1);

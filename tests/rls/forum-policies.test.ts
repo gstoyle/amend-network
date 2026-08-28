@@ -111,25 +111,26 @@ describe("forum RLS", () => {
     expect(rows).toEqual([]);
   });
 
-  it("forum definer helpers turn row security off so FORCE RLS owners can read", async () => {
-    const rows = await migrator.$queryRaw<{ name: string; config: string[] | null }[]>`
-      SELECT p.proname AS name, p.proconfig AS config
-      FROM pg_proc p
-      JOIN pg_namespace n ON n.oid = p.pronamespace
+  it("forum tables grant the migrate owner FORCE RLS access for definer helpers", async () => {
+    const rows = await migrator.$queryRaw<{ table: string }[]>`
+      SELECT c.relname AS table
+      FROM pg_policy pol
+      JOIN pg_class c ON c.oid = pol.polrelid
+      JOIN pg_namespace n ON n.oid = c.relnamespace
       WHERE n.nspname = 'public'
-        AND p.proname IN (
-          'forum_category_visible_core',
-          'forum_thread_member_visible',
-          'forum_thread_writable',
-          'forum_post_member_visible',
-          'forum_thread_subscriber_emails',
-          'forum_bump_last_posted'
+        AND pol.polname IN (
+          'forum_categories_owner',
+          'forum_threads_owner',
+          'forum_posts_owner',
+          'forum_subscriptions_owner'
         )
     `;
-    expect(rows).toHaveLength(6);
-    for (const row of rows) {
-      expect(row.config?.includes("row_security=off"), row.name).toBe(true);
-    }
+    expect(rows.map((row) => row.table).sort()).toEqual([
+      "forum_categories",
+      "forum_posts",
+      "forum_subscriptions",
+      "forum_threads",
+    ]);
   });
 
   it("staff selects every category", async () => {
