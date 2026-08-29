@@ -8,7 +8,9 @@ const MARKER = `forum-rls-${randomUUID()}`;
 
 function isRlsDenied(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
-  return /row-level security policy|permission denied|members may only edit body/i.test(message);
+  return /row-level security policy|permission denied|members may only edit body|authors may only delete|No record was found for an update/i.test(
+    message,
+  );
 }
 
 async function insertCategory(visibility: string[]): Promise<string> {
@@ -257,6 +259,38 @@ describe("forum RLS", () => {
             title: "Should not land",
             lastPostedAt: new Date(),
           },
+        }),
+      ),
+    ).rejects.toSatisfy(isRlsDenied);
+  });
+
+  it("the thread author can soft-delete their thread and cannot edit its title", async () => {
+    const categoryId = await insertCategory(["all_authenticated"]);
+    categoryIds.push(categoryId);
+    const authorId = claimsFor("pathways")!.userId;
+    const ownId = await insertThread(categoryId, authorId);
+    const otherId = await insertThread(categoryId, randomUUID());
+    await expect(
+      withRls(ctx("pathways"), (tx) =>
+        tx.forumThread.update({
+          where: { id: ownId },
+          data: { title: "rewritten" },
+        }),
+      ),
+    ).rejects.toSatisfy(isRlsDenied);
+    await withRls(ctx("pathways"), (tx) =>
+      tx.forumThread.update({
+        where: { id: ownId },
+        data: { deletedAt: new Date(), hiddenAt: new Date() },
+      }),
+    );
+    const own = await migrator.forumThread.findUnique({ where: { id: ownId } });
+    expect(own?.deletedAt).not.toBeNull();
+    await expect(
+      withRls(ctx("pathways"), (tx) =>
+        tx.forumThread.update({
+          where: { id: otherId },
+          data: { deletedAt: new Date() },
         }),
       ),
     ).rejects.toSatisfy(isRlsDenied);

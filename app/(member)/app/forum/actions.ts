@@ -12,6 +12,7 @@ import {
 import { createPost, createThread, editPost, flagPost } from "@/lib/forum/write";
 import {
   deletePost,
+  deleteThread,
   hidePost,
   setThreadLocked,
   setThreadPinned,
@@ -147,4 +148,19 @@ export async function deletePostAction(formData: FormData): Promise<void> {
   }
   revalidatePath(`/app/forum/t/${threadId}`);
   redirect(`/app/forum/t/${threadId}`);
+}
+
+export async function deleteThreadAction(formData: FormData): Promise<void> {
+  const threadId = String(formData.get("threadId") ?? "");
+  const slug = String(formData.get("slug") ?? "");
+  const result = await deleteThread(await claims(), {
+    threadId,
+    ...(await forumWriteMeta()),
+  });
+  if (!result.ok) {
+    fail(slug ? `/app/forum/${slug}` : `/app/forum/t/${threadId}`, result.error);
+  }
+  revalidatePath("/app/forum");
+  revalidatePath(`/app/forum/${slug}`);
+  redirect(`/app/forum/${slug}`);
 }

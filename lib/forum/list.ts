@@ -17,6 +17,7 @@ export type ForumCategoryListItem = {
 export type ForumThreadListItem = {
   id: string;
   title: string;
+  authorId: string;
   authorLabel: string;
   lastPostedAt: Date;
   postCount: number;
@@ -37,6 +38,7 @@ export type ForumPostView = {
 export type ForumThreadView = {
   id: string;
   title: string;
+  authorId: string;
   categoryName: string;
   categorySlug: string;
   locked: boolean;
@@ -107,6 +109,7 @@ export async function listForumThreads(
     return rows.map((row) => ({
       id: row.id,
       title: row.title,
+      authorId: row.authorId,
       authorLabel: row.authorLabel,
       lastPostedAt: row.lastPostedAt,
       postCount: row._count.posts,
@@ -152,6 +155,7 @@ export async function getForumThread(
     return {
       id: row.id,
       title: row.title,
+      authorId: row.authorId,
       categoryName: row.category.name,
       categorySlug: row.category.slug,
       locked: row.locked,

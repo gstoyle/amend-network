@@ -2,7 +2,7 @@ import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
 import { writeAudit } from "@/lib/audit/write";
 import { withRls } from "@/lib/db/rls";
-import { FORUM_STAFF_ROLES, actorRole, rlsContext } from "@/lib/forum/staff";
+import { FORUM_STAFF_ROLES, actorRole, isForumStaff, rlsContext } from "@/lib/forum/staff";
 import type { ForumWriteMeta, ForumWriteResult } from "@/lib/forum/write";
 
 function fail(error: unknown, fallback: string): ForumWriteResult {
@@ -81,6 +81,46 @@ export async function deletePost(
     return { ok: false, error: "Could not delete this post." };
   }
   return { ok: true, id: input.postId };
+}
+
+export async function deleteThread(
+  session: SessionClaims | null,
+  input: { threadId: string } & ForumWriteMeta,
+): Promise<ForumWriteResult> {
+  try {
+    const claims = requireRole(session);
+    await withRls(rlsContext(claims), async (tx) => {
+      const thread = await tx.forumThread.findUnique({
+        where: { id: input.threadId },
+        select: { id: true, authorId: true, deletedAt: true },
+      });
+      if (!thread || thread.deletedAt) {
+        throw new Error("missing");
+      }
+      if (!isForumStaff(claims) && thread.authorId !== claims.userId) {
+        throw new Error("forbidden");
+      }
+      const now = new Date();
+      await tx.forumThread.update({
+        where: { id: thread.id },
+        data: { deletedAt: now, hiddenAt: now },
+      });
+      await writeAudit(tx, {
+        actorUserId: claims.userId,
+        actorRole: actorRole(claims),
+        action: "thread_deleted",
+        entityType: "forum_thread",
+        entityId: thread.id,
+        ip: input.ip,
+        userAgent: input.userAgent,
+        metadata: {},
+        severity: "warning",
+      });
+    });
+  } catch {
+    return { ok: false, error: "Could not delete this thread." };
+  }
+  return { ok: true, id: input.threadId };
 }
 
 export async function keepFlaggedPost(

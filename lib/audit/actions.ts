@@ -37,6 +37,7 @@ export const AUDIT_ACTIONS = [
   "post_deleted",
   "thread_locked",
   "thread_pinned",
+  "thread_deleted",
   "user_forum_suspended",
   "directory_privacy_changed",
   "directory_profile_viewed",

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { ForumDeleteThreadControl } from "@/components/forum-delete-post";
 import { PageHeader } from "@/components/page-header";
 import { SectionHeader } from "@/components/section-header";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,7 @@ import { cardClassName } from "@/components/ui/card";
 import { AuthDeniedError, isPendingSession, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
 import { getForumCategory, listForumThreads } from "@/lib/forum/list";
+import { isForumStaff } from "@/lib/forum/staff";
 import { cn, formatDayMonthYear } from "@/lib/utils";
 
 export default async function ForumCategoryPage({
@@ -24,10 +26,14 @@ export default async function ForumCategoryPage({
   }
   let category;
   let threads;
+  let userId = "";
+  let staff = false;
   try {
-    requireRole(claims);
-    category = await getForumCategory(claims, slug);
-    threads = category ? await listForumThreads(claims, slug) : [];
+    const authorized = requireRole(claims);
+    userId = authorized.userId;
+    staff = isForumStaff(authorized);
+    category = await getForumCategory(authorized, slug);
+    threads = category ? await listForumThreads(authorized, slug) : [];
   } catch (error) {
     if (error instanceof AuthDeniedError) {
       redirect("/login");
@@ -69,27 +75,36 @@ export default async function ForumCategoryPage({
           </div>
         ) : (
           <ul className="flex flex-col gap-3">
-            {threads.map((thread) => (
-              <li key={thread.id}>
-                <Link
-                  className={cn(
-                    cardClassName,
-                    "flex min-h-touch flex-col gap-2 p-4 transition-shadow duration-fast ease-standard hover:shadow-md sm:p-5",
-                  )}
-                  href={`/app/forum/t/${thread.id}`}
-                >
-                  <span className="flex flex-wrap items-center gap-2">
-                    {thread.pinned ? <Badge tone="primary">Pinned</Badge> : null}
-                    {thread.locked ? <Badge>Locked</Badge> : null}
-                    <span className="font-semibold text-foreground">{thread.title}</span>
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {thread.authorLabel} · {formatDayMonthYear(thread.lastPostedAt)} ·{" "}
-                    {thread.postCount} {thread.postCount === 1 ? "post" : "posts"}
-                  </span>
-                </Link>
-              </li>
-            ))}
+            {threads.map((thread) => {
+              const canDelete = staff || thread.authorId === userId;
+              return (
+                <li className={cn(cardClassName, "p-4 sm:p-5")} key={thread.id}>
+                  <div className="flex items-start gap-3">
+                    <Link
+                      className="min-h-touch min-w-0 flex-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      href={`/app/forum/t/${thread.id}`}
+                    >
+                      <span className="flex flex-wrap items-center gap-2">
+                        {thread.pinned ? <Badge tone="primary">Pinned</Badge> : null}
+                        {thread.locked ? <Badge>Locked</Badge> : null}
+                        <span className="font-semibold text-foreground">{thread.title}</span>
+                      </span>
+                      <span className="mt-2 block text-sm text-muted-foreground">
+                        {thread.authorLabel} · {formatDayMonthYear(thread.lastPostedAt)} ·{" "}
+                        {thread.postCount} {thread.postCount === 1 ? "post" : "posts"}
+                      </span>
+                    </Link>
+                    {canDelete ? (
+                      <ForumDeleteThreadControl
+                        slug={category.slug}
+                        threadId={thread.id}
+                        title={thread.title}
+                      />
+                    ) : null}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

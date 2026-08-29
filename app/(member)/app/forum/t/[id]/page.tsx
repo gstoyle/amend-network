@@ -10,7 +10,7 @@ import {
   subscribeAction,
 } from "@/app/(member)/app/forum/actions";
 import { AnnouncementBody } from "@/components/announcement-body";
-import { ForumDeletePostControl } from "@/components/forum-delete-post";
+import { ForumDeletePostControl, ForumDeleteThreadControl } from "@/components/forum-delete-post";
 import { MemberInitials } from "@/components/member-initials";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -55,11 +55,11 @@ function ActionDisclosure({
   name: string;
 }) {
   return (
-    <details className="group">
+    <details className="group w-full min-w-0">
       <summary aria-label={name} className={disclosureSummaryClassName}>
         {label}
       </summary>
-      <div className={cn(formInsetClassName, "mt-2")}>{children}</div>
+      <div className={cn(formInsetClassName, "mt-2 w-full")}>{children}</div>
     </details>
   );
 }
@@ -139,6 +139,13 @@ export default async function ForumThreadPage({
                 </form>
               </>
             ) : null}
+            {staff || thread.authorId === userId ? (
+              <ForumDeleteThreadControl
+                slug={thread.categorySlug}
+                threadId={thread.id}
+                title={thread.title}
+              />
+            ) : null}
           </>
         }
         eyebrow="Forum"
@@ -162,7 +169,7 @@ export default async function ForumThreadPage({
             (staff || now - post.createdAt.getTime() <= FORUM_EDIT_WINDOW_MS);
           return (
             <li className={cn(cardClassName, "p-4 sm:p-5")} key={post.id}>
-              <div className="flex gap-3">
+              <div className="flex items-start gap-3">
                 <MemberInitials initials={initialsFromAuthorLabel(post.authorLabel)} />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-foreground">{post.authorLabel}</p>
@@ -172,45 +179,43 @@ export default async function ForumThreadPage({
                     {post.hidden ? " · hidden" : null}
                   </p>
                 </div>
+                {staff ? (
+                  <ForumDeletePostControl
+                    authorLabel={post.authorLabel}
+                    postId={post.id}
+                    threadId={thread.id}
+                  />
+                ) : null}
               </div>
               <div className="mt-4">
                 <AnnouncementBody source={post.body} />
               </div>
-              {(canEdit || staff) ? (
-                <div className="mt-4 flex flex-wrap items-start gap-1 border-t border-border pt-3">
-                  {canEdit ? (
-                    <ActionDisclosure
-                      label="Edit"
-                      name={`Edit post by ${post.authorLabel}`}
-                    >
-                      <form action={editPostAction} className="flex flex-col gap-3">
-                        <input name="threadId" type="hidden" value={thread.id} />
-                        <input name="postId" type="hidden" value={post.id} />
-                        <div className={formFieldClassName}>
-                          <Label htmlFor={`edit-${post.id}`}>Body</Label>
-                          <textarea
-                            className={controlClassName}
-                            defaultValue={post.body}
-                            id={`edit-${post.id}`}
-                            maxLength={8000}
-                            name="body"
-                            required
-                            rows={4}
-                          />
-                        </div>
-                        <Button className="self-start" type="submit" variant="outline">
-                          Save edit
-                        </Button>
-                      </form>
-                    </ActionDisclosure>
-                  ) : null}
-                  {staff ? (
-                    <ForumDeletePostControl
-                      authorLabel={post.authorLabel}
-                      postId={post.id}
-                      threadId={thread.id}
-                    />
-                  ) : null}
+              {canEdit ? (
+                <div className="mt-4 w-full min-w-0 border-t border-border pt-3">
+                  <ActionDisclosure
+                    label="Edit"
+                    name={`Edit post by ${post.authorLabel}`}
+                  >
+                    <form action={editPostAction} className="flex w-full min-w-0 flex-col gap-3">
+                      <input name="threadId" type="hidden" value={thread.id} />
+                      <input name="postId" type="hidden" value={post.id} />
+                      <div className={cn(formFieldClassName, "w-full")}>
+                        <Label htmlFor={`edit-${post.id}`}>Body</Label>
+                        <textarea
+                          className={controlClassName}
+                          defaultValue={post.body}
+                          id={`edit-${post.id}`}
+                          maxLength={8000}
+                          name="body"
+                          required
+                          rows={4}
+                        />
+                      </div>
+                      <Button className="self-start" type="submit" variant="outline">
+                        Save edit
+                      </Button>
+                    </form>
+                  </ActionDisclosure>
                 </div>
               ) : null}
             </li>
