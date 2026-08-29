@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { LogoutButton } from "@/components/logout-button";
 import { Icon } from "@/components/ui/icon";
+import { isCurrentPath } from "@/lib/nav/current";
 import type { Destination } from "@/lib/nav/destinations";
 import type { ShellIdentity } from "@/lib/profile/identity";
 import { cn } from "@/lib/utils";
@@ -11,34 +15,36 @@ const MENU_LINK =
 export function MobileTopBar({
   account,
   admin,
-  currentHref,
   identity,
 }: {
   account: Destination[];
   admin: Destination[];
-  currentHref: string | null;
   identity: ShellIdentity;
 }) {
+  const pathname = usePathname() ?? "";
   const hasMenu = account.length > 0 || admin.length > 0;
 
   function menuItems(destinations: Destination[]) {
-    return destinations.map((destination) => (
-      <li key={destination.href}>
-        <Link
-          aria-current={destination.href === currentHref ? "page" : undefined}
-          className={cn(
-            MENU_LINK,
-            destination.href === currentHref
-              ? "bg-sidebar-accent text-sidebar-accent-foreground"
-              : "text-muted-foreground hover:bg-muted hover:text-foreground",
-          )}
-          href={destination.href}
-        >
-          <Icon className="size-4 shrink-0" name={destination.iconKey} />
-          {destination.label}
-        </Link>
-      </li>
-    ));
+    return destinations.map((destination) => {
+      const current = isCurrentPath(pathname, destination.href, destination.match);
+      return (
+        <li key={destination.href}>
+          <Link
+            aria-current={current ? "page" : undefined}
+            className={cn(
+              MENU_LINK,
+              current
+                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            )}
+            href={destination.href}
+          >
+            <Icon className="size-4 shrink-0" name={destination.iconKey} />
+            {destination.label}
+          </Link>
+        </li>
+      );
+    });
   }
 
   return (
@@ -52,7 +58,7 @@ export function MobileTopBar({
         </Link>
 
         {hasMenu ? (
-          <details className="group relative" key={currentHref ?? "account-menu"}>
+          <details className="group relative" key={pathname}>
             <summary
               aria-label={`Open account menu for ${identity.displayName}`}
               className="flex min-h-touch min-w-touch cursor-pointer list-none items-center justify-center rounded-md [&::-webkit-details-marker]:hidden"

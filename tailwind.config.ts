@@ -67,6 +67,7 @@ const config: Config = {
         input: "var(--input)",
         field: "var(--field)",
         ring: "var(--ring)",
+        overlay: "var(--overlay)",
         sidebar: {
           DEFAULT: "var(--sidebar)",
           foreground: "var(--sidebar-foreground)",

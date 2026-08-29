@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppShell } from "@/components/app-shell";
@@ -27,8 +26,6 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   if (destination) {
     redirect(destination);
   }
-  const pathname = (await headers()).get("x-pathname") ?? "";
-
   let identity = ANONYMOUS_IDENTITY;
   if (claims) {
     try {
@@ -45,7 +42,6 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       account={accountDestinations(claims)}
       admin={adminDestinations(claims)}
       identity={identity}
-      pathname={pathname}
       primary={memberDestinations(claims)}
     >
       {children}

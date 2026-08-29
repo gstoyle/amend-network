@@ -1,17 +1,17 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
+import { isCurrentPath } from "@/lib/nav/current";
 import type { Destination } from "@/lib/nav/destinations";
 
 const ITEM_BASE =
   "flex min-h-touch flex-col items-center justify-center gap-1 px-1 py-2 text-xs font-medium transition-colors duration-fast ease-standard";
 
-export function BottomTabBar({
-  currentHref,
-  destinations,
-}: {
-  currentHref: string | null;
-  destinations: Destination[];
-}) {
+export function BottomTabBar({ destinations }: { destinations: Destination[] }) {
+  const pathname = usePathname() ?? "";
+
   if (destinations.length === 0) {
     return null;
   }
@@ -24,7 +24,7 @@ export function BottomTabBar({
     >
       <ul className="mx-auto flex max-w-content items-stretch">
         {destinations.map((destination) => {
-          const current = destination.href === currentHref;
+          const current = isCurrentPath(pathname, destination.href, destination.match);
           return (
             <li className="flex-1" key={destination.href}>
               <Link

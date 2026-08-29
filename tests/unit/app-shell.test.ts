@@ -14,6 +14,7 @@ const forbiddenLiteral = /#[0-9a-fA-F]{3,8}\b|\brgb\(|\bhsl\(|\b\d+px\b/;
 const CHROME_FILES = [
   "components/app-shell.tsx",
   "components/shell/desktop-sidebar.tsx",
+  "components/shell/desktop-account-menu.tsx",
   "components/shell/mobile-top-bar.tsx",
   "components/shell/bottom-tab-bar.tsx",
   "components/ui/icon.tsx",
@@ -55,20 +56,42 @@ describe("shell chrome is token-driven (T004 / FR-017)", () => {
   });
 });
 
-describe("shell chrome ships no client JavaScript (T004 / FR-020, FR-021)", () => {
-  for (const relative of CHROME_FILES) {
+describe("shell chrome navigation still works without JS (T004 / FR-020, FR-021, amended 2026-08-29)", () => {
+  // app-shell.tsx and icon.tsx are pure composition/presentation and stay server-only.
+  // The nav components need usePathname so active-state highlighting reflects the
+  // current route on client navigation: a shared layout's x-pathname header does not
+  // update on navigation between sibling routes (research.md §4 amendment).
+  for (const relative of [
+    "components/app-shell.tsx",
+    "components/shell/desktop-account-menu.tsx",
+    "components/ui/icon.tsx",
+  ]) {
     it(`${relative} is a server component`, () => {
       expect(read(relative), relative).not.toContain("use client");
     });
   }
 
-  it("navigation is plain links, not scripted handlers", () => {
+  it("nav components use usePathname only to compute the active entry, not to gate navigation", () => {
+    for (const relative of [
+      "components/shell/desktop-sidebar.tsx",
+      "components/shell/mobile-top-bar.tsx",
+      "components/shell/bottom-tab-bar.tsx",
+    ]) {
+      const source = read(relative);
+      expect(source, relative).toContain("use client");
+      expect(source, relative).toContain("usePathname");
+      expect(source, relative).not.toMatch(/\bonClick\b|\buseState\b/);
+    }
+  });
+
+  it("primary destinations render as real anchor-backed Links, not client-only handlers", () => {
     for (const relative of [
       "components/shell/desktop-sidebar.tsx",
       "components/shell/bottom-tab-bar.tsx",
     ]) {
       const source = read(relative);
-      expect(source, relative).not.toMatch(/\bonClick\b|\buseState\b|\busePathname\b/);
+      expect(source, relative).toContain("<Link");
+      expect(source, relative).toContain("href={destination.href}");
     }
   });
 });

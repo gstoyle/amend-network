@@ -47,7 +47,7 @@ function ConfirmDelete({
       </Button>
       <dialog
         aria-labelledby={titleId}
-        className="w-full max-w-md rounded-xl border border-border bg-card p-6 text-card-foreground shadow-lg backdrop:bg-foreground/40"
+        className="w-full max-w-md rounded-xl border border-border bg-card p-6 text-card-foreground shadow-lg backdrop:bg-overlay"
         onClick={(event) => {
           if (event.target === event.currentTarget) {
             close();

@@ -1,6 +1,7 @@
 import { ADMIN_ROLES } from "@/lib/auth/admin-mfa";
 import type { AdminRole, SessionClaims } from "@/lib/auth/types";
 import { EVENT_STAFF_ROLES } from "@/lib/events/publish";
+import { isCurrentPath } from "@/lib/nav/current";
 
 export type IconKey =
   | "home"
@@ -177,13 +178,7 @@ export function accountDestinations(claims: SessionClaims | null): Destination[]
 }
 
 export function isCurrent(path: string, destination: Destination): boolean {
-  if (path.length === 0) {
-    return false;
-  }
-  if (destination.match === "exact") {
-    return path === destination.href;
-  }
-  return path === destination.href || path.startsWith(`${destination.href}/`);
+  return isCurrentPath(path, destination.href, destination.match);
 }
 
 /** Longest href wins so a detail page marks one section, never two. */

@@ -40,7 +40,9 @@ Every Technical Context unknown is resolved below. Tokens come from `008`. Sessi
 
 **Alternatives considered**:
 
-- `usePathname()` — requires `use client` on the shell. Rejected against FR-020 and the budget.
+- `usePathname()` — requires `use client` on the shell. Originally rejected against FR-020 and the budget.
+
+**Amendment (2026-08-29)**: The `x-pathname`-header approach turned out to be wrong in practice, not just in principle. `app/(member)/layout.tsx` and `app/(admin)/layout.tsx` are shared layouts; the App Router does not re-render a shared layout segment on client-side navigation between sibling routes under it, so the `x-pathname` value captured at first paint stayed pinned to whichever route loaded the layout first for that session, and every later navigation highlighted the wrong entry. `desktop-sidebar.tsx`, `mobile-top-bar.tsx`, and `bottom-tab-bar.tsx` now call `usePathname()` (via `lib/nav/current.ts`'s dependency-free `isCurrentPath`) to compute the current entry per render. FR-020 is still satisfied: every entry renders as a real `<a href>` that navigates correctly with JavaScript disabled or not yet hydrated; only the active-state highlight needs hydration, which is consistent with "moving between destinations works from first paint." `app-shell.tsx` and `icon.tsx` remain server-only.
 
 ## 5. Navigation definition lives in `lib/`, not `components/`
 

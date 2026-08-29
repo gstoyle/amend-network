@@ -56,7 +56,6 @@ export default async function MemberLayout({ children }: { children: ReactNode }
       account={accountDestinations(claims)}
       admin={adminDestinations(claims)}
       identity={identity}
-      pathname={pathname}
       primary={memberDestinations(claims)}
     >
       <div className="flex flex-col gap-6 lg:gap-8">

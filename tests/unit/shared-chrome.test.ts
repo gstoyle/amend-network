@@ -107,13 +107,17 @@ describe("shared chrome (008 US1)", () => {
   it("the shell keeps the token chrome the member header used to carry", () => {
     const shell = read("components/app-shell.tsx");
     const sidebar = read("components/shell/desktop-sidebar.tsx");
+    const accountMenu = read("components/shell/desktop-account-menu.tsx");
     expect(shell).toContain("bg-background");
     expect(shell).toContain("px-gutter");
     expect(sidebar).toContain("bg-sidebar");
     expect(sidebar).toContain("border-sidebar-border");
     expect(sidebar).toContain("min-h-touch");
-    expect(sidebar).toContain("LogoutButton");
-    expect(sidebar).toContain('aria-label="Account"');
+    // Identity, profile links, and sign-out moved to a top-right dropdown so the
+    // active section and the account switcher aren't both fighting for the sidebar.
+    expect(shell).toContain("DesktopAccountMenu");
+    expect(accountMenu).toContain("LogoutButton");
+    expect(accountMenu).toContain('aria-label="Account"');
   });
 
   it("the destination module owns the member link set", () => {
