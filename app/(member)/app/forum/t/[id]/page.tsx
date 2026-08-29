@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
@@ -12,9 +13,16 @@ import {
   subscribeAction,
 } from "@/app/(member)/app/forum/actions";
 import { AnnouncementBody } from "@/components/announcement-body";
+import { MemberInitials } from "@/components/member-initials";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  cardClassName,
+  formFieldClassName,
+  formInsetClassName,
+  formSurfaceClassName,
+} from "@/components/ui/card";
 import { controlClassName } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthDeniedError, isPendingSession, requireRole } from "@/lib/auth/requireRole";
@@ -26,6 +34,36 @@ import { cn, formatDayMonthYear } from "@/lib/utils";
 
 function currentTimestamp(): number {
   return Date.now();
+}
+
+function initialsFromAuthorLabel(label: string): string {
+  const [first = "", second = ""] = label.trim().split(/\s+/);
+  const letters = `${first.charAt(0)}${second.replaceAll(".", "").charAt(0)}`.toUpperCase();
+  return letters || "—";
+}
+
+const disclosureSummaryClassName = cn(
+  buttonVariants({ variant: "ghost" }),
+  "cursor-pointer list-none group-open:bg-muted [&::-webkit-details-marker]:hidden",
+);
+
+function ActionDisclosure({
+  children,
+  label,
+  name,
+}: {
+  children: ReactNode;
+  label: string;
+  name: string;
+}) {
+  return (
+    <details className="group">
+      <summary aria-label={name} className={disclosureSummaryClassName}>
+        {label}
+      </summary>
+      <div className={cn(formInsetClassName, "mt-2")}>{children}</div>
+    </details>
+  );
 }
 
 export default async function ForumThreadPage({
@@ -72,135 +110,171 @@ export default async function ForumThreadPage({
           {thread.categoryName}
         </Link>
       </p>
-      <PageHeader eyebrow="Forum" title={thread.title} />
-      <div className="flex flex-wrap gap-2">
-        {thread.pinned ? <Badge tone="primary">Pinned</Badge> : null}
-        {thread.locked ? <Badge>Locked</Badge> : null}
-        {thread.hidden ? <Badge tone="support">Hidden</Badge> : null}
-      </div>
+      <PageHeader
+        actions={
+          <>
+            {thread.pinned ? <Badge tone="primary">Pinned</Badge> : null}
+            {thread.locked ? <Badge>Locked</Badge> : null}
+            {thread.hidden ? <Badge tone="support">Hidden</Badge> : null}
+            <form action={subscribeAction}>
+              <input name="threadId" type="hidden" value={thread.id} />
+              <input name="subscribed" type="hidden" value={String(thread.subscribed)} />
+              <Button type="submit" variant="outline">
+                {thread.subscribed ? "Unsubscribe" : "Subscribe"}
+              </Button>
+            </form>
+            {staff ? (
+              <>
+                <form action={lockThreadAction}>
+                  <input name="threadId" type="hidden" value={thread.id} />
+                  <input name="locked" type="hidden" value={String(thread.locked)} />
+                  <Button type="submit" variant="outline">
+                    {thread.locked ? "Unlock" : "Lock"}
+                  </Button>
+                </form>
+                <form action={pinThreadAction}>
+                  <input name="threadId" type="hidden" value={thread.id} />
+                  <input name="pinned" type="hidden" value={String(thread.pinned)} />
+                  <Button type="submit" variant="outline">
+                    {thread.pinned ? "Unpin" : "Pin"}
+                  </Button>
+                </form>
+              </>
+            ) : null}
+          </>
+        }
+        eyebrow="Forum"
+        title={thread.title}
+      />
       {query.error ? (
         <p className="text-sm text-destructive" role="alert">
           {query.error}
         </p>
       ) : null}
 
-      <form action={subscribeAction}>
-        <input name="threadId" type="hidden" value={thread.id} />
-        <input name="subscribed" type="hidden" value={String(thread.subscribed)} />
-        <Button type="submit" variant="outline">
-          {thread.subscribed ? "Unsubscribe" : "Subscribe"}
-        </Button>
-      </form>
-
-      {staff ? (
-        <div className="flex flex-wrap gap-2">
-          <form action={lockThreadAction}>
-            <input name="threadId" type="hidden" value={thread.id} />
-            <input name="locked" type="hidden" value={String(thread.locked)} />
-            <Button type="submit" variant="outline">
-              {thread.locked ? "Unlock" : "Lock"}
-            </Button>
-          </form>
-          <form action={pinThreadAction}>
-            <input name="threadId" type="hidden" value={thread.id} />
-            <input name="pinned" type="hidden" value={String(thread.pinned)} />
-            <Button type="submit" variant="outline">
-              {thread.pinned ? "Unpin" : "Pin"}
-            </Button>
-          </form>
-        </div>
-      ) : null}
-
-      <ol className="flex flex-col gap-4">
+      <ol className="flex flex-col gap-3">
         {thread.posts.map((post) => {
           const canEdit =
             post.authorId === userId &&
             (staff || now - post.createdAt.getTime() <= FORUM_EDIT_WINDOW_MS);
           return (
-            <li className="rounded-lg border border-border bg-card p-4" key={post.id}>
-              <p className="text-sm text-muted-foreground">
-                {post.authorLabel} · {formatDayMonthYear(post.createdAt)}
-                {post.editedAt ? " · edited" : null}
-                {post.hidden ? " · hidden" : null}
-              </p>
-              <div className="mt-2">
+            <li className={cn(cardClassName, "p-4 sm:p-5")} key={post.id}>
+              <div className="flex gap-3">
+                <MemberInitials initials={initialsFromAuthorLabel(post.authorLabel)} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-foreground">{post.authorLabel}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatDayMonthYear(post.createdAt)}
+                    {post.editedAt ? " · edited" : null}
+                    {post.hidden ? " · hidden" : null}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4">
                 <AnnouncementBody source={post.body} />
               </div>
-              {canEdit ? (
-                <form action={editPostAction} className="mt-4 flex flex-col gap-2">
-                  <input name="threadId" type="hidden" value={thread.id} />
-                  <input name="postId" type="hidden" value={post.id} />
-                  <Label htmlFor={`edit-${post.id}`}>Edit</Label>
-                  <textarea
-                    className={controlClassName}
-                    defaultValue={post.body}
-                    id={`edit-${post.id}`}
-                    maxLength={8000}
-                    name="body"
-                    required
-                    rows={4}
-                  />
-                  <Button type="submit" variant="outline">
-                    Save edit
-                  </Button>
-                </form>
-              ) : null}
-              <form action={flagPostAction} className="mt-4 flex flex-col gap-2">
-                <input name="threadId" type="hidden" value={thread.id} />
-                <input name="postId" type="hidden" value={post.id} />
-                <Label htmlFor={`flag-${post.id}`}>Flag this post</Label>
-                <textarea
-                  className={controlClassName}
-                  id={`flag-${post.id}`}
-                  maxLength={500}
-                  name="reason"
-                  required
-                  rows={2}
-                />
-                <Button type="submit" variant="outline">
-                  Flag
-                </Button>
-              </form>
-              {staff ? (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <form action={hidePostAction}>
+              <div className="mt-4 flex flex-wrap items-start gap-1 border-t border-border pt-3">
+                {canEdit ? (
+                  <ActionDisclosure
+                    label="Edit"
+                    name={`Edit post by ${post.authorLabel}`}
+                  >
+                    <form action={editPostAction} className="flex flex-col gap-3">
+                      <input name="threadId" type="hidden" value={thread.id} />
+                      <input name="postId" type="hidden" value={post.id} />
+                      <div className={formFieldClassName}>
+                        <Label htmlFor={`edit-${post.id}`}>Body</Label>
+                        <textarea
+                          className={controlClassName}
+                          defaultValue={post.body}
+                          id={`edit-${post.id}`}
+                          maxLength={8000}
+                          name="body"
+                          required
+                          rows={4}
+                        />
+                      </div>
+                      <Button className="self-start" type="submit" variant="outline">
+                        Save edit
+                      </Button>
+                    </form>
+                  </ActionDisclosure>
+                ) : null}
+                <ActionDisclosure
+                  label="Flag"
+                  name={`Flag post by ${post.authorLabel}`}
+                >
+                  <form action={flagPostAction} className="flex flex-col gap-3">
                     <input name="threadId" type="hidden" value={thread.id} />
                     <input name="postId" type="hidden" value={post.id} />
-                    <Button type="submit" variant="outline">
-                      Hide
+                    <div className={formFieldClassName}>
+                      <Label htmlFor={`flag-${post.id}`}>Reason</Label>
+                      <textarea
+                        className={controlClassName}
+                        id={`flag-${post.id}`}
+                        maxLength={500}
+                        name="reason"
+                        required
+                        rows={3}
+                      />
+                    </div>
+                    <Button className="self-start" type="submit" variant="outline">
+                      Submit flag
                     </Button>
                   </form>
-                  <form action={deletePostAction}>
-                    <input name="threadId" type="hidden" value={thread.id} />
-                    <input name="postId" type="hidden" value={post.id} />
-                    <Button type="submit" variant="outline">
-                      Delete
-                    </Button>
-                  </form>
-                </div>
-              ) : null}
+                </ActionDisclosure>
+                {staff ? (
+                  <>
+                    <form action={hidePostAction}>
+                      <input name="threadId" type="hidden" value={thread.id} />
+                      <input name="postId" type="hidden" value={post.id} />
+                      <Button type="submit" variant="ghost">
+                        Hide
+                      </Button>
+                    </form>
+                    <form action={deletePostAction}>
+                      <input name="threadId" type="hidden" value={thread.id} />
+                      <input name="postId" type="hidden" value={post.id} />
+                      <Button type="submit" variant="ghost">
+                        Delete
+                      </Button>
+                    </form>
+                  </>
+                ) : null}
+              </div>
             </li>
           );
         })}
       </ol>
 
       {thread.locked ? (
-        <p className="text-sm text-muted-foreground">This thread is locked.</p>
+        <p className={cn(formInsetClassName, "text-sm text-muted-foreground")}>
+          This thread is locked. New replies are closed.
+        </p>
       ) : (
-        <form action={createPostAction} className="flex max-w-xl flex-col gap-4">
+        <form
+          action={createPostAction}
+          aria-labelledby="forum-reply-heading"
+          className={cn(formSurfaceClassName, "flex flex-col gap-4")}
+        >
           <input name="threadId" type="hidden" value={thread.id} />
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="reply">Reply</Label>
+          <h2 className="text-base font-semibold text-foreground" id="forum-reply-heading">
+            Reply
+          </h2>
+          <div className={formFieldClassName}>
+            <Label htmlFor="reply">Message</Label>
             <textarea
               className={controlClassName}
               id="reply"
               maxLength={8000}
               name="body"
               required
-              rows={6}
+              rows={5}
             />
           </div>
-          <Button type="submit">Post reply</Button>
+          <Button className="self-start" type="submit">
+            Post reply
+          </Button>
         </form>
       )}
     </div>

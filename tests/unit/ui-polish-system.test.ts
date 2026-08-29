@@ -47,11 +47,16 @@ describe("shared UI polish system", () => {
   it("polishes the named forum and privacy surfaces with shared patterns", () => {
     const adminForum = read("app/(admin)/admin/forum/page.tsx");
     const newThread = read("app/(member)/app/forum/[slug]/new/page.tsx");
+    const thread = read("app/(member)/app/forum/t/[id]/page.tsx");
     const privacy = read("components/directory-privacy-form.tsx");
 
     expect(adminForum).toContain("formSurfaceClassName");
     expect(adminForum).toContain("SectionHeader");
     expect(newThread).toContain("formSurfaceClassName");
+    expect(thread).toContain("formSurfaceClassName");
+    expect(thread).toContain("<details");
+    expect(thread).toContain("ActionDisclosure");
+    expect(thread).not.toContain("Flag this post");
     expect(privacy).toContain("formSurfaceClassName");
     expect(privacy).toContain("checkboxClassName");
     expect(privacy).not.toContain("min-h-touch min-w-touch");
