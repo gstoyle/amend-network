@@ -56,7 +56,16 @@ describe("shared UI polish system", () => {
     expect(thread).toContain("formSurfaceClassName");
     expect(thread).toContain("<details");
     expect(thread).toContain("ActionDisclosure");
+    expect(thread).toContain("ForumDeletePostControl");
+    expect(thread).not.toContain("flagPostAction");
+    expect(thread).not.toContain("hidePostAction");
     expect(thread).not.toContain("Flag this post");
+    const deleteControl = read("components/forum-delete-post.tsx");
+    expect(deleteControl).toContain("showModal");
+    expect(deleteControl).toContain("deletePostAction");
+    expect(deleteControl).toContain("Delete this post?");
+    const list = read("lib/forum/list.ts");
+    expect(list).toContain("!post.deletedAt");
     expect(privacy).toContain("formSurfaceClassName");
     expect(privacy).toContain("checkboxClassName");
     expect(privacy).not.toContain("min-h-touch min-w-touch");

@@ -50,8 +50,8 @@ export async function deletePost(
   session: SessionClaims | null,
   input: { postId: string } & ForumWriteMeta,
 ): Promise<ForumWriteResult> {
-  const claims = requireRole(session, { admin: [...FORUM_STAFF_ROLES], mfa: true });
   try {
+    const claims = requireRole(session, { admin: [...FORUM_STAFF_ROLES], mfa: true });
     await withRls(rlsContext(claims), async (tx) => {
       await tx.forumPost.update({
         where: { id: input.postId },
@@ -77,8 +77,8 @@ export async function deletePost(
         severity: "warning",
       });
     });
-  } catch (error) {
-    return fail(error, "Could not delete this post.");
+  } catch {
+    return { ok: false, error: "Could not delete this post." };
   }
   return { ok: true, id: input.postId };
 }

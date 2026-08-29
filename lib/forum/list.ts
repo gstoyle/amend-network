@@ -139,7 +139,7 @@ export async function getForumThread(
       return null;
     }
     const posts = row.posts
-      .filter((post) => staff || (!post.hiddenAt && !post.deletedAt))
+      .filter((post) => !post.deletedAt && (staff || !post.hiddenAt))
       .map((post) => ({
         id: post.id,
         authorLabel: post.authorLabel,

@@ -4,15 +4,13 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import {
   createPostAction,
-  deletePostAction,
   editPostAction,
-  flagPostAction,
-  hidePostAction,
   lockThreadAction,
   pinThreadAction,
   subscribeAction,
 } from "@/app/(member)/app/forum/actions";
 import { AnnouncementBody } from "@/components/announcement-body";
+import { ForumDeletePostControl } from "@/components/forum-delete-post";
 import { MemberInitials } from "@/components/member-initials";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -153,6 +151,11 @@ export default async function ForumThreadPage({
       ) : null}
 
       <ol className="flex flex-col gap-3">
+        {thread.posts.length === 0 ? (
+          <li className={cn(cardClassName, "border-dashed p-6 text-center text-sm text-muted-foreground")}>
+            No posts remain in this discussion.
+          </li>
+        ) : null}
         {thread.posts.map((post) => {
           const canEdit =
             post.authorId === userId &&
@@ -173,75 +176,43 @@ export default async function ForumThreadPage({
               <div className="mt-4">
                 <AnnouncementBody source={post.body} />
               </div>
-              <div className="mt-4 flex flex-wrap items-start gap-1 border-t border-border pt-3">
-                {canEdit ? (
-                  <ActionDisclosure
-                    label="Edit"
-                    name={`Edit post by ${post.authorLabel}`}
-                  >
-                    <form action={editPostAction} className="flex flex-col gap-3">
-                      <input name="threadId" type="hidden" value={thread.id} />
-                      <input name="postId" type="hidden" value={post.id} />
-                      <div className={formFieldClassName}>
-                        <Label htmlFor={`edit-${post.id}`}>Body</Label>
-                        <textarea
-                          className={controlClassName}
-                          defaultValue={post.body}
-                          id={`edit-${post.id}`}
-                          maxLength={8000}
-                          name="body"
-                          required
-                          rows={4}
-                        />
-                      </div>
-                      <Button className="self-start" type="submit" variant="outline">
-                        Save edit
-                      </Button>
-                    </form>
-                  </ActionDisclosure>
-                ) : null}
-                <ActionDisclosure
-                  label="Flag"
-                  name={`Flag post by ${post.authorLabel}`}
-                >
-                  <form action={flagPostAction} className="flex flex-col gap-3">
-                    <input name="threadId" type="hidden" value={thread.id} />
-                    <input name="postId" type="hidden" value={post.id} />
-                    <div className={formFieldClassName}>
-                      <Label htmlFor={`flag-${post.id}`}>Reason</Label>
-                      <textarea
-                        className={controlClassName}
-                        id={`flag-${post.id}`}
-                        maxLength={500}
-                        name="reason"
-                        required
-                        rows={3}
-                      />
-                    </div>
-                    <Button className="self-start" type="submit" variant="outline">
-                      Submit flag
-                    </Button>
-                  </form>
-                </ActionDisclosure>
-                {staff ? (
-                  <>
-                    <form action={hidePostAction}>
-                      <input name="threadId" type="hidden" value={thread.id} />
-                      <input name="postId" type="hidden" value={post.id} />
-                      <Button type="submit" variant="ghost">
-                        Hide
-                      </Button>
-                    </form>
-                    <form action={deletePostAction}>
-                      <input name="threadId" type="hidden" value={thread.id} />
-                      <input name="postId" type="hidden" value={post.id} />
-                      <Button type="submit" variant="ghost">
-                        Delete
-                      </Button>
-                    </form>
-                  </>
-                ) : null}
-              </div>
+              {(canEdit || staff) ? (
+                <div className="mt-4 flex flex-wrap items-start gap-1 border-t border-border pt-3">
+                  {canEdit ? (
+                    <ActionDisclosure
+                      label="Edit"
+                      name={`Edit post by ${post.authorLabel}`}
+                    >
+                      <form action={editPostAction} className="flex flex-col gap-3">
+                        <input name="threadId" type="hidden" value={thread.id} />
+                        <input name="postId" type="hidden" value={post.id} />
+                        <div className={formFieldClassName}>
+                          <Label htmlFor={`edit-${post.id}`}>Body</Label>
+                          <textarea
+                            className={controlClassName}
+                            defaultValue={post.body}
+                            id={`edit-${post.id}`}
+                            maxLength={8000}
+                            name="body"
+                            required
+                            rows={4}
+                          />
+                        </div>
+                        <Button className="self-start" type="submit" variant="outline">
+                          Save edit
+                        </Button>
+                      </form>
+                    </ActionDisclosure>
+                  ) : null}
+                  {staff ? (
+                    <ForumDeletePostControl
+                      authorLabel={post.authorLabel}
+                      postId={post.id}
+                      threadId={thread.id}
+                    />
+                  ) : null}
+                </div>
+              ) : null}
             </li>
           );
         })}
