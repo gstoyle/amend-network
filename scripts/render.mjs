@@ -8,6 +8,12 @@ import { join } from "node:path";
 
 const AMEND_APP_ROLE = "amend_app";
 
+/** Failed Prisma migrations that are safe to mark rolled back and retry (idempotent SQL). */
+const RETRY_FAILED_MIGRATIONS = [
+  "20260828033000_forum_definer_row_security",
+  "20260914160000_pause_all_members_forum",
+];
+
 function usage() {
   process.stderr.write("Usage: node scripts/render.mjs <copy-standalone|bootstrap|start>\n");
   process.exit(1);
@@ -78,7 +84,7 @@ async function bootstrap() {
     datasources: { db: { url: migrateUrl } },
   });
   const migrateEnv = { ...process.env, DATABASE_URL: migrateUrl };
-  let rolledBackFailedDefiner = false;
+  const migrationsToRetry = [];
 
   try {
     await prisma.$executeRawUnsafe(`CREATE EXTENSION IF NOT EXISTS pgcrypto`);
@@ -98,16 +104,20 @@ async function bootstrap() {
     );
     await prisma.$executeRawUnsafe(`GRANT USAGE ON SCHEMA public TO ${AMEND_APP_ROLE}`);
     try {
-      const failed = await prisma.$queryRaw`
-        SELECT 1
-        FROM _prisma_migrations
-        WHERE migration_name = '20260828033000_forum_definer_row_security'
-          AND finished_at IS NULL
-          AND rolled_back_at IS NULL
-      `;
-      rolledBackFailedDefiner = Array.isArray(failed) && failed.length > 0;
+      for (const name of RETRY_FAILED_MIGRATIONS) {
+        const failed = await prisma.$queryRaw`
+          SELECT 1
+          FROM _prisma_migrations
+          WHERE migration_name = ${name}
+            AND finished_at IS NULL
+            AND rolled_back_at IS NULL
+        `;
+        if (Array.isArray(failed) && failed.length > 0) {
+          migrationsToRetry.push(name);
+        }
+      }
     } catch {
-      rolledBackFailedDefiner = false;
+      // _prisma_migrations is missing on a first bootstrap.
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "bootstrap failed";
@@ -117,17 +127,10 @@ async function bootstrap() {
     await prisma.$disconnect();
   }
 
-  if (rolledBackFailedDefiner) {
+  for (const name of migrationsToRetry) {
     const resolve = spawnSync(
       "pnpm",
-      [
-        "exec",
-        "prisma",
-        "migrate",
-        "resolve",
-        "--rolled-back",
-        "20260828033000_forum_definer_row_security",
-      ],
+      ["exec", "prisma", "migrate", "resolve", "--rolled-back", name],
       { stdio: "inherit", env: migrateEnv },
     );
     if (resolve.status !== 0) {
