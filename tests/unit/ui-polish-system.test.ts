@@ -77,4 +77,22 @@ describe("shared UI polish system", () => {
     expect(privacy).toContain("checkboxClassName");
     expect(privacy).not.toContain("min-h-touch min-w-touch");
   });
+
+  it("keeps the public sign-in page generic, single-column, and program-agnostic", () => {
+    const home = read("app/page.tsx");
+    const frame = read("components/auth-split.tsx");
+
+    expect(home).toContain('title="Amend Member Network"');
+    expect(home).toContain(
+      "Sign in for access to program announcements, resources, event information, and community forums.",
+    );
+    expect(home).toContain('href="/login"');
+    expect(home).toContain("Sign in");
+    expect(home).toContain('href="/register"');
+    expect(home).toContain("Request access");
+    expect(home).not.toMatch(/Pathways|LEAD/);
+    expect(frame).not.toMatch(/Pathways|LEAD/);
+    expect(frame).not.toContain("grid-cols-2");
+    expect(frame).toContain("formSurfaceClassName");
+  });
 });

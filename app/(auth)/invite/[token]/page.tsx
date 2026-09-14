@@ -69,7 +69,6 @@ export default async function InviteCompletePage({
           </Link>
         </p>
       }
-      panelAction={{ href: "/login", label: "Sign in" }}
       title="Complete invitation"
     >
       {feedback ? (

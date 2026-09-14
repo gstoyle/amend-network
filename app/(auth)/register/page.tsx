@@ -46,7 +46,6 @@ export default async function RegisterPage() {
           </Link>
         </p>
       }
-      panelAction={{ href: "/login", label: "Sign in" }}
       title="Request access"
     >
       <RegisterForm action={submitRegistration} affiliations={affiliations} networks={networks} />

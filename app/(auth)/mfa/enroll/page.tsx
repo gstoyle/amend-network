@@ -46,7 +46,6 @@ export default async function MfaEnrollPage() {
           </Link>
         </p>
       }
-      panelAction={{ href: "/admin", label: "Back to admin" }}
       title="Set up authenticator"
     >
       <MfaForm action={enrollMfaAction} otpauthUri={pending.otpauthUri} />

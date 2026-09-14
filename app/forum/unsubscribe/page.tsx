@@ -28,7 +28,6 @@ export default async function ForumUnsubscribePage({
           </Link>
         </p>
       }
-      panelAction={{ href: "/login", label: "Sign in" }}
       title="Forum emails"
     >
       <p

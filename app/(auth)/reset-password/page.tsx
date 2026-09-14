@@ -21,7 +21,6 @@ export default async function ResetPasswordPage({
           </Link>
         </p>
       }
-      panelAction={{ href: "/login", label: "Sign in" }}
       title="Reset password"
     >
       <ResetPasswordForm token={token} />

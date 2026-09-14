@@ -40,7 +40,6 @@ export default async function MfaChallengePage() {
           </Link>
         </p>
       }
-      panelAction={{ href: "/admin", label: "Back to admin" }}
       title="Authenticator code"
     >
       <MfaForm action={challengeMfaAction} />

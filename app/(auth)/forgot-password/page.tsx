@@ -14,7 +14,6 @@ export default function ForgotPasswordPage() {
           </Link>
         </p>
       }
-      panelAction={{ href: "/login", label: "Sign in" }}
       title="Forgot password"
     >
       <ForgotPasswordForm />

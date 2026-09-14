@@ -14,8 +14,7 @@ export default function LoginPage() {
           </Link>
         </p>
       }
-      panelAction={{ href: "/register", label: "Request access" }}
-      title="Sign in to Amend"
+      title="Sign in"
     >
       <LoginForm />
     </AuthSplit>
