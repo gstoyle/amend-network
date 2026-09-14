@@ -41,8 +41,9 @@ Use seed accounts from [data-model.md](./data-model.md) (password = `SEED_PASSWO
 
 | Check | Expect |
 | --- | --- |
-| Sign in `pathways@local` | `/app`; log out visible; no remember-me |
-| Sign in `lead@local` | Cannot see pathways-only fixture |
+| Sign in `immersion@local` or `pathways@local` | `/app`; Immersion-visible content; no remember-me |
+| Sign in `lead@local` | Cannot see Immersion-only fixture |
+| Sign in `both@local` | Immersion-only and LEAD-only fixtures |
 | Sign in `pending@local` | `/app/pending` only |
 | Sign in `denied@local` or bad password | Same generic message |
 | Sign in `admin@local` (MFA off) | `/admin` blocked until enroll + code |

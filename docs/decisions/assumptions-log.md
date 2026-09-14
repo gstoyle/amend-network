@@ -33,8 +33,10 @@ role. Pathways to Change is not a launch audience.
 **Revisit:** When a second Immersion trip is added, confirm whether
 trip-specific resources/announcements must stay hidden from other
 Immersion trips (today, Immersion content is shared across all Immersion
-groups). Cross-program membership (one email in both Immersion and LEAD)
-is not in the data model yet.
+groups). Cross-program membership (one email in Immersion and LEAD) is
+stored on `user_networks`. `users.program_role` remains the primary
+programme for directory listing and registration. Dual membership is
+seeded for local/UAT testing; there is no admin UI to add it yet.
 
 **Previous assumption:** Pathways to Change and LEAD only for launch.
 

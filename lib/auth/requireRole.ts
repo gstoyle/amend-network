@@ -50,7 +50,8 @@ export function requireRole(
 
   if (options.program) {
     const allowed = asList(options.program);
-    if (!allowed.includes(session.programRole)) {
+    const held = new Set<ProgramRole>([session.programRole, ...(session.programRoles ?? [])]);
+    if (!allowed.some((role) => held.has(role))) {
       throw new AuthDeniedError();
     }
   }

@@ -2,7 +2,7 @@ import { requireRole } from "@/lib/auth/requireRole";
 import type { ProgramRole, SessionClaims } from "@/lib/auth/types";
 import { decryptPii } from "@/lib/crypto/pii";
 import { withRls } from "@/lib/db/rls";
-import { PROGRAM_LABELS } from "@/lib/db/visibility";
+import { memberProgramRoles, PROGRAM_LABELS } from "@/lib/db/visibility";
 
 export type ShellIdentity = {
   displayName: string;
@@ -26,6 +26,18 @@ function initialsFrom(firstName: string, lastName: string): string {
   return letters.length > 0 ? letters : FALLBACK_INITIALS;
 }
 
+function programRoleLabelFor(claims: SessionClaims): string {
+  const roles = memberProgramRoles(claims.programRole, claims.programRoles ?? []);
+  if (roles.includes("pathways") && roles.includes("lead")) {
+    return `${PROGRAM_LABELS.pathways} and ${PROGRAM_LABELS.lead}`;
+  }
+  const only = roles[0];
+  if (only) {
+    return PROGRAM_LABELS[only];
+  }
+  return PROGRAM_ROLE_LABELS[claims.programRole];
+}
+
 /**
  * Name and program role only. FR-018 keeps email, title, and DOC affiliation
  * out of persistent chrome, so those columns are never selected.
@@ -34,7 +46,7 @@ export async function loadShellIdentity(
   session: SessionClaims | null,
 ): Promise<ShellIdentity> {
   const claims = requireRole(session, { statuses: ["active", "pending"] });
-  const programRoleLabel = PROGRAM_ROLE_LABELS[claims.programRole];
+  const programRoleLabel = programRoleLabelFor(claims);
 
   return withRls(
     {

@@ -1,4 +1,4 @@
-import type { SessionClaims } from "@/lib/auth/types";
+import type { ProgramRole, SessionClaims } from "@/lib/auth/types";
 import { withRls } from "@/lib/db/rls";
 import { PROGRAM_LABELS } from "@/lib/db/program-labels";
 
@@ -41,24 +41,39 @@ export function audienceLabel(visibility: string[]): AudienceMarker {
   return { label: "Restricted", restricted: true };
 }
 
+export function memberProgramRoles(
+  primary: ProgramRole,
+  extra: Iterable<ProgramRole> = [],
+): Array<"pathways" | "lead"> {
+  const roles = new Set<"pathways" | "lead">();
+  const add = (role: ProgramRole): void => {
+    switch (role) {
+      case "pathways":
+      case "lead":
+        roles.add(role);
+        break;
+      case "none":
+        break;
+      default: {
+        const _exhaustive: never = role;
+        void _exhaustive;
+      }
+    }
+  };
+  add(primary);
+  for (const role of extra) {
+    add(role);
+  }
+  return [...roles];
+}
+
 export function visibilityTokens(claims: SessionClaims): string[] {
   if (claims.status !== "active") {
     return [];
   }
   const tokens = new Set<string>(["all_authenticated"]);
-  switch (claims.programRole) {
-    case "pathways":
-      tokens.add("pathways");
-      break;
-    case "lead":
-      tokens.add("lead");
-      break;
-    case "none":
-      break;
-    default: {
-      const _exhaustive: never = claims.programRole;
-      return _exhaustive;
-    }
+  for (const role of memberProgramRoles(claims.programRole, claims.programRoles ?? [])) {
+    tokens.add(role);
   }
   switch (claims.adminRole) {
     case "moderator":

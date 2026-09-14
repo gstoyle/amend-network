@@ -142,6 +142,14 @@ async function bootstrap() {
   if (migrate.status !== 0) {
     process.exit(migrate.status ?? 1);
   }
+
+  const seed = spawnSync("pnpm", ["exec", "prisma", "db", "seed"], {
+    stdio: "inherit",
+    env: migrateEnv,
+  });
+  if (seed.status !== 0) {
+    process.exit(seed.status ?? 1);
+  }
 }
 
 function start() {

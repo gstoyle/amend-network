@@ -14,6 +14,7 @@ type SeedUser = {
   status: UserStatus;
   mfaEnabled: boolean;
   networkName?: typeof IMMERSION_NETWORK_NAME | typeof LEAD_NETWORK_NAME;
+  extraNetworkNames?: Array<typeof IMMERSION_NETWORK_NAME | typeof LEAD_NETWORK_NAME>;
 };
 
 const SEED_USERS: SeedUser[] = [
@@ -47,12 +48,29 @@ const SEED_USERS: SeedUser[] = [
     networkName: IMMERSION_NETWORK_NAME,
   },
   {
+    email: "immersion@local",
+    programRole: "pathways",
+    adminRole: "none",
+    status: "active",
+    mfaEnabled: false,
+    networkName: IMMERSION_NETWORK_NAME,
+  },
+  {
     email: "lead@local",
     programRole: "lead",
     adminRole: "none",
     status: "active",
     mfaEnabled: false,
     networkName: "LEAD",
+  },
+  {
+    email: "both@local",
+    programRole: "pathways",
+    adminRole: "none",
+    status: "active",
+    mfaEnabled: false,
+    networkName: IMMERSION_NETWORK_NAME,
+    extraNetworkNames: [LEAD_NETWORK_NAME],
   },
   {
     email: "pending@local",
@@ -582,6 +600,23 @@ async function seed(): Promise<void> {
       await migrator.user.update({ where: { id: existing.id }, data });
     } else {
       await migrator.user.create({ data: { id: randomUUID(), ...data } });
+    }
+
+    const seeded = await migrator.user.findUniqueOrThrow({ where: { emailLookup } });
+    const membershipNames = [
+      ...(user.networkName ? [user.networkName] : []),
+      ...(user.extraNetworkNames ?? []),
+    ];
+    for (const name of membershipNames) {
+      const networkId = networks[name];
+      if (!networkId) {
+        throw new Error(`seed network ${name} is missing`);
+      }
+      await migrator.userNetwork.upsert({
+        where: { userId_networkId: { userId: seeded.id, networkId } },
+        create: { userId: seeded.id, networkId },
+        update: {},
+      });
     }
   }
 

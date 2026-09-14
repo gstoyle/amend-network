@@ -6,6 +6,8 @@ export type SessionClaims = {
   sessionId: string;
   userId: string;
   programRole: ProgramRole;
+  /** Extra programme tokens from `user_networks`. Omit in tests that only set `programRole`. */
+  programRoles?: Array<"pathways" | "lead">;
   adminRole: AdminRole;
   status: UserStatus;
   mfaEnabled: boolean;

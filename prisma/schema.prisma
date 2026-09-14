@@ -47,12 +47,13 @@ enum InvitationStatus {
 }
 
 model Network {
-  id          String       @id @default(uuid()) @db.Uuid
-  name        String       @unique
-  programRole ProgramRole  @map("program_role")
-  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
-  users       User[]
-  invitations Invitation[]
+  id           String        @id @default(uuid()) @db.Uuid
+  name         String        @unique
+  programRole  ProgramRole   @map("program_role")
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  users        User[]
+  invitations  Invitation[]
+  memberships  UserNetwork[]
 
   @@map("networks")
 }
@@ -95,10 +96,22 @@ model User {
   createdAt                     DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt                     DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
   network                       Network?             @relation(fields: [networkId], references: [id])
+  networkMemberships            UserNetwork[]
   sessions                      Session[]
   passwordResetTokens           PasswordResetToken[]
 
   @@map("users")
+}
+
+model UserNetwork {
+  userId    String   @map("user_id") @db.Uuid
+  networkId String   @map("network_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  network   Network  @relation(fields: [networkId], references: [id], onDelete: Cascade)
+
+  @@id([userId, networkId])
+  @@map("user_networks")
 }
 
 model DirectoryListing {

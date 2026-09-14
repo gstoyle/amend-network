@@ -135,13 +135,15 @@ Registration/approval transitions are out of scope; seeds create each state dire
 
 Passwords from `SEED_PASSWORD` env (never committed). One user each:
 
-| Email (local only) | program_role | admin_role | status | mfa_enabled |
+| Email (local / UAT only) | program_role | admin_role | status | mfa_enabled |
 | --- | --- | --- | --- | --- |
 | superadmin@local | none | super_admin | active | true (test secret in env, not git) |
 | admin@local | none | admin | active | false (enrollment path) |
 | moderator@local | none | moderator | active | true |
 | pathways@local | pathways | none | active | false |
+| immersion@local | pathways | none | active | false |
 | lead@local | lead | none | active | false |
+| both@local | pathways (+ LEAD membership) | none | active | false |
 | pending@local | none | none | pending | false |
 | denied@local | none | none | denied | false |
 | deactivated@local | pathways | none | deactivated | false |

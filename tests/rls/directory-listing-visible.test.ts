@@ -4,6 +4,7 @@ import { hashPassword } from "@/lib/auth/password";
 import { encryptPii, hmacEmailLookup } from "@/lib/crypto/pii";
 import { migrator } from "@/lib/db/migrator";
 import { withRls } from "@/lib/db/rls";
+import { LEAD_NETWORK_NAME } from "@/lib/db/visibility";
 import { env } from "@/lib/env";
 
 const MARKER = `dir-vis-${randomUUID()}`;
@@ -260,5 +261,32 @@ describe("directory_listing_visible direct EXECUTE as amend_app — contracts/rl
         status: "pending",
       }),
     ).toBe(false);
+  });
+
+  it("dual membership: extra LEAD network lets a Pathways viewer see a LEAD listing", async () => {
+    const leadNet = await migrator.network.findUnique({ where: { name: LEAD_NETWORK_NAME } });
+    if (!leadNet) {
+      throw new Error("LEAD network is required");
+    }
+    const leadPeer = randomUUID();
+    createdUserIds.push(CALLER.userId, leadPeer);
+    await insertUser({
+      id: CALLER.userId,
+      email: `${MARKER}-dualcaller@example.com`,
+      status: "active",
+      programRole: "pathways",
+    });
+    await insertUser({
+      id: leadPeer,
+      email: `${MARKER}-duallead@example.com`,
+      status: "active",
+      programRole: "lead",
+    });
+    await insertListing(leadPeer, "lead");
+    await migrator.userNetwork.create({
+      data: { userId: CALLER.userId, networkId: leadNet.id },
+    });
+
+    expect(await executeVisible(leadPeer, CALLER)).toBe(true);
   });
 });

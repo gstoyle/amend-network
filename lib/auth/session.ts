@@ -4,6 +4,7 @@ import { writeAudit } from "@/lib/audit/write";
 import type { SessionClaims } from "@/lib/auth/types";
 import type { AdminRole, ProgramRole, UserStatus } from "@/lib/auth/types";
 import { withRls } from "@/lib/db/rls";
+import { memberProgramRoles } from "@/lib/db/visibility";
 
 const SLIDING_MS = 24 * 60 * 60 * 1000;
 const ABSOLUTE_MS = 30 * 24 * 60 * 60 * 1000;
@@ -44,6 +45,21 @@ function expiresAt(createdAt: Date, lastSeenAt: Date): Date {
   return sliding < absolute ? sliding : absolute;
 }
 
+async function programRolesForUser(
+  tx: Prisma.TransactionClient,
+  userId: string,
+  primary: ProgramRole,
+): Promise<Array<"pathways" | "lead">> {
+  const rows = await tx.userNetwork.findMany({
+    where: { userId },
+    select: { network: { select: { programRole: true } } },
+  });
+  return memberProgramRoles(
+    primary,
+    rows.map((row) => row.network.programRole),
+  );
+}
+
 export type CreateSessionInput = {
   userId: string;
   ip: string;
@@ -75,10 +91,12 @@ export async function insertSession(
     },
   });
 
+  const programRoles = await programRolesForUser(tx, input.userId, input.programRole);
   const claims: SessionClaims = {
     sessionId: row.id,
     userId: input.userId,
     programRole: input.programRole,
+    programRoles,
     adminRole: input.adminRole,
     status: input.status,
     mfaEnabled: false,
@@ -118,6 +136,7 @@ export async function loadSession(sessionId: string): Promise<SessionClaims | nu
       sessionId: sessionRow.id,
       userId: sessionRow.userId,
       programRole: user.programRole,
+      programRoles: await programRolesForUser(tx, sessionRow.userId, user.programRole),
       adminRole: user.adminRole,
       status: user.status,
       mfaEnabled: user.mfaEnabled,

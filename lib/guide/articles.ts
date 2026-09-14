@@ -327,7 +327,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     blocks: [
       {
         type: "p",
-        text: "You hold exactly one programme role (International Immersion Program, LEAD, or none) and zero or one administrative role. Role checks run on the server from the signed session. A value typed into the page cannot raise your access.",
+        text: "Most members belong to one programme (International Immersion Program or LEAD). Some people are in both. You may also have zero or one administrative role. Role checks run on the server from the signed session. A value typed into the page cannot raise your access.",
       },
       { type: "h2", id: "what-you-see", text: "What you can see" },
       {
@@ -335,6 +335,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
         items: [
           "International Immersion Program members see Immersion-visible and all-authenticated content.",
           "LEAD members see LEAD-visible and all-authenticated content.",
+          "Members of both programmes see Immersion-visible and LEAD-visible content.",
           "Staff with an administrative role also reach Admin from the account area. Authenticator setup is optional.",
         ],
       },
