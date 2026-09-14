@@ -26,11 +26,13 @@ describe("forum validate", () => {
   });
 
   it("parses the same allowlisted markdown as announcements", () => {
-    expect(parseAnnouncementBody("See **bold** and _em_")).toEqual([
+    expect(parseAnnouncementBody("See **bold** and _em_ and ++line++")).toEqual([
       { type: "text", value: "See " },
       { type: "bold", value: "bold" },
       { type: "text", value: " and " },
       { type: "emphasis", value: "em" },
+      { type: "text", value: " and " },
+      { type: "underline", value: "line" },
     ]);
   });
 

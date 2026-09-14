@@ -11,6 +11,7 @@ import {
 } from "@/app/(member)/app/forum/actions";
 import { AnnouncementBody } from "@/components/announcement-body";
 import { ForumDeletePostControl, ForumDeleteThreadControl } from "@/components/forum-delete-post";
+import { FormattedBodyField } from "@/components/formatted-body-field";
 import { MemberInitials } from "@/components/member-initials";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +22,6 @@ import {
   formInsetClassName,
   formSurfaceClassName,
 } from "@/components/ui/card";
-import { controlClassName } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthDeniedError, isPendingSession, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
@@ -201,8 +201,7 @@ export default async function ForumThreadPage({
                       <input name="postId" type="hidden" value={post.id} />
                       <div className={cn(formFieldClassName, "w-full")}>
                         <Label htmlFor={`edit-${post.id}`}>Body</Label>
-                        <textarea
-                          className={controlClassName}
+                        <FormattedBodyField
                           defaultValue={post.body}
                           id={`edit-${post.id}`}
                           maxLength={8000}
@@ -239,14 +238,7 @@ export default async function ForumThreadPage({
           </h2>
           <div className={formFieldClassName}>
             <Label htmlFor="reply">Message</Label>
-            <textarea
-              className={controlClassName}
-              id="reply"
-              maxLength={8000}
-              name="body"
-              required
-              rows={5}
-            />
+            <FormattedBodyField id="reply" maxLength={8000} name="body" required rows={5} />
           </div>
           <Button className="self-start" type="submit">
             Post reply

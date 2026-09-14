@@ -14,6 +14,8 @@ export function AnnouncementBody({ source }: { source: string }) {
                 {segment.value}
               </strong>
             );
+          case "underline":
+            return <u key={index}>{segment.value}</u>;
           case "emphasis":
             return <em key={index}>{segment.value}</em>;
           case "link":

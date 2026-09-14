@@ -16,6 +16,7 @@ const FORMS = [
   "components/resource-form.tsx",
   "components/announcement-form.tsx",
   "components/event-form.tsx",
+  "components/formatted-body-field.tsx",
   "components/pending-queue.tsx",
   "components/resource-filters.tsx",
 ] as const;

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { createThreadAction } from "@/app/(member)/app/forum/actions";
+import { FormattedBodyField } from "@/components/formatted-body-field";
 import { PageHeader } from "@/components/page-header";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -9,7 +10,7 @@ import {
   formGridClassName,
   formSurfaceClassName,
 } from "@/components/ui/card";
-import { controlClassName, Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthDeniedError, isPendingSession, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
@@ -57,7 +58,7 @@ export default async function NewForumThreadPage({
       <PageHeader
         description={
           <>
-            Allowlisted markdown only. Read the{" "}
+            Use the formatting buttons for bold, italic, underline, and links. Read the{" "}
             <Link className="underline" href="/community-guidelines">
               community guidelines
             </Link>{" "}
@@ -79,14 +80,7 @@ export default async function NewForumThreadPage({
         </div>
         <div className={cn(formFieldClassName, "lg:col-span-2")}>
           <Label htmlFor="body">First post</Label>
-          <textarea
-            className={controlClassName}
-            id="body"
-            maxLength={8000}
-            name="body"
-            required
-            rows={8}
-          />
+          <FormattedBodyField id="body" maxLength={8000} name="body" required rows={8} />
         </div>
         <Button className="justify-self-start lg:col-span-2" type="submit">
           Post thread

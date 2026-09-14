@@ -250,7 +250,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
       {
         type: "ul",
         items: [
-          "Use allowlisted markdown only: bold, italics, and links that start with http, https, or /app/. Raw HTML is rejected.",
+          "Use the formatting buttons for bold, italic, underline, and links (http, https, or /app/). Raw HTML is rejected.",
           "There are no image uploads in the forum.",
           "You may edit your own post for 15 minutes. After that, only staff can change it.",
           "Rate limits for members: one new thread per minute, five posts per minute, thirty posts per hour. Staff are exempt. If you hit a limit, the product says to try again later.",

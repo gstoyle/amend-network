@@ -28,8 +28,8 @@ export default function CommunityGuidelinesPage() {
         <ul className="mt-4 flex list-disc flex-col gap-3 pl-5 text-foreground">
           <li>Participate only in the categories available to your program role.</li>
           <li>
-            Use the supported markdown formatting. Do not add raw HTML, images, or identifying
-            details.
+            Use the formatting buttons for bold, italic, underline, and links. Do not add raw HTML,
+            images, or identifying details.
           </li>
           <li>You may edit your own post for 15 minutes. Staff can moderate it after that.</li>
           <li>

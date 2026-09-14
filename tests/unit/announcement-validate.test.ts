@@ -5,6 +5,8 @@ import {
   parseAnnouncementBody,
   parseCtaPair,
   parseVisibility,
+  wrapMarkdownLink,
+  wrapMarkdownSelection,
 } from "@/lib/announcements/validate";
 
 describe("announcement validation (T010)", () => {
@@ -32,9 +34,9 @@ describe("announcement validation (T010)", () => {
     expect(() => parseVisibility([])).toThrowError(/visibility/);
   });
 
-  it("parses bold, emphasis, and allowlisted links without raw HTML", () => {
+  it("parses bold, emphasis, underline, and allowlisted links without raw HTML", () => {
     const segments = parseAnnouncementBody(
-      "See **bold** and _em_ and [docs](/app/resources) plus [bad](javascript:x)",
+      "See **bold** and _em_ and ++line++ and [docs](/app/resources) plus [bad](javascript:x)",
     );
     expect(segments).toEqual([
       { type: "text", value: "See " },
@@ -42,9 +44,40 @@ describe("announcement validation (T010)", () => {
       { type: "text", value: " and " },
       { type: "emphasis", value: "em" },
       { type: "text", value: " and " },
+      { type: "underline", value: "line" },
+      { type: "text", value: " and " },
       { type: "link", label: "docs", href: "/app/resources" },
       { type: "text", value: " plus " },
       { type: "text", value: "[bad](javascript:x)" },
     ]);
+  });
+
+  it("wraps and unwraps a selection for the formatting bar", () => {
+    expect(wrapMarkdownSelection("hello world", 0, 5, "bold")).toEqual({
+      value: "**hello** world",
+      selectionStart: 2,
+      selectionEnd: 7,
+    });
+    expect(wrapMarkdownSelection("**hello** world", 2, 7, "bold")).toEqual({
+      value: "hello world",
+      selectionStart: 0,
+      selectionEnd: 5,
+    });
+    expect(wrapMarkdownSelection("hello", 0, 5, "italic")).toEqual({
+      value: "_hello_",
+      selectionStart: 1,
+      selectionEnd: 6,
+    });
+    expect(wrapMarkdownSelection("hello", 0, 5, "underline")).toEqual({
+      value: "++hello++",
+      selectionStart: 2,
+      selectionEnd: 7,
+    });
+    expect(wrapMarkdownLink("see here", 4, 8, "https://example.com")).toEqual({
+      value: "see [here](https://example.com)",
+      selectionStart: 5,
+      selectionEnd: 9,
+    });
+    expect(wrapMarkdownLink("see here", 4, 8, "javascript:alert(1)")).toBeNull();
   });
 });

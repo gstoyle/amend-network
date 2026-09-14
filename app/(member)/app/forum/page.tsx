@@ -36,7 +36,7 @@ export default async function ForumIndexPage() {
             Community guidelines
           </Link>
         }
-        description="Discussion rooms for your programme. Posts use the same allowlisted markdown as announcements. Community guidelines apply."
+        description="Discussion rooms for your programme. Use the formatting buttons when you write; community guidelines apply."
         eyebrow="Community"
         title="Forum"
       />

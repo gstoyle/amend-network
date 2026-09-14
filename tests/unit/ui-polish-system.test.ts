@@ -53,7 +53,9 @@ describe("shared UI polish system", () => {
     expect(adminForum).toContain("formSurfaceClassName");
     expect(adminForum).toContain("SectionHeader");
     expect(newThread).toContain("formSurfaceClassName");
+    expect(newThread).toContain("FormattedBodyField");
     expect(thread).toContain("formSurfaceClassName");
+    expect(thread).toContain("FormattedBodyField");
     expect(thread).toContain("<details");
     expect(thread).toContain("ActionDisclosure");
     expect(thread).toContain("ForumDeletePostControl");
