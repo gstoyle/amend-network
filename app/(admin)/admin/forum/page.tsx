@@ -17,13 +17,15 @@ import { checkboxClassName, controlClassName, Input } from "@/components/ui/inpu
 import { Label } from "@/components/ui/label";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
-import { audienceLabel } from "@/lib/db/visibility";
-import { VISIBILITY_OPTIONS } from "@/lib/db/program-labels";
 import { listAdminCategories } from "@/lib/forum/categories";
 import {
   FORUM_CATEGORY_ADMIN_ROLES,
   FORUM_STAFF_ROLES,
 } from "@/lib/forum/staff";
+import {
+  FORUM_CATEGORY_VISIBILITY_OPTIONS,
+  forumCategoryAudience,
+} from "@/lib/forum/validate";
 import { cn } from "@/lib/utils";
 
 export default async function AdminForumPage({
@@ -60,7 +62,7 @@ export default async function AdminForumPage({
             Open flags
           </Link>
         }
-        description="Manage discussion categories and review member-reported content."
+        description="Programme-specific rooms only. The all-members room is paused."
         eyebrow="Administration"
         title="Forum"
       />
@@ -78,7 +80,8 @@ export default async function AdminForumPage({
             <div className="lg:col-span-2">
               <h2 className="text-lg font-semibold text-foreground">Create a category</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Choose a short name, URL slug, description, and member audience.
+                Choose a short name, URL slug, description, and programme audience.
+                Cross-programme rooms are paused.
               </p>
             </div>
             <div className={formFieldClassName}>
@@ -103,11 +106,10 @@ export default async function AdminForumPage({
             <fieldset className={cn(formInsetClassName, "lg:col-span-2")}>
               <legend className="text-sm font-medium text-foreground">Visibility</legend>
               <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1">
-                {VISIBILITY_OPTIONS.map((option) => (
+                {FORUM_CATEGORY_VISIBILITY_OPTIONS.map((option) => (
                   <label className="flex min-h-touch items-center gap-2 text-sm text-foreground" key={option.value}>
                     <input
                       className={checkboxClassName}
-                      defaultChecked={option.value === "all_authenticated"}
                       name="visibility"
                       type="checkbox"
                       value={option.value}
@@ -134,7 +136,7 @@ export default async function AdminForumPage({
             ) : (
               <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {categories.map((category) => {
-                  const audience = audienceLabel(category.visibility);
+                  const audience = forumCategoryAudience(category.visibility);
                   return (
                     <li className={cn(cardClassName, "p-4")} key={category.id}>
                       <div className="flex items-start justify-between gap-3">

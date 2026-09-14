@@ -228,6 +228,14 @@ rules the product enforces: role-gated rooms, allowlisted markdown, a
 lock / pin. Escalation for harm stays with programme staff. **Unconfirmed
 by Amend.** Revisit when Q5/Q16 is answered.
 
+**The all-members forum is paused at launch (2026-09-14).** Amend does
+not have bandwidth to moderate a cross-programme room. `all-members-general`
+is hidden from members (empty visibility, existing threads locked). New
+forum categories cannot use `all_authenticated`. Immersion and LEAD rooms
+remain. Announcements, resources, and events may still use
+`all_authenticated`. **Confirmed by Amend.** Revisit when there is
+moderation capacity for a general room.
+
 **Administrative MFA is optional until Amend confirms the gate
 (2026-08-19).** PRD §5.1 still says Super Admin, Admin, and Moderator
 must enroll TOTP before `/admin`. Local and staging use currently need
@@ -250,4 +258,4 @@ Q15 (budget ceiling).
 
 **Log maintained by:** solo developer, per constitution governance.
 
-**Last updated:** 2026-09-14 (Q3 launch networks: LEAD + International Immersion trip groups; Pathways not in launch)
+**Last updated:** 2026-09-14 (Q3 launch networks; all-members forum paused)

@@ -72,8 +72,8 @@ describe("axe-core on member page layouts (012 T007)", () => {
           <a href="/app/forum">All categories<span aria-hidden="true">→</span></a>
           <ul>
             <li>
-              <a href="/app/forum/t/example">Welcome to the general room</a>
-              <p>All members · Ada L. · 19 August 2026</p>
+              <a href="/app/forum/t/example">Welcome to the Immersion room</a>
+              <p>International Immersion Program only · Ada L. · 19 August 2026</p>
             </li>
           </ul>
         </section>

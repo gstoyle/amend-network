@@ -16,6 +16,7 @@ import {
   assertForumTitle,
   authorLabelFrom,
   forumErrorMessage,
+  isPausedForumCategory,
 } from "@/lib/forum/validate";
 
 export type ForumWriteResult = { ok: true; id: string } | { ok: false; error: string };
@@ -63,7 +64,7 @@ export async function createThread(
       const category = await tx.forumCategory.findUnique({
         where: { slug: input.categorySlug },
       });
-      if (!category) {
+      if (!category || isPausedForumCategory(category.visibility)) {
         throw new Error("That category is not available.");
       }
       const label = await authorLabel(tx, claims.userId);
@@ -107,6 +108,7 @@ export async function createThread(
       ok: false,
       error: forumErrorMessage(error, "Could not start this thread.", [
         FORUM_RATE_LIMIT_MESSAGE,
+        "That category is not available.",
       ]),
     };
   }
@@ -134,8 +136,15 @@ export async function createPost(
   const id = randomUUID();
   try {
     await withRls(rlsContext(claims), async (tx) => {
-      const thread = await tx.forumThread.findUnique({ where: { id: input.threadId } });
-      if (!thread || thread.locked) {
+      const thread = await tx.forumThread.findUnique({
+        where: { id: input.threadId },
+        include: { category: { select: { visibility: true } } },
+      });
+      if (
+        !thread ||
+        thread.locked ||
+        isPausedForumCategory(thread.category.visibility)
+      ) {
         throw new Error("This thread is locked.");
       }
       if (!isForumStaff(claims)) {

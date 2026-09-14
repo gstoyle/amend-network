@@ -135,6 +135,19 @@ describe("forum RLS", () => {
     ]);
   });
 
+  it("members cannot select a paused empty-visibility category; staff can", async () => {
+    const paused = await insertCategory([]);
+    categoryIds.push(paused);
+    const memberRows = await withRls(ctx("pathways"), (tx) =>
+      tx.forumCategory.findMany({ where: { id: paused } }),
+    );
+    const staffRows = await withRls(ctx("moderator"), (tx) =>
+      tx.forumCategory.findMany({ where: { id: paused } }),
+    );
+    expect(memberRows).toEqual([]);
+    expect(staffRows).toHaveLength(1);
+  });
+
   it("staff selects every category", async () => {
     const lead = await insertCategory(["lead"]);
     categoryIds.push(lead);

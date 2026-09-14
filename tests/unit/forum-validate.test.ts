@@ -1,13 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { parseAnnouncementBody } from "@/lib/announcements/validate";
 import {
+  FORUM_CATEGORY_VISIBILITY_OPTIONS,
   FORUM_RATE_LIMIT_MESSAGE,
   assertCategorySlug,
   assertForumBody,
   assertForumReason,
   assertForumTitle,
   authorLabelFrom,
+  forumCategoryAudience,
   forumErrorMessage,
+  isPausedForumCategory,
+  parseForumCategoryVisibility,
 } from "@/lib/forum/validate";
 
 describe("forum validate", () => {
@@ -38,6 +42,24 @@ describe("forum validate", () => {
 
   it("exports the public rate-limit copy", () => {
     expect(FORUM_RATE_LIMIT_MESSAGE).toBe("Try again later.");
+  });
+
+  it("rejects cross-programme category visibility while launch rooms stay programme-scoped", () => {
+    expect(parseForumCategoryVisibility(["pathways"])).toEqual(["pathways"]);
+    expect(parseForumCategoryVisibility(["lead", "pathways"])).toEqual(["lead", "pathways"]);
+    expect(() => parseForumCategoryVisibility(["all_authenticated"])).toThrowError(
+      /Cross-programme rooms are paused/,
+    );
+    expect(() => parseForumCategoryVisibility(["all_authenticated", "pathways"])).toThrowError(
+      /paused/,
+    );
+    expect(isPausedForumCategory([])).toBe(true);
+    expect(isPausedForumCategory(["pathways"])).toBe(false);
+    expect(FORUM_CATEGORY_VISIBILITY_OPTIONS.map((option) => option.value)).toEqual([
+      "pathways",
+      "lead",
+    ]);
+    expect(forumCategoryAudience([])).toEqual({ label: "Paused", restricted: true });
   });
 
   it("does not expose database errors in forum form responses", () => {

@@ -3,7 +3,6 @@ import { writeAudit } from "@/lib/audit/write";
 import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
 import { withRls } from "@/lib/db/rls";
-import { parseVisibility } from "@/lib/announcements/validate";
 import {
   FORUM_CATEGORY_ADMIN_ROLES,
   actorRole,
@@ -13,6 +12,7 @@ import {
   assertCategoryDescription,
   assertCategoryName,
   assertCategorySlug,
+  parseForumCategoryVisibility,
 } from "@/lib/forum/validate";
 import type { ForumWriteMeta, ForumWriteResult } from "@/lib/forum/write";
 
@@ -41,7 +41,7 @@ export async function createForumCategory(
     name = assertCategoryName(input.name);
     slug = assertCategorySlug(input.slug);
     description = assertCategoryDescription(input.description);
-    visibility = parseVisibility(input.visibility);
+    visibility = parseForumCategoryVisibility(input.visibility);
   } catch (error) {
     return fail(error, "Could not save this category.");
   }

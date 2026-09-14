@@ -4,6 +4,7 @@ import type { SessionClaims } from "@/lib/auth/types";
 import { withRls } from "@/lib/db/rls";
 import { type AudienceMarker, audienceLabel } from "@/lib/db/visibility";
 import { isForumStaff, rlsContext } from "@/lib/forum/staff";
+import { isPausedForumCategory } from "@/lib/forum/validate";
 
 export type ForumCategoryListItem = {
   id: string;
@@ -66,7 +67,7 @@ export async function listForumCategories(
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
       include: { _count: { select: { threads: true } } },
     });
-    return rows.map((row) => ({
+    return rows.filter((row) => !isPausedForumCategory(row.visibility)).map((row) => ({
       id: row.id,
       name: row.name,
       slug: row.slug,
@@ -85,9 +86,17 @@ export async function getForumCategory(
   return withRls(rlsContext(claims), async (tx) => {
     const row = await tx.forumCategory.findUnique({
       where: { slug },
-      select: { id: true, name: true, slug: true, description: true },
+      select: { id: true, name: true, slug: true, description: true, visibility: true },
     });
-    return row;
+    if (!row || isPausedForumCategory(row.visibility)) {
+      return null;
+    }
+    return {
+      id: row.id,
+      name: row.name,
+      slug: row.slug,
+      description: row.description,
+    };
   });
 }
 
@@ -98,7 +107,7 @@ export async function listForumThreads(
   const claims = requireRole(session);
   return withRls(rlsContext(claims), async (tx) => {
     const category = await tx.forumCategory.findUnique({ where: { slug } });
-    if (!category) {
+    if (!category || isPausedForumCategory(category.visibility)) {
       return [];
     }
     const rows = await tx.forumThread.findMany({
@@ -130,7 +139,7 @@ export async function getForumThread(
     const row = await tx.forumThread.findUnique({
       where: { id },
       include: {
-        category: { select: { name: true, slug: true } },
+        category: { select: { name: true, slug: true, visibility: true } },
         posts: { orderBy: { createdAt: "asc" } },
         subscriptions: { where: { userId: claims.userId }, select: { userId: true } },
       },
@@ -139,6 +148,9 @@ export async function getForumThread(
       return null;
     }
     if (!staff && row.hiddenAt) {
+      return null;
+    }
+    if (!staff && isPausedForumCategory(row.category.visibility)) {
       return null;
     }
     const posts = row.posts
@@ -183,7 +195,11 @@ export async function listRecentForumActivity(
   const claims = requireRole(session);
   return withRls(rlsContext(claims), async (tx) => {
     const rows = await tx.forumThread.findMany({
-      where: { deletedAt: null, hiddenAt: null },
+      where: {
+        deletedAt: null,
+        hiddenAt: null,
+        category: { visibility: { isEmpty: false } },
+      },
       orderBy: { lastPostedAt: "desc" },
       take: limit,
       include: { category: { select: { name: true, slug: true } } },

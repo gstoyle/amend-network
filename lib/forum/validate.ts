@@ -1,6 +1,33 @@
 import { parseVisibility } from "@/lib/announcements/validate";
+import { type AudienceMarker, audienceLabel, VISIBILITY_OPTIONS } from "@/lib/db/visibility";
 
 export { parseVisibility };
+
+/** Programme rooms only. Cross-programme (`all_authenticated`) is paused at launch. */
+export const FORUM_CATEGORY_VISIBILITY_OPTIONS = VISIBILITY_OPTIONS.filter(
+  (option) => option.value !== "all_authenticated",
+);
+
+export function isPausedForumCategory(visibility: string[]): boolean {
+  return visibility.length === 0;
+}
+
+export function forumCategoryAudience(visibility: string[]): AudienceMarker {
+  if (isPausedForumCategory(visibility)) {
+    return { label: "Paused", restricted: true };
+  }
+  return audienceLabel(visibility);
+}
+
+export function parseForumCategoryVisibility(values: string[]): Array<"pathways" | "lead"> {
+  const visibility = parseVisibility(values);
+  if (visibility.includes("all_authenticated")) {
+    throw new Error("Cross-programme rooms are paused.");
+  }
+  return visibility.filter((token): token is "pathways" | "lead" => {
+    return token === "pathways" || token === "lead";
+  });
+}
 
 export const FORUM_RATE_LIMIT_MESSAGE = "Try again later.";
 export const FORUM_EDIT_WINDOW_MS = 15 * 60 * 1000;

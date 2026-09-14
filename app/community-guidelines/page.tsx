@@ -26,7 +26,10 @@ export default function CommunityGuidelinesPage() {
           How to participate
         </h2>
         <ul className="mt-4 flex list-disc flex-col gap-3 pl-5 text-foreground">
-          <li>Participate only in the categories available to your program role.</li>
+          <li>
+            Participate only in the programme rooms available to you. There is no all-members room
+            at launch.
+          </li>
           <li>
             Use the formatting buttons for bold, italic, underline, and links. Do not add raw HTML,
             images, or identifying details.

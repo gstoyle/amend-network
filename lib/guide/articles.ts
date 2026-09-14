@@ -235,13 +235,13 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     blocks: [
       {
         type: "p",
-        text: "The forum is a professional space. You only see categories whose visibility matches your roles. Staff can see every category so they can moderate.",
+        text: "The forum is a professional space. You only see programme rooms that match your roles. The all-members room is paused until Amend has moderation capacity. Staff can still see paused rooms in Forum admin.",
       },
       { type: "h2", id: "rooms", text: "Rooms and threads" },
       {
         type: "ul",
         items: [
-          "Open Forum to see categories, then a category to see threads, then a thread to read posts.",
+          "Open Forum to see programme rooms, then a room to see threads, then a thread to read posts. There is no all-members room at launch.",
           "Threads are two-level: the thread plus a flat list of posts. There are no nested replies and no @-mentions.",
           "Pinned threads stay at the top of a category. Locked threads cannot take new replies.",
         ],
