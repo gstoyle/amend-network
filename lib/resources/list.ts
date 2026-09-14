@@ -4,15 +4,21 @@ import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
 import { withRls } from "@/lib/db/rls";
 import { type AudienceMarker, audienceLabel, visibilityTokens } from "@/lib/db/visibility";
+import type { ResourceFolderListItem } from "@/lib/resources/folders";
+import {
+  RESOURCE_SOURCE_COPY,
+  RESOURCE_SOURCES,
+  type ResourceSource,
+  isResourceSource,
+} from "@/lib/resources/labels";
 import { presignGet } from "@/lib/storage/client";
 
 const THUMBNAIL_EXPIRES_SECONDS = 120;
-const SOURCE_LABELS = ["Amend", "Partner Org", "External"] as const;
 const RESOURCE_SORTS = ["newest", "downloads", "title"] as const;
 const KIB = 1024;
 
 export type ResourceSort = (typeof RESOURCE_SORTS)[number];
-export type ResourceSource = (typeof SOURCE_LABELS)[number];
+export type { ResourceSource };
 export type ResourceFormat = "PDF" | "Video" | "Slides" | "Template" | "Toolkit";
 
 const FORMAT_BY_MIME_TYPE: Record<string, ResourceFormat> = {
@@ -64,7 +70,8 @@ export function resourceSizeLabel(bytes: bigint | number | null | undefined): st
 export type ResourceListQuery = {
   q?: string;
   tags?: string[];
-  source?: string;
+  source?: ResourceSource;
+  folder?: string;
   sort?: ResourceSort;
   clientProgramRole?: unknown;
   clientAdminRole?: unknown;
@@ -76,6 +83,9 @@ export type MemberResource = {
   previewText: string;
   sourceLabel: string;
   tags: string[];
+  folderId: string | null;
+  folderName: string | null;
+  folderSlug: string | null;
   updatedAt: Date;
   thumbnailHref: string;
   fileMimeType: string;
@@ -99,10 +109,6 @@ export function escapeIlike(term: string): string {
   return term.replaceAll("\\", "\\\\").replaceAll("%", "\\%").replaceAll("_", "\\_");
 }
 
-function isSourceLabel(value: string): value is ResourceSource {
-  return (SOURCE_LABELS as readonly string[]).includes(value);
-}
-
 function isResourceSort(value: string): value is ResourceSort {
   return (RESOURCE_SORTS as readonly string[]).includes(value);
 }
@@ -118,6 +124,7 @@ export function parseResourceListQuery(input: {
   q?: string | string[];
   tag?: string | string[];
   source?: string | string[];
+  folder?: string | string[];
   sort?: string | string[];
 }): ResourceListQuery {
   const q = firstParam(input.q)?.trim();
@@ -126,11 +133,14 @@ export function parseResourceListQuery(input: {
     .map((tag) => tag.trim())
     .filter((tag) => tag.length > 0);
   const sourceRaw = firstParam(input.source)?.trim() ?? "";
+  const folderRaw = firstParam(input.folder)?.trim() ?? "";
   const sortRaw = firstParam(input.sort) ?? "newest";
+  const folderOk = /^[a-z0-9]+(-[a-z0-9]+)*$/.test(folderRaw);
   return {
     ...(q ? { q } : {}),
     ...(tags.length > 0 ? { tags } : {}),
-    ...(isSourceLabel(sourceRaw) ? { source: sourceRaw } : {}),
+    ...(isResourceSource(sourceRaw) ? { source: sourceRaw } : {}),
+    ...(folderOk ? { folder: folderRaw } : {}),
     sort: isResourceSort(sortRaw) ? sortRaw : "newest",
   };
 }
@@ -156,6 +166,8 @@ function toMemberResource(row: {
   previewText: string;
   sourceLabel: string;
   tags: string[];
+  folderId: string | null;
+  folder: { name: string; slug: string } | null;
   updatedAt: Date;
   fileMimeType: string;
   fileSizeBytes: bigint;
@@ -168,6 +180,9 @@ function toMemberResource(row: {
     previewText: row.previewText,
     sourceLabel: row.sourceLabel,
     tags: row.tags,
+    folderId: row.folderId,
+    folderName: row.folder?.name ?? null,
+    folderSlug: row.folder?.slug ?? null,
     updatedAt: row.updatedAt,
     thumbnailHref: `/app/resources/${row.id}/thumbnail`,
     fileMimeType: row.fileMimeType,
@@ -194,19 +209,33 @@ async function loadLiveVisible(
     ...(extraWhere.id ? { id: extraWhere.id } : {}),
   };
 
+  const and: Prisma.ResourceWhereInput[] = [];
   const keyword = query.q?.trim();
   if (keyword) {
     const escaped = escapeIlike(keyword);
-    where.OR = [
-      { title: { contains: escaped, mode: "insensitive" } },
-      { previewText: { contains: escaped, mode: "insensitive" } },
-    ];
+    and.push({
+      OR: [
+        { title: { contains: escaped, mode: "insensitive" } },
+        { previewText: { contains: escaped, mode: "insensitive" } },
+      ],
+    });
   }
   if (query.tags && query.tags.length > 0) {
     where.tags = { hasEvery: query.tags };
   }
-  if (query.source && isSourceLabel(query.source)) {
+  if (query.source && isResourceSource(query.source)) {
     where.sourceLabel = query.source;
+  }
+  if (query.folder) {
+    and.push({
+      OR: [
+        { folder: { slug: query.folder } },
+        { folder: { parent: { slug: query.folder } } },
+      ],
+    });
+  }
+  if (and.length > 0) {
+    where.AND = and;
   }
 
   const sort = extraWhere.id ? "newest" : (query.sort ?? "newest");
@@ -228,6 +257,8 @@ async function loadLiveVisible(
           previewText: true,
           sourceLabel: true,
           tags: true,
+          folderId: true,
+          folder: { select: { name: true, slug: true } },
           updatedAt: true,
           thumbnailObjectKey: true,
           fileMimeType: true,
@@ -278,4 +309,94 @@ export async function grantThumbnail(
     return null;
   }
   return presignGet(row.thumbnailObjectKey, THUMBNAIL_EXPIRES_SECONDS);
+}
+
+export type LibraryFolderLink = {
+  id: string;
+  name: string;
+  slug: string;
+  resourceCount: number;
+};
+
+export type LibrarySection = {
+  source: ResourceSource;
+  title: string;
+  description: string;
+  folders: LibraryFolderLink[];
+  resources: MemberResource[];
+};
+
+export type LibraryView = {
+  currentFolder: ResourceFolderListItem | null;
+  parentFolder: ResourceFolderListItem | null;
+  sections: LibrarySection[];
+};
+
+function countInTree(
+  folderId: string,
+  source: ResourceSource,
+  folders: ResourceFolderListItem[],
+  resources: MemberResource[],
+): number {
+  const childIds = new Set(
+    folders.filter((folder) => folder.parentId === folderId).map((folder) => folder.id),
+  );
+  return resources.filter(
+    (resource) =>
+      resource.sourceLabel === source &&
+      (resource.folderId === folderId || (resource.folderId && childIds.has(resource.folderId))),
+  ).length;
+}
+
+export function buildLibraryView(input: {
+  resources: MemberResource[];
+  folders: ResourceFolderListItem[];
+  folderSlug?: string;
+  source?: ResourceSource;
+}): LibraryView {
+  const currentFolder = input.folderSlug
+    ? (input.folders.find((folder) => folder.slug === input.folderSlug) ?? null)
+    : null;
+  const parentFolder = currentFolder?.parentId
+    ? (input.folders.find((folder) => folder.id === currentFolder.parentId) ?? null)
+    : null;
+  const sources: ResourceSource[] = input.source ? [input.source] : [...RESOURCE_SOURCES];
+  const browse = currentFolder
+    ? input.folders.filter((folder) => folder.parentId === currentFolder.id)
+    : input.folders.filter((folder) => folder.parentId === null);
+
+  const sections = sources
+    .map((source) => {
+      const copy = RESOURCE_SOURCE_COPY[source];
+      const folders = browse
+        .map((folder) => ({
+          id: folder.id,
+          name: folder.name,
+          slug: folder.slug,
+          resourceCount: countInTree(folder.id, source, input.folders, input.resources),
+        }))
+        .filter((folder) => folder.resourceCount > 0);
+      const resources = input.resources.filter((resource) => {
+        if (resource.sourceLabel !== source) {
+          return false;
+        }
+        if (currentFolder) {
+          return resource.folderId === currentFolder.id;
+        }
+        return !resource.folderId;
+      });
+      return {
+        source,
+        title: copy.sectionTitle,
+        description: copy.sectionDescription,
+        folders,
+        resources,
+      };
+    })
+    .filter(
+      (section) =>
+        section.folders.length > 0 || section.resources.length > 0 || Boolean(input.source),
+    );
+
+  return { currentFolder, parentFolder, sections };
 }

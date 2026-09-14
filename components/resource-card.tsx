@@ -13,6 +13,8 @@ export type ResourceCardData = {
   previewText: string;
   sourceLabel: string;
   tags: string[];
+  folderName?: string | null;
+  folderSlug?: string | null;
   updatedAt: Date;
   thumbnailHref: string;
   formatLabel: ResourceFormat | null;
@@ -97,7 +99,10 @@ export function ResourceCard({ resource }: { resource: ResourceCardData }) {
       <div className="flex gap-4">
         <ResourceThumb format={resource.formatLabel} thumbnailHref={resource.thumbnailHref} />
         <div className="min-w-0 flex-1">
-          <p className="eyebrow text-muted-foreground">{resource.sourceLabel}</p>
+          <p className="eyebrow text-muted-foreground">
+            {resource.sourceLabel}
+            {resource.folderName ? ` · ${resource.folderName}` : ""}
+          </p>
           <h3 className="mt-1 text-base font-semibold tracking-tight text-foreground lg:text-lg">
             <Link
               className="rounded-sm underline decoration-transparent underline-offset-4 transition-colors duration-fast ease-standard hover:decoration-border-strong"
@@ -152,7 +157,10 @@ export function ResourceCompactRow({ resource }: { resource: ResourceCardData })
         thumbnailHref={resource.thumbnailHref}
       />
       <div className="min-w-0 flex-1">
-        <p className="eyebrow text-muted-foreground">{resource.sourceLabel}</p>
+        <p className="eyebrow text-muted-foreground">
+          {resource.sourceLabel}
+          {resource.folderName ? ` · ${resource.folderName}` : ""}
+        </p>
         <h3 className="mt-1 text-base font-medium tracking-tight text-foreground">
           <Link
             className="rounded-sm underline decoration-transparent underline-offset-4 transition-colors duration-fast ease-standard hover:decoration-border-strong"

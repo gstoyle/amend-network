@@ -27,7 +27,8 @@ export type IconName =
   | "slides"
   | "chevron-down"
   | "forum"
-  | "guide";
+  | "guide"
+  | "folder";
 
 const PATHS: Record<IconName, string[]> = {
   home: ["M3 10.5 12 3l9 7.5", "M5.25 9.75V21h13.5V9.75", "M9.75 21v-6h4.5v6"],
@@ -109,6 +110,9 @@ const PATHS: Record<IconName, string[]> = {
     "M4 4.5A1.5 1.5 0 0 1 5.5 3H11v15H5.5A1.5 1.5 0 0 0 4 19.5z",
     "M20 4.5A1.5 1.5 0 0 0 18.5 3H13v15h5.5A1.5 1.5 0 0 1 20 19.5z",
     "M11 6h2",
+  ],
+  folder: [
+    "M3 7.5A1.5 1.5 0 0 1 4.5 6h4.4L11 8h8.5A1.5 1.5 0 0 1 21 9.5v8A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z",
   ],
 };
 

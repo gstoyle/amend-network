@@ -3,6 +3,7 @@ import { writeAudit } from "@/lib/audit/write";
 import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
 import { withRls } from "@/lib/db/rls";
+import { parseOptionalFolderId, RESOURCE_SOURCES } from "@/lib/resources/labels";
 import {
   replaceResource as commitReplacement,
   type PublishResult,
@@ -10,7 +11,7 @@ import {
 } from "@/lib/resources/publish";
 
 const ADMIN_ROLES = ["admin", "super_admin"] as const;
-const SOURCES = ["Amend", "Partner Org", "External"] as const;
+const SOURCES = RESOURCE_SOURCES;
 const VISIBILITY = ["all_authenticated", "pathways", "lead"] as const;
 const GENERIC_EDIT_ERROR = "Could not save this resource.";
 
@@ -23,6 +24,7 @@ const metadataSchema = z.object({
     .min(1, "Preview text is required.")
     .max(500, "Preview text must be 500 characters or fewer."),
   sourceLabel: z.enum(SOURCES, { message: "Choose a valid source label." }),
+  folderId: z.string().uuid().nullable().optional(),
   tags: z
     .array(z.string().trim().min(1).max(40))
     .max(10, "Use 10 tags or fewer."),
@@ -38,6 +40,7 @@ export type EditInput = {
   title: string;
   previewText: string;
   sourceLabel: string;
+  folderId?: string | null;
   tags: string[];
   visibility: string[];
   ip: string;
@@ -59,6 +62,7 @@ export type AdminResourceDetail = {
   title: string;
   previewText: string;
   sourceLabel: string;
+  folderId: string | null;
   tags: string[];
   visibility: string[];
   deletedAt: Date | null;
@@ -103,6 +107,7 @@ export async function getAdminResource(
           title: true,
           previewText: true,
           sourceLabel: true,
+          folderId: true,
           tags: true,
           visibility: true,
           deletedAt: true,
@@ -125,6 +130,7 @@ export async function updateResource(
     title: input.title,
     previewText: input.previewText,
     sourceLabel: input.sourceLabel,
+    folderId: parseOptionalFolderId(input.folderId ?? undefined),
     tags: input.tags,
     visibility: input.visibility,
   });
@@ -155,6 +161,7 @@ export async function updateResource(
             title: parsed.data.title,
             previewText: parsed.data.previewText,
             sourceLabel: parsed.data.sourceLabel,
+            folderId: parsed.data.folderId ?? null,
             tags: parsed.data.tags,
             visibility: parsed.data.visibility,
           },

@@ -98,7 +98,7 @@ describe("admin resource edit and replace (US6 / FR-016)", () => {
       resourceId: created.id,
       title: `${MARKER}-renamed`,
       previewText: "Updated preview",
-      sourceLabel: "Partner Org",
+      sourceLabel: "Members",
       tags: ["handbook"],
       visibility: ["all_authenticated"],
       ip: IP,
@@ -113,7 +113,7 @@ describe("admin resource edit and replace (US6 / FR-016)", () => {
     const after = await migrator.resource.findUnique({ where: { id: created.id } });
     expect(after?.title).toBe(`${MARKER}-renamed`);
     expect(after?.previewText).toBe("Updated preview");
-    expect(after?.sourceLabel).toBe("Partner Org");
+    expect(after?.sourceLabel).toBe("Members");
     expect(after?.tags).toEqual(["handbook"]);
     expect(after?.updatedAt.getTime()).toBeGreaterThan(before!.updatedAt.getTime());
 

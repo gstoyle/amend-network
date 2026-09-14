@@ -353,4 +353,29 @@ describe("resources RLS (GUCs only, no requireRole) — contracts/rls-policies.m
     }
     expect(await getCount(id)).toBe(0);
   });
+
+  it("members cannot select an empty folder; admins can", async () => {
+    const folderId = randomUUID();
+    await migrator.$executeRaw`
+      INSERT INTO resource_folders (id, name, slug, parent_id, sort_order)
+      VALUES (
+        ${folderId}::uuid,
+        ${`${MARKER}-empty`},
+        ${`empty-${folderId.slice(0, 8)}`},
+        NULL,
+        99
+      )
+    `;
+    const memberRows = await withRls(
+      { programRole: "pathways", adminRole: "none", status: "active" },
+      (tx) => tx.resourceFolder.findMany({ where: { id: folderId } }),
+    );
+    const adminRows = await withRls(
+      { programRole: "none", adminRole: "admin", status: "active" },
+      (tx) => tx.resourceFolder.findMany({ where: { id: folderId } }),
+    );
+    await migrator.$executeRaw`DELETE FROM resource_folders WHERE id = ${folderId}::uuid`;
+    expect(memberRows).toEqual([]);
+    expect(adminRows).toHaveLength(1);
+  });
 });

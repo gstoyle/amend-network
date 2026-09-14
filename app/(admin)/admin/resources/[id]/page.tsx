@@ -12,6 +12,8 @@ import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
 import { getAdminResource, replaceResource, updateResource, withdrawResource } from "@/lib/resources/edit";
+import { listAdminFolders } from "@/lib/resources/folders";
+import { RESOURCE_TOPIC_SUGGESTIONS } from "@/lib/resources/labels";
 import { mintIngestSlots } from "@/lib/resources/publish";
 import { cn } from "@/lib/utils";
 
@@ -74,6 +76,7 @@ async function saveAction(
       title: String(formData.get("title") ?? ""),
       previewText: String(formData.get("previewText") ?? ""),
       sourceLabel: String(formData.get("sourceLabel") ?? ""),
+      folderId: String(formData.get("folderId") ?? ""),
       tags,
       visibility,
       ...context,
@@ -132,9 +135,13 @@ export default async function AdminResourceEditPage({
   const { id } = await params;
   const claims = await loadClaims();
   let resource;
+  let folders;
   try {
     requireRole(claims, { admin: ["admin", "super_admin"], mfa: true });
-    resource = await getAdminResource(claims, id);
+    [resource, folders] = await Promise.all([
+      getAdminResource(claims, id),
+      listAdminFolders(claims),
+    ]);
   } catch (error) {
     if (error instanceof AuthDeniedError) {
       redirect("/login");
@@ -172,16 +179,23 @@ export default async function AdminResourceEditPage({
         <>
           <section className={formSurfaceClassName} aria-label="Resource details">
             <ResourceForm
+              folders={folders.map((folder) => ({
+                id: folder.id,
+                name: folder.name,
+                parentName: folder.parentName,
+              }))}
               initial={{
                 id: resource.id,
                 title: resource.title,
                 previewText: resource.previewText,
                 sourceLabel: resource.sourceLabel,
+                folderId: resource.folderId,
                 tags: resource.tags,
                 visibility: resource.visibility,
               }}
               mintAction={mintAction}
               saveAction={saveAction}
+              topicSuggestions={[...RESOURCE_TOPIC_SUGGESTIONS]}
             />
           </section>
           <form action={withdrawAction} className="border-t border-border pt-6">

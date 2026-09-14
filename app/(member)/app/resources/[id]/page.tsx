@@ -47,6 +47,11 @@ export default async function MemberResourceDetailPage({
           Back to resources
         </Link>
       </p>
+      {resource.sourceLabel === "Members" ? (
+        <p className="rounded-lg border border-support bg-support-subtle p-4 text-sm text-support-subtle-foreground">
+          Shared by a member. Amend has not endorsed this material.
+        </p>
+      ) : null}
       <PageHeader
         actions={
           resource.fileMimeType === "video/mp4" && resource.playbackHref ? null : (
@@ -60,7 +65,11 @@ export default async function MemberResourceDetailPage({
           )
         }
         description={resource.previewText}
-        eyebrow={resource.sourceLabel}
+        eyebrow={
+          resource.folderName
+            ? `${resource.sourceLabel} · ${resource.folderName}`
+            : resource.sourceLabel
+        }
         title={resource.title}
       />
 

@@ -33,9 +33,9 @@ describe("axe-core on resource library pages (T044)", () => {
             <legend>Tags</legend>
             <label><input name="tag" type="checkbox" value="guide" />guide</label>
           </fieldset>
-          <label for="resource-source">Source</label>
+          <label for="resource-source">Collection</label>
           <select id="resource-source" name="source">
-            <option value="">All sources</option>
+            <option value="">Amend and members</option>
             <option value="Amend">Amend</option>
           </select>
           <label for="resource-sort">Sort</label>
@@ -125,9 +125,11 @@ describe("axe-core on resource library pages (T044)", () => {
         <form>
           <label for="title">Title</label><input id="title" name="title" type="text" />
           <label for="previewText">Preview text</label><textarea id="previewText" name="previewText"></textarea>
-          <label for="sourceLabel">Source</label>
+          <label for="sourceLabel">Collection</label>
           <select id="sourceLabel" name="sourceLabel"><option value="Amend">Amend</option></select>
-          <label for="tags">Tags (comma-separated, up to 10)</label><input id="tags" name="tags" type="text" />
+          <label for="folderId">Folder</label>
+          <select id="folderId" name="folderId"><option value="">No folder</option></select>
+          <label for="tags">Topics (comma-separated, up to 10)</label><input id="tags" name="tags" type="text" />
           <fieldset>
             <legend>Visibility</legend>
             <label><input name="visibility" type="checkbox" value="all_authenticated" />Everyone signed in</label>
@@ -150,9 +152,11 @@ describe("axe-core on resource library pages (T044)", () => {
           <input name="resourceId" type="hidden" value="example" />
           <label for="title">Title</label><input id="title" name="title" type="text" />
           <label for="previewText">Preview text</label><textarea id="previewText" name="previewText"></textarea>
-          <label for="sourceLabel">Source</label>
+          <label for="sourceLabel">Collection</label>
           <select id="sourceLabel" name="sourceLabel"><option value="Amend">Amend</option></select>
-          <label for="tags">Tags (comma-separated, up to 10)</label><input id="tags" name="tags" type="text" />
+          <label for="folderId">Folder</label>
+          <select id="folderId" name="folderId"><option value="">No folder</option></select>
+          <label for="tags">Topics (comma-separated, up to 10)</label><input id="tags" name="tags" type="text" />
           <fieldset>
             <legend>Visibility</legend>
             <label><input name="visibility" type="checkbox" value="all_authenticated" />Everyone signed in</label>

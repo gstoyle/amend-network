@@ -236,6 +236,15 @@ remain. Announcements, resources, and events may still use
 `all_authenticated`. **Confirmed by Amend.** Revisit when there is
 moderation capacity for a general room.
 
+**Resource library collections and folders (2026-09-14).** The member
+library has two collections: **From Amend** (endorsed) and **Shared by
+members** (not an endorsement). Staff still publish both; members cannot
+upload. `source_label` is `Amend` or `Members`. Former Partner Org and
+External rows were recoded as Amend. Folders nest one level (Policies →
+location). Topic tags remain free-form (up to 10) with suggested labels.
+**Confirmed by Amend.** Revisit if members should upload directly or if
+folders need their own visibility.
+
 **Administrative MFA is optional until Amend confirms the gate
 (2026-08-19).** PRD §5.1 still says Super Admin, Admin, and Moderator
 must enroll TOTP before `/admin`. Local and staging use currently need
@@ -258,4 +267,4 @@ Q15 (budget ceiling).
 
 **Log maintained by:** solo developer, per constitution governance.
 
-**Last updated:** 2026-09-14 (Q3 launch networks; all-members forum paused)
+**Last updated:** 2026-09-14 (resource collections and folders; all-members forum paused)

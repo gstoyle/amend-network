@@ -4,6 +4,7 @@ import { writeAudit } from "@/lib/audit/write";
 import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
 import { withRls } from "@/lib/db/rls";
+import { parseOptionalFolderId, RESOURCE_SOURCES } from "@/lib/resources/labels";
 import { scanBytes } from "@/lib/scan/clamav";
 import {
   deleteObject,
@@ -23,7 +24,7 @@ const FILE_MIMES = [
   "video/mp4",
 ] as const;
 const THUMB_MIMES = ["image/jpeg", "image/png"] as const;
-const SOURCES = ["Amend", "Partner Org", "External"] as const;
+const SOURCES = RESOURCE_SOURCES;
 const VISIBILITY = ["all_authenticated", "pathways", "lead"] as const;
 const MAX_FILE_BYTES = 262_144_000;
 const MAX_THUMB_BYTES = 5 * 1024 * 1024;
@@ -38,6 +39,7 @@ const publishSchema = z.object({
     .min(1, "Preview text is required.")
     .max(500, "Preview text must be 500 characters or fewer."),
   sourceLabel: z.enum(SOURCES, { message: "Choose a valid source label." }),
+  folderId: z.string().uuid().nullable().optional(),
   tags: z
     .array(z.string().trim().min(1).max(40))
     .max(10, "Use 10 tags or fewer."),
@@ -70,6 +72,7 @@ export type PublishInput = {
   title: string;
   previewText: string;
   sourceLabel: string;
+  folderId?: string | null;
   tags: string[];
   visibility: string[];
   fileMimeType: string;
@@ -100,6 +103,7 @@ export type AdminResourceListItem = {
   title: string;
   visibility: string[];
   sourceLabel: string;
+  folderName: string | null;
   deletedAt: Date | null;
   createdAt: Date;
 };
@@ -219,11 +223,20 @@ export async function listAdminResources(
           title: true,
           visibility: true,
           sourceLabel: true,
+          folder: { select: { name: true } },
           deletedAt: true,
           createdAt: true,
         },
       });
-      return rows;
+      return rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        visibility: row.visibility,
+        sourceLabel: row.sourceLabel,
+        folderName: row.folder?.name ?? null,
+        deletedAt: row.deletedAt,
+        createdAt: row.createdAt,
+      }));
     },
   );
 }
@@ -238,6 +251,7 @@ export async function publishResource(
     title: input.title,
     previewText: input.previewText,
     sourceLabel: input.sourceLabel,
+    folderId: parseOptionalFolderId(input.folderId ?? undefined),
     tags: input.tags,
     visibility: input.visibility,
     fileMimeType: input.fileMimeType,
@@ -286,6 +300,7 @@ export async function publishResource(
             previewText: parsed.data.previewText,
             thumbnailObjectKey: liveThumbKey,
             sourceLabel: parsed.data.sourceLabel,
+            folderId: parsed.data.folderId ?? null,
             tags: parsed.data.tags,
             fileObjectKey: liveFileKey,
             fileSizeBytes: BigInt(scanned.fileBytes.length),

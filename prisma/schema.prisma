@@ -238,24 +238,42 @@ model AuditLog {
   @@map("audit_log")
 }
 
+model ResourceFolder {
+  id        String           @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String           @unique
+  parentId  String?          @map("parent_id") @db.Uuid
+  sortOrder Int              @map("sort_order")
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  parent    ResourceFolder?  @relation("ResourceFolderTree", fields: [parentId], references: [id])
+  children  ResourceFolder[] @relation("ResourceFolderTree")
+  resources Resource[]
+
+  @@index([parentId, sortOrder])
+  @@map("resource_folders")
+}
+
 model Resource {
-  id                  String    @id @default(uuid()) @db.Uuid
+  id                  String          @id @default(uuid()) @db.Uuid
   title               String
-  previewText         String    @map("preview_text")
-  thumbnailObjectKey  String    @map("thumbnail_object_key")
-  sourceLabel         String    @map("source_label")
+  previewText         String          @map("preview_text")
+  thumbnailObjectKey  String          @map("thumbnail_object_key")
+  sourceLabel         String          @map("source_label")
   tags                String[]
-  fileObjectKey       String    @map("file_object_key")
-  fileSizeBytes       BigInt    @map("file_size_bytes")
-  fileMimeType        String    @map("file_mime_type")
+  fileObjectKey       String          @map("file_object_key")
+  fileSizeBytes       BigInt          @map("file_size_bytes")
+  fileMimeType        String          @map("file_mime_type")
   visibility          String[]
-  downloadCount       Int       @default(0) @map("download_count")
-  uploadedBy          String    @map("uploaded_by") @db.Uuid
-  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt           DateTime? @map("deleted_at") @db.Timestamptz(6)
+  downloadCount       Int             @default(0) @map("download_count")
+  uploadedBy          String          @map("uploaded_by") @db.Uuid
+  folderId            String?         @map("folder_id") @db.Uuid
+  createdAt           DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt           DateTime?       @map("deleted_at") @db.Timestamptz(6)
+  folder              ResourceFolder? @relation(fields: [folderId], references: [id])
 
   @@index([visibility], type: Gin)
+  @@index([folderId])
   @@map("resources")
 }
 

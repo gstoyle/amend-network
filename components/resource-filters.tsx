@@ -3,9 +3,9 @@ import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { RESOURCE_SOURCE_COPY, RESOURCE_SOURCES } from "@/lib/resources/labels";
 import { cn } from "@/lib/utils";
 
-const SOURCES = ["Amend", "Partner Org", "External"] as const;
 const SORTS = [
   { value: "newest", label: "Newest" },
   { value: "downloads", label: "Most downloaded" },
@@ -16,6 +16,7 @@ export type ResourceFilterValues = {
   q?: string;
   tags?: string[];
   source?: string;
+  folder?: string;
   sort?: string;
 };
 
@@ -34,6 +35,7 @@ export function ResourceFilters({
       </h2>
 
       <form className="flex flex-col gap-4" method="get">
+        {query.folder ? <input name="folder" type="hidden" value={query.folder} /> : null}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
           <div className="flex-1">
             <Label className="mb-1.5 block" htmlFor="resource-q">
@@ -57,17 +59,17 @@ export function ResourceFilters({
 
           <div className="lg:w-56">
             <Label className="mb-1.5 block" htmlFor="resource-source">
-              Source
+              Collection
             </Label>
             <Select
               defaultValue={query.source ?? ""}
               id="resource-source"
               name="source"
             >
-              <option value="">All sources</option>
-              {SOURCES.map((source) => (
+              <option value="">Amend and members</option>
+              {RESOURCE_SOURCES.map((source) => (
                 <option key={source} value={source}>
-                  {source}
+                  {RESOURCE_SOURCE_COPY[source].label}
                 </option>
               ))}
             </Select>

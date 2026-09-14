@@ -12,6 +12,7 @@ async function insertLive(input: {
   visibility: string[];
   tags?: string[];
   sourceLabel?: string;
+  folderId?: string;
   downloadCount?: number;
   createdAt?: Date;
   deletedAt?: Date | null;
@@ -24,6 +25,7 @@ async function insertLive(input: {
       thumbnailObjectKey: `seed/${randomUUID()}/thumb.png`,
       sourceLabel: input.sourceLabel ?? "Amend",
       tags: input.tags ?? [],
+      folderId: input.folderId,
       fileObjectKey: `seed/${randomUUID()}/file.pdf`,
       fileSizeBytes: BigInt(1024),
       fileMimeType: "application/pdf",
@@ -66,7 +68,7 @@ describe("member resource search (US5 / FR-015)", () => {
       previewText: "forms packet",
       visibility: ["all_authenticated"],
       tags: ["forms"],
-      sourceLabel: "Partner Org",
+      sourceLabel: "Members",
       downloadCount: 20,
       createdAt: new Date("2026-06-01T00:00:00.000Z"),
     });
@@ -75,7 +77,7 @@ describe("member resource search (US5 / FR-015)", () => {
       previewText: "token a_b in preview",
       visibility: ["pathways", "lead"],
       tags: ["handbook", "workshop"],
-      sourceLabel: "External",
+      sourceLabel: "Members",
       downloadCount: 1,
       createdAt: new Date("2026-03-01T00:00:00.000Z"),
     });
@@ -135,7 +137,7 @@ describe("member resource search (US5 / FR-015)", () => {
     const handbookExternal = ours(
       await listResources(claimsFor("pathways"), {
         tags: ["handbook"],
-        source: "External",
+        source: "Members",
       }),
     );
     expect(handbookExternal).toEqual([`${MARKER}-Gamma workshop`]);
@@ -143,7 +145,7 @@ describe("member resource search (US5 / FR-015)", () => {
     const empty = ours(
       await listResources(claimsFor("pathways"), {
         q: "handbook",
-        source: "Partner Org",
+        source: "Members",
       }),
     );
     expect(empty).toEqual([]);
@@ -173,6 +175,44 @@ describe("member resource search (US5 / FR-015)", () => {
     ]);
   });
 
+  it("filters to a folder and its child folders", async () => {
+    const parent = await migrator.resourceFolder.create({
+      data: {
+        id: randomUUID(),
+        name: `${MARKER}-Policies`,
+        slug: `${MARKER}-policies`.toLowerCase().replaceAll("_", "-"),
+        sortOrder: 90,
+      },
+    });
+    const child = await migrator.resourceFolder.create({
+      data: {
+        id: randomUUID(),
+        name: `${MARKER}-Australia`,
+        slug: `${MARKER}-australia`.toLowerCase().replaceAll("_", "-"),
+        parentId: parent.id,
+        sortOrder: 91,
+      },
+    });
+    createdIds.push(
+      await insertLive({
+        title: `${MARKER}-AU file`,
+        visibility: ["pathways"],
+        folderId: child.id,
+      }),
+      await insertLive({
+        title: `${MARKER}-loose file`,
+        visibility: ["pathways"],
+      }),
+    );
+    const inChild = ours(
+      await listResources(claimsFor("pathways"), { folder: child.slug }),
+    );
+    expect(inChild).toEqual([`${MARKER}-AU file`]);
+    await migrator.resource.deleteMany({ where: { id: { in: createdIds } } });
+    createdIds.length = 0;
+    await migrator.resourceFolder.deleteMany({ where: { id: { in: [child.id, parent.id] } } });
+  });
+
   it("Independent Test: Pathways search/filter/sort never includes LEAD-only", async () => {
     await seedCatalog();
     const session = claimsFor("pathways");
@@ -180,11 +220,11 @@ describe("member resource search (US5 / FR-015)", () => {
       { q: "Alpha" },
       { q: "reentry" },
       { tags: ["handbook"] },
-      { source: "Amend" },
+      { source: "Amend" as const },
       { sort: "newest" as const },
       { sort: "downloads" as const },
       { sort: "title" as const },
-      { q: "Alpha", tags: ["handbook"], source: "Amend", sort: "downloads" as const },
+      { q: "Alpha", tags: ["handbook"], source: "Amend" as const, sort: "downloads" as const },
     ];
     for (const query of queries) {
       const titles = ours(await listResources(session, query));

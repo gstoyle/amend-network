@@ -11,6 +11,7 @@ import { checkboxClassName, controlClassName, Input } from "@/components/ui/inpu
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { VISIBILITY_OPTIONS } from "@/lib/db/program-labels";
+import { RESOURCE_SOURCE_COPY, RESOURCE_SOURCES } from "@/lib/resources/labels";
 import { cn } from "@/lib/utils";
 
 export type ResourceListItem = {
@@ -37,8 +38,15 @@ export type ResourceFormInitial = {
   title: string;
   previewText: string;
   sourceLabel: string;
+  folderId: string | null;
   tags: string[];
   visibility: string[];
+};
+
+export type ResourceFolderOption = {
+  id: string;
+  name: string;
+  parentName: string | null;
 };
 
 type ResourceFormProps = {
@@ -52,6 +60,8 @@ type ResourceFormProps = {
     formData: FormData,
   ) => Promise<ResourceFormState>;
   initial?: ResourceFormInitial;
+  folders: ResourceFolderOption[];
+  topicSuggestions: string[];
 };
 
 const initialState: ResourceFormState = {};
@@ -61,6 +71,8 @@ export function ResourceForm({
   publishAction,
   saveAction,
   initial,
+  folders,
+  topicSuggestions,
 }: ResourceFormProps) {
   const [clientError, setClientError] = useState<string | undefined>();
   const isEdit = Boolean(initial);
@@ -149,26 +161,50 @@ export function ResourceForm({
         />
       </div>
       <div className={formFieldClassName}>
-        <Label htmlFor="sourceLabel">Source</Label>
+        <Label htmlFor="sourceLabel">Collection</Label>
         <Select
           defaultValue={initial?.sourceLabel ?? "Amend"}
           id="sourceLabel"
           name="sourceLabel"
           required
         >
-          <option value="Amend">Amend</option>
-          <option value="Partner Org">Partner Org</option>
-          <option value="External">External</option>
+          {RESOURCE_SOURCES.map((source) => (
+            <option key={source} value={source}>
+              {RESOURCE_SOURCE_COPY[source].label}
+            </option>
+          ))}
         </Select>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Amend means you stand behind this. Members means a peer shared it.
+        </p>
       </div>
       <div className={formFieldClassName}>
-        <Label htmlFor="tags">Tags (comma-separated, up to 10)</Label>
+        <Label htmlFor="folderId">Folder</Label>
+        <Select defaultValue={initial?.folderId ?? ""} id="folderId" name="folderId">
+          <option value="">No folder</option>
+          {folders.map((folder) => (
+            <option key={folder.id} value={folder.id}>
+              {folder.parentName ? `${folder.parentName} / ${folder.name}` : folder.name}
+            </option>
+          ))}
+        </Select>
+      </div>
+      <div className={cn(formFieldClassName, "lg:col-span-2")}>
+        <Label htmlFor="tags">Topics (comma-separated, up to 10)</Label>
         <Input
           defaultValue={initial?.tags.join(", ") ?? ""}
           id="tags"
+          list="resource-topic-suggestions"
           name="tags"
           type="text"
         />
+        {topicSuggestions.length > 0 ? (
+          <datalist id="resource-topic-suggestions">
+            {topicSuggestions.map((topic) => (
+              <option key={topic} value={topic} />
+            ))}
+          </datalist>
+        ) : null}
       </div>
       <fieldset className={cn(formInsetClassName, "lg:col-span-2")}>
         <legend className="text-sm font-medium text-foreground">Visibility</legend>

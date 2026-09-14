@@ -165,8 +165,10 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
       {
         type: "ul",
         items: [
+          "The library is split into From Amend (materials Amend stands behind) and Shared by members (peer files, not an endorsement).",
+          "Open a folder to browse, for example Policies and then a location.",
           "Search by words in the title or description.",
-          "Filter by source and by topic tags.",
+          "Filter by collection and by topic tags.",
           "Sort by newest or other offered sorts.",
           "Clear filters returns the full list you are allowed to see.",
         ],
