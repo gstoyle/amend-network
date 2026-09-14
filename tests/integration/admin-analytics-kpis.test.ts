@@ -20,9 +20,9 @@ function mfaAdmin(): SessionClaims {
 }
 
 async function pathwaysNetworkId(): Promise<string> {
-  const network = await migrator.network.findUnique({ where: { name: "Pathways to Change" } });
+  const network = await migrator.network.findUnique({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
   if (!network) {
-    throw new Error("Pathways to Change network missing");
+    throw new Error("Norway & Northern Ireland | Fall 2026 network missing");
   }
   return network.id;
 }

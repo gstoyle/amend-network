@@ -7,9 +7,9 @@ import { sanitizeIp } from "@/lib/auth/credentials";
 import { encryptPii, hmacEmailLookup, normalizeEmail } from "@/lib/crypto/pii";
 import { withRls } from "@/lib/db/rls";
 import { sendLifecycleEmail } from "@/lib/email/transport";
+import { isProgramNetworkRole } from "@/lib/db/program-labels";
 import { env } from "@/lib/env";
 
-const LAUNCH_NETWORK_NAMES = ["Pathways to Change", "LEAD"] as const;
 const VALIDATION_ERROR = "Check the form and try again.";
 const VISITOR_COPY = "If this email is eligible, you will receive instructions.";
 
@@ -53,8 +53,8 @@ export function registrationVisitorCopy(outcome?: RegistrationOutcome): string {
   return VISITOR_COPY;
 }
 
-export function isLaunchNetworkName(name: string): boolean {
-  return LAUNCH_NETWORK_NAMES.some((allowed) => allowed.toLowerCase() === name.trim().toLowerCase());
+export function isLaunchNetwork(network: { programRole: string }): boolean {
+  return isProgramNetworkRole(network.programRole);
 }
 
 function isUniqueViolation(error: unknown): boolean {
@@ -68,10 +68,11 @@ function isUniqueViolation(error: unknown): boolean {
 export async function listLaunchNetworks(): Promise<{ id: string; name: string }[]> {
   return withRls({}, async (tx) => {
     const rows = await tx.network.findMany({
+      where: { programRole: { in: ["pathways", "lead"] } },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
     });
-    return rows.filter((row) => isLaunchNetworkName(row.name));
+    return rows;
   });
 }
 
@@ -109,9 +110,9 @@ export async function registerSelf(input: RegisterInput): Promise<RegisterResult
       });
       const network = await tx.network.findFirst({
         where: { id: parsed.data.networkId },
-        select: { id: true, name: true },
+        select: { id: true, name: true, programRole: true },
       });
-      if (!affiliation || !network || !isLaunchNetworkName(network.name)) {
+      if (!affiliation || !network || !isLaunchNetwork(network)) {
         throw new FormValidationError();
       }
 

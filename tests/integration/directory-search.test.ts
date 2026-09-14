@@ -79,7 +79,7 @@ describe("directory list/search (US2)", () => {
   });
 
   it("Independent Test: Pathways sees Pathways only; hidden title/DOC are not matches; pending sees zero", async () => {
-    const pathwaysNet = await migrator.network.findUnique({ where: { name: "Pathways to Change" } });
+    const pathwaysNet = await migrator.network.findUnique({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
     const leadNet = await migrator.network.findUnique({ where: { name: "LEAD" } });
     const agency = await migrator.docAffiliation.findUnique({ where: { label: "Test Agency A" } });
     expect(pathwaysNet).not.toBeNull();

@@ -74,7 +74,7 @@ describe("axe-core on join pages (T045)", () => {
             <p>Ada Lovelace</p>
             <form>
               <label for="network-1">Assign network</label>
-              <select id="network-1" name="networkId"><option value="n1">Pathways to Change</option></select>
+              <select id="network-1" name="networkId"><option value="n1">Norway & Northern Ireland | Fall 2026</option></select>
               <button type="submit">Approve</button>
             </form>
             <form>

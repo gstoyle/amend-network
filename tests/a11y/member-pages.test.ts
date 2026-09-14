@@ -195,7 +195,7 @@ describe("axe-core on member page layouts (012 T007)", () => {
             <article>
               <span aria-hidden="true">AS</span>
               <h2><a href="/app/directory/example">Ada Subject</a></h2>
-              <p>Pathways to Change</p>
+              <p>Norway & Northern Ireland | Fall 2026</p>
             </article>
           </li>
         </ul>
@@ -211,12 +211,12 @@ describe("axe-core on member page layouts (012 T007)", () => {
         <header>
           <span aria-hidden="true">AS</span>
           <h1>Ada Subject</h1>
-          <p>Pathways to Change</p>
+          <p>Norway & Northern Ireland | Fall 2026</p>
         </header>
         <dl>
           <div>
             <dt>Network</dt>
-            <dd>Pathways to Change</dd>
+            <dd>Norway & Northern Ireland | Fall 2026</dd>
           </div>
           <div>
             <dt>Email</dt>

@@ -107,7 +107,7 @@ describe("directory privacy save (US1)", () => {
   });
 
   it("Independent Test: opted-out A is hidden; opted-in B shows name, network, title, not DOC/email; pending cannot list", async () => {
-    const network = await migrator.network.findUnique({ where: { name: "Pathways to Change" } });
+    const network = await migrator.network.findUnique({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
     expect(network).not.toBeNull();
     const networkId = network!.id;
 
@@ -184,7 +184,7 @@ describe("directory privacy save (US1)", () => {
   });
 
   it("opt-in writes directory_privacy_changed without PII in metadata", async () => {
-    const network = await migrator.network.findUnique({ where: { name: "Pathways to Change" } });
+    const network = await migrator.network.findUnique({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
     const userId = await insertMember({
       email: `${MARKER}-audit@example.com`,
       programRole: "pathways",
@@ -215,7 +215,7 @@ describe("directory privacy save (US1)", () => {
   });
 
   it("hiding title deletes the shown-title row and writes audit", async () => {
-    const network = await migrator.network.findUnique({ where: { name: "Pathways to Change" } });
+    const network = await migrator.network.findUnique({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
     const userId = await insertMember({
       email: `${MARKER}-hide@example.com`,
       programRole: "pathways",
@@ -249,7 +249,7 @@ describe("directory privacy save (US1)", () => {
   });
 
   it("opt-out deletes listing and shown-field rows immediately", async () => {
-    const network = await migrator.network.findUnique({ where: { name: "Pathways to Change" } });
+    const network = await migrator.network.findUnique({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
     const userId = await insertMember({
       email: `${MARKER}-out@example.com`,
       programRole: "pathways",

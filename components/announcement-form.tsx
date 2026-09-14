@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { checkboxClassName, controlClassName, Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { VISIBILITY_OPTIONS } from "@/lib/db/program-labels";
 import { cn } from "@/lib/utils";
 
 export type AnnouncementFormState = {
@@ -33,12 +34,6 @@ type AnnouncementFormProps = {
   initial?: AnnouncementFormInitial;
   submitLabel: string;
 };
-
-const VISIBILITY_OPTIONS = [
-  { value: "all_authenticated", label: "Everyone signed in" },
-  { value: "pathways", label: "Pathways only" },
-  { value: "lead", label: "LEAD only" },
-] as const;
 
 export function AnnouncementForm({ action, initial, submitLabel }: AnnouncementFormProps) {
   const [state, formAction, pending] = useActionState(action, {});

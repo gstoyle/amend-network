@@ -93,11 +93,11 @@ function gucFor(
 
 async function pathwaysNetworkId(): Promise<string> {
   const rows = await migrator.$queryRaw<{ id: string }[]>`
-    SELECT id::text AS id FROM networks WHERE name = 'Pathways to Change' LIMIT 1
+    SELECT id::text AS id FROM networks WHERE name = 'Norway & Northern Ireland | Fall 2026' LIMIT 1
   `;
   const id = rows[0]?.id;
   if (!id) {
-    throw new Error("Pathways to Change network missing");
+    throw new Error("Norway & Northern Ireland | Fall 2026 network missing");
   }
   return id;
 }

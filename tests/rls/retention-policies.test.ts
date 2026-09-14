@@ -118,9 +118,9 @@ async function insertAuditSecurityRow(): Promise<bigint> {
 
 async function insertInvitation(status: "pending" | "expired"): Promise<string> {
   const admin = await migrator.user.findUnique({ where: { emailLookup: hmacEmailLookup("admin@local") } });
-  const network = await migrator.network.findFirst({ where: { name: "Pathways to Change" } });
+  const network = await migrator.network.findFirst({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
   if (!admin || !network) {
-    throw new Error("seed admin@local and Pathways to Change are required");
+    throw new Error("seed admin@local and Norway & Northern Ireland | Fall 2026 are required");
   }
   const id = randomUUID();
   await migrator.invitation.create({

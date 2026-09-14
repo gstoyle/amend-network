@@ -92,7 +92,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
       { type: "h2", id: "announcements", text: "Announcements" },
       {
         type: "p",
-        text: "Time-bounded banners can appear at the top of member pages. A banner you dismiss stays dismissed for you. Visibility still follows your roles — a Pathways-only announcement is not shown to a LEAD-only member.",
+        text: "Time-bounded banners can appear at the top of member pages. A banner you dismiss stays dismissed for you. Visibility still follows your roles — an Immersion-only announcement is not shown to a LEAD-only member.",
       },
       {
         type: "callout",
@@ -327,13 +327,13 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     blocks: [
       {
         type: "p",
-        text: "You hold exactly one programme role (Pathways, LEAD, or none) and zero or one administrative role. Role checks run on the server from the signed session. A value typed into the page cannot raise your access.",
+        text: "You hold exactly one programme role (International Immersion Program, LEAD, or none) and zero or one administrative role. Role checks run on the server from the signed session. A value typed into the page cannot raise your access.",
       },
       { type: "h2", id: "what-you-see", text: "What you can see" },
       {
         type: "ul",
         items: [
-          "Pathways members see Pathways-visible and all-authenticated content.",
+          "International Immersion Program members see Immersion-visible and all-authenticated content.",
           "LEAD members see LEAD-visible and all-authenticated content.",
           "Staff with an administrative role also reach Admin from the account area. Authenticator setup is optional.",
         ],
@@ -429,7 +429,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     blocks: [
       {
         type: "p",
-        text: "Content visibility is a list of tokens: all authenticated members, Pathways, and/or LEAD. Do not invent a special-case role branch in a page. If someone cannot see an item, it is because their roles do not intersect that list.",
+        text: "Content visibility is a list of tokens: all authenticated members, International Immersion Program, and/or LEAD. Do not invent a special-case role branch in a page. If someone cannot see an item, it is because their roles do not intersect that list.",
       },
       { type: "h2", id: "resources-events", text: "Resources and events" },
       {

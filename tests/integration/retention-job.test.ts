@@ -231,9 +231,9 @@ describe("retention job user anonymization (US2 / contracts/job.md 4)", () => {
   });
 
   it("Independent Test: 3y+1d deactivated anonymized, leftovers gone, attribution FKs kept, in-window and active unchanged", async () => {
-    const network = await migrator.network.findFirst({ where: { name: "Pathways to Change" } });
+    const network = await migrator.network.findFirst({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
     if (!network) {
-      throw new Error("Pathways to Change network is required");
+      throw new Error("Norway & Northern Ireland | Fall 2026 network is required");
     }
 
     const eligibleEmail = `${MARKER}-eligible@example.com`;
@@ -383,9 +383,9 @@ describe("retention job leftover tokens (US3 / contracts/job.md 5–6)", () => {
   });
 
   it("Independent Test: expired/consumed resets gone, valid unused reset kept, expired+revoked invites gone, pending in-window invite kept", async () => {
-    const network = await migrator.network.findFirst({ where: { name: "Pathways to Change" } });
+    const network = await migrator.network.findFirst({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
     if (!network) {
-      throw new Error("Pathways to Change network is required");
+      throw new Error("Norway & Northern Ireland | Fall 2026 network is required");
     }
     const networkId = network.id;
     const holder = await insertMember({

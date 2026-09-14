@@ -10,7 +10,7 @@ function csv(rows: string[]): string {
 describe("invite CSV parse (US4 / FR-006)", () => {
   it("accepts exact headers and quoted commas", () => {
     const result = parseInviteCsv(
-      csv(['ada@example.com,"Lovelace, Ada",Lovelace,Pathways to Change,Analyst,Test Agency A']),
+      csv(['ada@example.com,"Lovelace, Ada",Lovelace,Norway & Northern Ireland | Fall 2026,Analyst,Test Agency A']),
     );
     expect(result.ok).toBe(true);
     if (!result.ok) {
@@ -22,7 +22,7 @@ describe("invite CSV parse (US4 / FR-006)", () => {
   });
 
   it("rejects a wrong header", () => {
-    const result = parseInviteCsv("email,first,last,network,title,doc\nada@example.com,A,B,Pathways to Change,T,Test Agency A\n");
+    const result = parseInviteCsv("email,first,last,network,title,doc\nada@example.com,A,B,Norway & Northern Ireland | Fall 2026,T,Test Agency A\n");
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error).toBe("bad_header");
@@ -31,7 +31,7 @@ describe("invite CSV parse (US4 / FR-006)", () => {
 
   it("rejects more than 500 data rows", () => {
     const rows = Array.from({ length: 501 }, (_, i) =>
-      `user${i}@example.com,First,Last,Pathways to Change,Title,Test Agency A`,
+      `user${i}@example.com,First,Last,Norway & Northern Ireland | Fall 2026,Title,Test Agency A`,
     );
     const result = parseInviteCsv(csv(rows));
     expect(result.ok).toBe(false);
@@ -43,10 +43,10 @@ describe("invite CSV parse (US4 / FR-006)", () => {
   it("marks missing fields, malformed email, and later duplicate emails invalid", () => {
     const result = parseInviteCsv(
       csv([
-        "ada@example.com,Ada,Lovelace,Pathways to Change,Analyst,Test Agency A",
-        "not-an-email,Ada,Lovelace,Pathways to Change,Analyst,Test Agency A",
-        "ada@example.com,Ada,Duplicate,Pathways to Change,Analyst,Test Agency A",
-        ",Missing,Email,Pathways to Change,Analyst,Test Agency A",
+        "ada@example.com,Ada,Lovelace,Norway & Northern Ireland | Fall 2026,Analyst,Test Agency A",
+        "not-an-email,Ada,Lovelace,Norway & Northern Ireland | Fall 2026,Analyst,Test Agency A",
+        "ada@example.com,Ada,Duplicate,Norway & Northern Ireland | Fall 2026,Analyst,Test Agency A",
+        ",Missing,Email,Norway & Northern Ireland | Fall 2026,Analyst,Test Agency A",
       ]),
     );
     expect(result.ok).toBe(true);

@@ -33,7 +33,7 @@ const ADMIN_GROUP = `<nav aria-label="Administration">
 function sidebar(adminGroup = ""): string {
   return `<aside aria-label="Member">
   <div><a href="/app">Amend Member Network<span>Member portal</span></a></div>
-  <div><p>Ada Lovelace</p><p>Pathways to Change</p></div>
+  <div><p>Ada Lovelace</p><p>International Immersion Program</p></div>
   <nav aria-label="Primary">
     <ul>
       <li><a aria-current="page" class="flex min-h-touch items-center" href="/app">Home</a></li>

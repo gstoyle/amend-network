@@ -266,7 +266,7 @@ describe("join-flow RLS (GUCs only, no requireRole)", () => {
         await tx.docAffiliation.create({
           data: { id: affiliationId, label: `${MARKER}-admin`, active: true },
         });
-        const network = await tx.network.findFirst({ where: { name: "Pathways to Change" } });
+        const network = await tx.network.findFirst({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
         if (!network) {
           throw new Error("Pathways network required");
         }
@@ -383,7 +383,7 @@ describe("join-flow RLS (GUCs only, no requireRole)", () => {
 
   it("empty GUCs cannot expire invitations (sweep operator GUC is required)", async () => {
     const admin = await seedUser("admin@local");
-    const network = await migrator.network.findFirst({ where: { name: "Pathways to Change" } });
+    const network = await migrator.network.findFirst({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
     if (!network) {
       throw new Error("Pathways network required");
     }

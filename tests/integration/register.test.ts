@@ -37,7 +37,7 @@ function countMatching(bodies: string[], ...needles: string[]): number {
 }
 
 async function launchNetwork() {
-  const network = await migrator.network.findFirst({ where: { name: "Pathways to Change" } });
+  const network = await migrator.network.findFirst({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
   if (!network) {
     throw new Error("Pathways network required");
   }

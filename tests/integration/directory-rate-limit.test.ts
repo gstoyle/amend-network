@@ -30,7 +30,7 @@ function sessionFor(userId: string): SessionClaims {
 }
 
 async function insertListedPathways(lastName: string): Promise<string> {
-  const pathwaysNet = await migrator.network.findUnique({ where: { name: "Pathways to Change" } });
+  const pathwaysNet = await migrator.network.findUnique({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
   const agency = await migrator.docAffiliation.findUnique({ where: { label: "Test Agency A" } });
   const id = randomUUID();
   await migrator.user.create({

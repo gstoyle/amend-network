@@ -98,7 +98,7 @@ describe("approval queue (US3 / FR-010–FR-012)", () => {
   });
 
   it("lists pending oldest-first, filters by network, and rejects a second decision", async () => {
-    const pathways = await networkByName("Pathways to Change");
+    const pathways = await networkByName("Norway & Northern Ireland | Fall 2026");
     const lead = await networkByName("LEAD");
     const older = await registerPending(`older-${randomUUID()}@example.com`, pathways.id);
     const newer = await registerPending(`newer-${randomUUID()}@example.com`, lead.id);
@@ -107,7 +107,7 @@ describe("approval queue (US3 / FR-010–FR-012)", () => {
     const all = await listPendingRegistrations(adminSession());
     const ids = all.map((row) => row.id);
     expect(ids.indexOf(older.id)).toBeLessThan(ids.indexOf(newer.id));
-    expect(all.find((row) => row.id === older.id)?.networkName).toBe("Pathways to Change");
+    expect(all.find((row) => row.id === older.id)?.networkName).toBe("Norway & Northern Ireland | Fall 2026");
     expect(all.find((row) => row.id === older.id)?.docAffiliationLabel).toBe("Test Agency A");
     expect(all.find((row) => row.id === older.id)?.registrationIp).toBe(IP);
 
@@ -130,7 +130,7 @@ describe("approval queue (US3 / FR-010–FR-012)", () => {
   });
 
   it("Independent Test: approve/deny from oldest-first filterable queue; Moderator denied", async () => {
-    const pathways = await networkByName("Pathways to Change");
+    const pathways = await networkByName("Norway & Northern Ireland | Fall 2026");
     const lead = await networkByName("LEAD");
     const approveEmail = `approve-${randomUUID()}@example.com`;
     const denyEmail = `deny-${randomUUID()}@example.com`;

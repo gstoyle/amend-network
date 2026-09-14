@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { audienceLabel } from "@/lib/db/visibility";
+import { audienceLabel, PROGRAM_LABELS } from "@/lib/db/visibility";
 
 /**
  * 012 T004 — FR-010, FR-031, FR-032.
@@ -20,21 +20,21 @@ describe("audienceLabel (012 T004)", () => {
 
   it("names both programmes when the item is scoped to both and not to everyone", () => {
     expect(audienceLabel(["pathways", "lead"])).toEqual({
-      label: "Pathways to Change and LEAD",
+      label: `${PROGRAM_LABELS.pathways} and ${PROGRAM_LABELS.lead}`,
       restricted: true,
     });
     expect(audienceLabel(["lead", "pathways"])).toEqual({
-      label: "Pathways to Change and LEAD",
+      label: `${PROGRAM_LABELS.pathways} and ${PROGRAM_LABELS.lead}`,
       restricted: true,
     });
   });
 
   it("names a single programme when the item is scoped to one", () => {
     expect(audienceLabel(["pathways"])).toEqual({
-      label: "Pathways to Change only",
+      label: `${PROGRAM_LABELS.pathways} only`,
       restricted: true,
     });
-    expect(audienceLabel(["lead"])).toEqual({ label: "LEAD only", restricted: true });
+    expect(audienceLabel(["lead"])).toEqual({ label: `${PROGRAM_LABELS.lead} only`, restricted: true });
   });
 
   it("falls back to restricted for an empty or unrecognised set", () => {
@@ -45,9 +45,8 @@ describe("audienceLabel (012 T004)", () => {
     });
   });
 
-  it("reuses the programme names the rest of the product already shows", () => {
-    // A member must never see two different names for the same programme.
-    expect(audienceLabel(["pathways"]).label).toContain("Pathways to Change");
-    expect(audienceLabel(["lead"]).label).toContain("LEAD");
+  it("does not surface Pathways as a member-facing programme name", () => {
+    expect(PROGRAM_LABELS.pathways).toBe("International Immersion Program");
+    expect(PROGRAM_LABELS.pathways).not.toMatch(/Pathways/i);
   });
 });

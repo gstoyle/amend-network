@@ -18,18 +18,13 @@ import { Label } from "@/components/ui/label";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
 import { audienceLabel } from "@/lib/db/visibility";
+import { VISIBILITY_OPTIONS } from "@/lib/db/program-labels";
 import { listAdminCategories } from "@/lib/forum/categories";
 import {
   FORUM_CATEGORY_ADMIN_ROLES,
   FORUM_STAFF_ROLES,
 } from "@/lib/forum/staff";
 import { cn } from "@/lib/utils";
-
-const VISIBILITY_OPTIONS = [
-  { value: "all_authenticated", label: "Everyone signed in" },
-  { value: "pathways", label: "Pathways only" },
-  { value: "lead", label: "LEAD only" },
-] as const;
 
 export default async function AdminForumPage({
   searchParams,

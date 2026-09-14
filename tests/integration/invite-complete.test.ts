@@ -47,7 +47,7 @@ describe("invite complete (US4 / FR-008 / FR-009 / FR-023)", () => {
   });
 
   it("completes an unused invite to an active member and refuses a second use", async () => {
-    const network = await migrator.network.findFirst({ where: { name: "Pathways to Change" } });
+    const network = await migrator.network.findFirst({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
     const affiliation = await migrator.docAffiliation.findFirst({
       where: { label: "Test Agency A", active: true },
     });
@@ -74,7 +74,7 @@ describe("invite complete (US4 / FR-008 / FR-009 / FR-023)", () => {
     if (preview.state === "pending") {
       expect(preview.email).toBe(email);
       expect(preview.firstName).toBe("Complete");
-      expect(preview.networkName).toBe("Pathways to Change");
+      expect(preview.networkName).toBe("Norway & Northern Ireland | Fall 2026");
     }
 
     const completed = await completeInvite({
@@ -208,7 +208,7 @@ describe("invite complete (US4 / FR-008 / FR-009 / FR-023)", () => {
     }
     const manualEmail = `indie-manual-${randomUUID()}@example.com`;
     const csvValid = `indie-csv-${randomUUID()}@example.com`;
-    const network = await migrator.network.findFirst({ where: { name: "Pathways to Change" } });
+    const network = await migrator.network.findFirst({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
     if (!network) {
       throw new Error("Pathways network required");
     }
@@ -231,7 +231,7 @@ describe("invite complete (US4 / FR-008 / FR-009 / FR-023)", () => {
       csvText: [
         "email,first_name,last_name,network_name,title,doc_affiliation",
         `${csvValid},Csv,Valid,LEAD,Engineer,Test Agency A`,
-        `skip-${randomUUID()}@example.com,Bad,Doc,Pathways to Change,Engineer,Test Agency Inactive`,
+        `skip-${randomUUID()}@example.com,Bad,Doc,Norway & Northern Ireland | Fall 2026,Engineer,Test Agency Inactive`,
       ].join("\n"),
       ip: IP,
       userAgent: USER_AGENT,

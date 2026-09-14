@@ -79,7 +79,7 @@ describe("axe-core on directory pages (T035)", () => {
               <span aria-hidden="true">AS</span>
               <a href="/app/directory/example">Ada Subject</a>
             </p>
-            <p>Pathways to Change</p>
+            <p>Norway & Northern Ireland | Fall 2026</p>
           </li>
         </ul>
       </main>`,
@@ -94,7 +94,7 @@ describe("axe-core on directory pages (T035)", () => {
         <p><a href="/app/directory">Back to directory</a></p>
         <span aria-hidden="true">AS</span>
         <h1>Ada Subject</h1>
-        <p>Pathways to Change</p>
+        <p>Norway & Northern Ireland | Fall 2026</p>
         <p>shown@example.com</p>
       </main>`,
     );

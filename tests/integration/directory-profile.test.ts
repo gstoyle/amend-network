@@ -79,7 +79,7 @@ describe("directory profile (US3)", () => {
   });
 
   it("Independent Test: peer sees shown email not hidden DOC; LEAD withheld; other-member view audits", async () => {
-    const pathwaysNet = await migrator.network.findUnique({ where: { name: "Pathways to Change" } });
+    const pathwaysNet = await migrator.network.findUnique({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
     const leadNet = await migrator.network.findUnique({ where: { name: "LEAD" } });
     const agency = await migrator.docAffiliation.findUnique({ where: { label: "Test Agency A" } });
     expect(pathwaysNet).not.toBeNull();
@@ -148,7 +148,7 @@ describe("directory profile (US3)", () => {
     const profile = await getDirectoryProfile(peer, subjectId, auditCtx());
     expect(profile).not.toBeNull();
     expect(profile?.displayName).toBe("Ada Subject");
-    expect(profile?.networkLabel).toBe("Pathways to Change");
+    expect(profile?.networkLabel).toBe("Norway & Northern Ireland | Fall 2026");
     expect(profile?.initials).toBe("AS");
     expect(profile?.email).toBe(SHOWN_EMAIL);
     expect(profile?.docLabel).toBeUndefined();

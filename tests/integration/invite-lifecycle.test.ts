@@ -65,7 +65,7 @@ describe("invite lifecycle (US5 / FR-016)", () => {
   });
 
   it("Independent Test: frozen-clock expiry, T-3d reminder, revoke, re-issue", async () => {
-    const network = await migrator.network.findFirst({ where: { name: "Pathways to Change" } });
+    const network = await migrator.network.findFirst({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
     if (!network) {
       throw new Error("Pathways network required");
     }

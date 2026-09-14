@@ -77,7 +77,7 @@ describe("directory staff both-programs (US4)", () => {
   });
 
   it("Independent Test: Admin sees both programs; Pathways sees Pathways only; Admin does not see a hidden DOC field", async () => {
-    const pathwaysNet = await migrator.network.findUnique({ where: { name: "Pathways to Change" } });
+    const pathwaysNet = await migrator.network.findUnique({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
     const leadNet = await migrator.network.findUnique({ where: { name: "LEAD" } });
     const agency = await migrator.docAffiliation.findUnique({ where: { label: "Test Agency A" } });
     expect(pathwaysNet).not.toBeNull();

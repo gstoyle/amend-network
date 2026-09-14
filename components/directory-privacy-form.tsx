@@ -80,7 +80,7 @@ export function DirectoryPrivacyForm({
       </p>
       {canAppear ? null : (
         <p className="text-sm text-muted-foreground">
-          Only Pathways and LEAD program members can appear in the directory.
+          Only International Immersion Program and LEAD members can appear in the directory.
           Staff-only accounts are not listed.
         </p>
       )}

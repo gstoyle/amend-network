@@ -4,6 +4,7 @@ import { hashPassword } from "@/lib/auth/password";
 import { encryptPii, hmacEmailLookup } from "@/lib/crypto/pii";
 import { migrator } from "@/lib/db/migrator";
 import { env } from "@/lib/env";
+import { IMMERSION_NETWORK_NAME, LEAD_NETWORK_NAME } from "@/lib/db/visibility";
 import { putObject } from "@/lib/storage/client";
 
 type SeedUser = {
@@ -12,7 +13,7 @@ type SeedUser = {
   adminRole: AdminRole;
   status: UserStatus;
   mfaEnabled: boolean;
-  networkName?: "Pathways to Change" | "LEAD";
+  networkName?: typeof IMMERSION_NETWORK_NAME | typeof LEAD_NETWORK_NAME;
 };
 
 const SEED_USERS: SeedUser[] = [
@@ -43,7 +44,7 @@ const SEED_USERS: SeedUser[] = [
     adminRole: "none",
     status: "active",
     mfaEnabled: false,
-    networkName: "Pathways to Change",
+    networkName: IMMERSION_NETWORK_NAME,
   },
   {
     email: "lead@local",
@@ -73,7 +74,7 @@ const SEED_USERS: SeedUser[] = [
     adminRole: "none",
     status: "deactivated",
     mfaEnabled: false,
-    networkName: "Pathways to Change",
+    networkName: IMMERSION_NETWORK_NAME,
   },
 ];
 
@@ -387,8 +388,8 @@ async function seedEvents(): Promise<void> {
 }
 
 async function seedDirectory(): Promise<void> {
-  const pathwaysNet = await migrator.network.findUnique({ where: { name: "Pathways to Change" } });
-  const leadNet = await migrator.network.findUnique({ where: { name: "LEAD" } });
+  const pathwaysNet = await migrator.network.findUnique({ where: { name: IMMERSION_NETWORK_NAME } });
+  const leadNet = await migrator.network.findUnique({ where: { name: LEAD_NETWORK_NAME } });
   const agency = await migrator.docAffiliation.findUnique({ where: { label: "Test Agency A" } });
   if (!pathwaysNet || !leadNet || !agency) {
     throw new Error("networks and Test Agency A are required before directory seed");
@@ -539,20 +540,26 @@ async function seed(): Promise<void> {
     ? encryptPii(env().SEED_MFA_SECRET as string)
     : null;
 
-  const pathways = await migrator.network.upsert({
-    where: { name: "Pathways to Change" },
-    update: {},
-    create: { id: randomUUID(), name: "Pathways to Change", programRole: "pathways" },
+  const existingImmersion = await migrator.network.findFirst({
+    where: { OR: [{ name: IMMERSION_NETWORK_NAME }, { name: "Pathways to Change" }] },
   });
+  const pathways = existingImmersion
+    ? await migrator.network.update({
+        where: { id: existingImmersion.id },
+        data: { name: IMMERSION_NETWORK_NAME, programRole: "pathways" },
+      })
+    : await migrator.network.create({
+        data: { id: randomUUID(), name: IMMERSION_NETWORK_NAME, programRole: "pathways" },
+      });
   const lead = await migrator.network.upsert({
-    where: { name: "LEAD" },
+    where: { name: LEAD_NETWORK_NAME },
     update: {},
-    create: { id: randomUUID(), name: "LEAD", programRole: "lead" },
+    create: { id: randomUUID(), name: LEAD_NETWORK_NAME, programRole: "lead" },
   });
 
   const networks = {
-    "Pathways to Change": pathways.id,
-    LEAD: lead.id,
+    [IMMERSION_NETWORK_NAME]: pathways.id,
+    [LEAD_NETWORK_NAME]: lead.id,
   };
 
   for (const user of SEED_USERS) {

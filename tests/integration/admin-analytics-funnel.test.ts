@@ -21,7 +21,7 @@ function mfaAdmin(): SessionClaims {
   return { ...claimsFor("admin")!, mfaSatisfied: true };
 }
 
-async function networkByName(name: "Pathways to Change" | "LEAD"): Promise<{ id: string; name: string }> {
+async function networkByName(name: "Norway & Northern Ireland | Fall 2026" | "LEAD"): Promise<{ id: string; name: string }> {
   const network = await migrator.network.findUnique({ where: { name } });
   if (!network) {
     throw new Error(`${name} network missing`);
@@ -193,7 +193,7 @@ describe("admin analytics funnel (US2 / SC-004)", () => {
   });
 
   it("Independent Test: Pathways invite completed with two logins over 31 days, LEAD pending self-reg, approved never signed in; network filters match research §3", async () => {
-    const pathways = await networkByName("Pathways to Change");
+    const pathways = await networkByName("Norway & Northern Ireland | Fall 2026");
     const lead = await networkByName("LEAD");
     const createdAt = new Date(Date.now() - 50 * DAY_MS);
     const firstLoginAt = new Date(Date.now() - 40 * DAY_MS);
@@ -285,7 +285,7 @@ describe("admin analytics funnel (US2 / SC-004)", () => {
   });
 
   it("retention omits first login younger than 30 days from the denominator (not counted as not-retained)", async () => {
-    const pathways = await networkByName("Pathways to Change");
+    const pathways = await networkByName("Norway & Northern Ireland | Fall 2026");
     const createdAt = new Date(Date.now() - 20 * DAY_MS);
     const recentFirst = new Date(Date.now() - 10 * DAY_MS);
     const recentReturn = new Date(Date.now() - 5 * DAY_MS);
@@ -373,7 +373,7 @@ describe("admin analytics funnel (US2 / SC-004)", () => {
         },
         networkId: null,
         networks: [
-          { id: "00000000-0000-4000-8000-000000000001", name: "Pathways to Change" },
+          { id: "00000000-0000-4000-8000-000000000001", name: "Norway & Northern Ireland | Fall 2026" },
           { id: "00000000-0000-4000-8000-000000000002", name: "LEAD" },
         ],
       }),

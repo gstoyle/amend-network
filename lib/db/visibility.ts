@@ -1,20 +1,19 @@
 import type { SessionClaims } from "@/lib/auth/types";
 import { withRls } from "@/lib/db/rls";
+import { PROGRAM_LABELS } from "@/lib/db/program-labels";
 
 export type AudienceMarker = {
   label: string;
   restricted: boolean;
 };
 
-/**
- * Display names for the two programme visibility tokens. This module owns the
- * `all_authenticated | pathways | lead` vocabulary, so it owns what those tokens
- * are called, and every surface reads the names from here.
- */
-export const PROGRAM_LABELS: Record<"pathways" | "lead", string> = {
-  pathways: "Pathways to Change",
-  lead: "LEAD",
-};
+export {
+  IMMERSION_NETWORK_NAME,
+  LEAD_NETWORK_NAME,
+  PROGRAM_LABELS,
+  VISIBILITY_OPTIONS,
+  isProgramNetworkRole,
+} from "@/lib/db/program-labels";
 
 /**
  * Describes who an entity is available to, for display beside content the caller

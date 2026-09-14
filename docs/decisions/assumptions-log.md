@@ -24,9 +24,19 @@ throughout the PRD and ADR-0001.
 
 ## Q3 — Network Name list
 
-**Assumption:** Pathways to Change and LEAD only for launch.
+**Assumption (updated 2026-09-14):** Launch networks are **LEAD** and
+**International Immersion Program** trip groups. The first Immersion
+group is `Norway & Northern Ireland | Fall 2026`. Further Immersion
+trips are additional `networks` rows that share the Immersion program
+role. Pathways to Change is not a launch audience.
 
-**Revisit:** Before slice 2 ships.
+**Revisit:** When a second Immersion trip is added, confirm whether
+trip-specific resources/announcements must stay hidden from other
+Immersion trips (today, Immersion content is shared across all Immersion
+groups). Cross-program membership (one email in both Immersion and LEAD)
+is not in the data model yet.
+
+**Previous assumption:** Pathways to Change and LEAD only for launch.
 
 ---
 
@@ -238,5 +248,4 @@ Q15 (budget ceiling).
 
 **Log maintained by:** solo developer, per constitution governance.
 
-**Last updated:** 2026-08-19 (administrative MFA optional until launch;
-in-app member guide still present; Q5/Q16 still open)
+**Last updated:** 2026-09-14 (Q3 launch networks: LEAD + International Immersion trip groups; Pathways not in launch)

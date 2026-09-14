@@ -13,7 +13,7 @@ export function AdminKpiCards({ kpis }: { kpis: AdminAnalyticsKpis }) {
         <h2 className="text-lg font-medium text-card-foreground">Monthly active members</h2>
         <p className="text-2xl font-medium text-foreground">{kpis.mam}</p>
         <p className="text-sm text-muted-foreground">
-          Pathways {kpis.mamPathways} · LEAD {kpis.mamLead}
+          Immersion {kpis.mamPathways} · LEAD {kpis.mamLead}
         </p>
       </article>
       <article className={cn(cardClassName, "flex flex-col gap-2 p-4")}>

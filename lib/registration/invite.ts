@@ -12,7 +12,7 @@ import { withRls } from "@/lib/db/rls";
 import { sendLifecycleEmail } from "@/lib/email/transport";
 import { env } from "@/lib/env";
 import { parseInviteCsv } from "@/lib/registration/csv";
-import { isLaunchNetworkName } from "@/lib/registration/register";
+import { isLaunchNetwork } from "@/lib/registration/register";
 
 export const INVITE_TTL_DAYS = 14;
 export const INVITE_USED_COPY =
@@ -264,7 +264,10 @@ export async function sendManualInvite(
           where: { emailLookup: hmacEmailLookup(email), status: "pending" },
           select: { id: true },
         }),
-        tx.network.findUnique({ where: { id: parsed.data.networkId }, select: { id: true, name: true } }),
+        tx.network.findUnique({
+          where: { id: parsed.data.networkId },
+          select: { id: true, name: true, programRole: true },
+        }),
       ]);
       if (existingUser) {
         throw new InviteCompleteError("email_already_a_user");
@@ -272,7 +275,7 @@ export async function sendManualInvite(
       if (pendingInvite) {
         throw new InviteCompleteError("pending_invitation");
       }
-      if (!network || !isLaunchNetworkName(network.name)) {
+      if (!network || !isLaunchNetwork(network)) {
         throw new InviteCompleteError("unknown_network");
       }
       await insertPendingInvitation(tx, authorized, prepared, ip, parsed.data.userAgent);
@@ -308,7 +311,7 @@ export async function sendCsvInvites(
 
   await withRls(rlsSession(authorized), async (tx) => {
     const [networks, affiliations] = await Promise.all([
-      tx.network.findMany({ select: { id: true, name: true } }),
+      tx.network.findMany({ select: { id: true, name: true, programRole: true } }),
       tx.docAffiliation.findMany({ select: { id: true, label: true, active: true } }),
     ]);
 
@@ -316,7 +319,7 @@ export async function sendCsvInvites(
       const network = networks.find(
         (candidate) => candidate.name.trim().toLowerCase() === row.networkName.trim().toLowerCase(),
       );
-      if (!network || !isLaunchNetworkName(network.name)) {
+      if (!network || !isLaunchNetwork(network)) {
         invalid.push({ email: row.email, reason: "unknown_network" });
         continue;
       }

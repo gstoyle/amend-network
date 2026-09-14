@@ -45,7 +45,7 @@ describe("invite send (US4 / FR-005 / FR-006)", () => {
   });
 
   it("sends a manual invite with a hashed token, 14-day expiry, and invitation_sent", async () => {
-    const network = await migrator.network.findFirst({ where: { name: "Pathways to Change" } });
+    const network = await migrator.network.findFirst({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
     if (!network) {
       throw new Error("Pathways network required");
     }
@@ -86,9 +86,9 @@ describe("invite send (US4 / FR-005 / FR-006)", () => {
     const result = await sendCsvInvites(adminSession(), {
       csvText: [
         "email,first_name,last_name,network_name,title,doc_affiliation",
-        `${emailA},Ada,Lovelace,Pathways to Change,Analyst,Test Agency A`,
+        `${emailA},Ada,Lovelace,Norway & Northern Ireland | Fall 2026,Analyst,Test Agency A`,
         `${emailB},Grace,Hopper,LEAD,Engineer,Test Agency A`,
-        `pathways@local,Existing,Member,Pathways to Change,Analyst,Test Agency A`,
+        `pathways@local,Existing,Member,Norway & Northern Ireland | Fall 2026,Analyst,Test Agency A`,
         `bad-${randomUUID()}@example.com,No,Network,Unknown Network,Analyst,Test Agency A`,
       ].join("\n"),
       ip: IP,
@@ -109,7 +109,7 @@ describe("invite send (US4 / FR-005 / FR-006)", () => {
   });
 
   it("rejects a manual invite for an existing member or a pending invite", async () => {
-    const network = await migrator.network.findFirst({ where: { name: "Pathways to Change" } });
+    const network = await migrator.network.findFirst({ where: { name: "Norway & Northern Ireland | Fall 2026" } });
     if (!network) {
       throw new Error("Pathways network required");
     }

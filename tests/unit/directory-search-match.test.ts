@@ -5,7 +5,7 @@ describe("directory search match (hidden fields excluded, not blanked)", () => {
   const visibleName = {
     firstName: "Ada",
     lastName: "Titled",
-    networkLabel: "Pathways to Change",
+    networkLabel: "Norway & Northern Ireland | Fall 2026",
   };
 
   it("a query that matches only a hidden title does not keep the member", () => {
