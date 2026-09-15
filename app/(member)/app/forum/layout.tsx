@@ -12,16 +12,17 @@ export default async function ForumLayout({ children }: { children: ReactNode })
   if (isPendingSession(claims)) {
     redirect("/app/pending");
   }
+  let allowed = false;
   try {
-    const access = await loadForumAccess(claims);
-    if (!access.allowed) {
-      return <ForumDirectoryGate />;
-    }
+    allowed = (await loadForumAccess(claims)).allowed;
   } catch (error) {
     if (error instanceof AuthDeniedError) {
       redirect("/login");
     }
     throw error;
+  }
+  if (!allowed) {
+    return <ForumDirectoryGate />;
   }
   return children;
 }
