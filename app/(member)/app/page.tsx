@@ -7,14 +7,17 @@ import { ResourceCompactRow } from "@/components/resource-card";
 import { ReservedPanel } from "@/components/reserved-panel";
 import { SectionHeader } from "@/components/section-header";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import { AuthDeniedError, isPendingSession, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
 import { loadDirectoryPrivacy } from "@/lib/directory/privacy";
 import { listUpcomingEvents } from "@/lib/events/list";
+import { memberHasForumAccess } from "@/lib/forum/access";
 import { listRecentForumActivity } from "@/lib/forum/list";
+import { isForumStaff } from "@/lib/forum/staff";
 import { loadShellIdentity } from "@/lib/profile/identity";
 import { listResources } from "@/lib/resources/list";
-import { formatDayMonthYear } from "@/lib/utils";
+import { cn, formatDayMonthYear } from "@/lib/utils";
 
 const PREVIEW_LIMIT = 3;
 
@@ -34,13 +37,19 @@ export default async function MemberHomePage() {
     throw error;
   }
 
-  const [identity, upcoming, resources, privacy, forum] = await Promise.all([
+  const [identity, upcoming, resources, privacy] = await Promise.all([
     loadShellIdentity(authorized),
     listUpcomingEvents(authorized),
     listResources(authorized, { sort: "newest" }),
     loadDirectoryPrivacy(authorized),
-    listRecentForumActivity(authorized, PREVIEW_LIMIT),
   ]);
+  const forumAllowed = memberHasForumAccess({
+    staff: isForumStaff(authorized),
+    directoryVisible: privacy.listing,
+  });
+  const forum = forumAllowed
+    ? await listRecentForumActivity(authorized, PREVIEW_LIMIT)
+    : [];
 
   const events = upcoming.slice(0, PREVIEW_LIMIT);
   const recent = resources.slice(0, PREVIEW_LIMIT);
@@ -122,7 +131,20 @@ export default async function MemberHomePage() {
               linkLabel="All categories"
               title="Recent forum activity"
             />
-            {forum.length === 0 ? (
+            {!forumAllowed ? (
+              <div className="flex flex-col gap-3">
+                <p className="text-sm text-muted-foreground">
+                  Join the directory to use the forum. Posts show your first name
+                  and last initial.
+                </p>
+                <Link
+                  className={cn(buttonVariants({ variant: "outline" }), "w-fit")}
+                  href="/app/profile/privacy"
+                >
+                  Directory privacy
+                </Link>
+              </div>
+            ) : forum.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 No recent threads in the rooms you can see.
               </p>

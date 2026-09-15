@@ -30,6 +30,10 @@ export function parseForumCategoryVisibility(values: string[]): Array<"pathways"
 }
 
 export const FORUM_RATE_LIMIT_MESSAGE = "Try again later.";
+export const FORUM_LISTING_REQUIRED_MESSAGE =
+  "Join the directory to use the forum. Posts show your name.";
+export const FORUM_NAME_REQUIRED_MESSAGE =
+  "Posts must show your name. Add your name, then try again.";
 export const FORUM_EDIT_WINDOW_MS = 15 * 60 * 1000;
 
 export function forumErrorMessage(
@@ -95,6 +99,10 @@ export function assertCategoryDescription(description: string): string {
     throw new Error("Description must be 1 to 500 characters.");
   }
   return trimmed;
+}
+
+export function hasDisplayableForumName(firstName: string, lastName: string): boolean {
+  return firstName.trim().length > 0 || lastName.trim().length > 0;
 }
 
 export function authorLabelFrom(firstName: string, lastName: string): string {

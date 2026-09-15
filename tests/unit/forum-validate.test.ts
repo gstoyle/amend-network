@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { parseAnnouncementBody } from "@/lib/announcements/validate";
 import {
   FORUM_CATEGORY_VISIBILITY_OPTIONS,
+  FORUM_LISTING_REQUIRED_MESSAGE,
+  FORUM_NAME_REQUIRED_MESSAGE,
   FORUM_RATE_LIMIT_MESSAGE,
   assertCategorySlug,
   assertForumBody,
@@ -10,6 +12,7 @@ import {
   authorLabelFrom,
   forumCategoryAudience,
   forumErrorMessage,
+  hasDisplayableForumName,
   isPausedForumCategory,
   parseForumCategoryVisibility,
 } from "@/lib/forum/validate";
@@ -27,6 +30,8 @@ describe("forum validate", () => {
     expect(authorLabelFrom("", "")).toBe("Member");
     expect(authorLabelFrom("Ada", "Lovelace")).toBe("Ada L.");
     expect(authorLabelFrom("Ada", "")).toBe("Ada");
+    expect(hasDisplayableForumName("", "")).toBe(false);
+    expect(hasDisplayableForumName("Ada", "")).toBe(true);
   });
 
   it("parses the same allowlisted markdown as announcements", () => {
@@ -76,5 +81,13 @@ describe("forum validate", () => {
         [FORUM_RATE_LIMIT_MESSAGE],
       ),
     ).toBe(FORUM_RATE_LIMIT_MESSAGE);
+    expect(
+      forumErrorMessage(
+        new Error(FORUM_LISTING_REQUIRED_MESSAGE),
+        fallback,
+        [FORUM_LISTING_REQUIRED_MESSAGE],
+      ),
+    ).toBe(FORUM_LISTING_REQUIRED_MESSAGE);
+    expect(FORUM_NAME_REQUIRED_MESSAGE).toMatch(/name/);
   });
 });

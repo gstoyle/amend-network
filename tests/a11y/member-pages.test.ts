@@ -236,7 +236,7 @@ describe("axe-core on member page layouts (012 T007)", () => {
           <h1>Directory privacy</h1>
         </header>
         <form>
-          <p>If you appear in the directory, members in your same program can see you. Super Admin, Admin, and Moderator can see listed members of both programs. Your name and network are always shown while you are listed. DOC affiliation, title, and email stay hidden unless you turn each one on. Hiding a field hides it from every directory viewer, including staff — not only peers.</p>
+          <p>If you appear in the directory, members in your same program can see you. Super Admin, Admin, and Moderator can see listed members of both programs. Your name and network are always shown while you are listed. DOC affiliation, title, and email stay hidden unless you turn each one on. Hiding a field hides it from every directory viewer, including staff — not only peers. Listing is also required to use the forum; posts show your first name and last initial, never an anonymous label.</p>
           <label><input name="listing" type="checkbox" value="true" />Appear in the member directory</label>
           <fieldset>
             <legend>Optional fields (hidden unless turned on)</legend>
@@ -327,6 +327,26 @@ describe("axe-core on member page layouts (012 T007)", () => {
             </form>
           </li>
         </ul>
+      </main>`,
+    );
+  });
+
+  it("forum listing gate names the directory privacy control", async () => {
+    await expectNoViolations(
+      "Forum",
+      `<main>
+        <header>
+          <p>Community</p>
+          <h1>Forum</h1>
+          <p>Programme rooms are named spaces. Join the directory so posts show your first name and last initial.</p>
+          <a href="/community-guidelines">Community guidelines</a>
+        </header>
+        <section aria-labelledby="forum-listing-heading">
+          <p>Directory</p>
+          <h2 id="forum-listing-heading">Join the directory to participate</h2>
+          <p>There are no anonymous posts. Members who appear in the directory can read and write in the rooms for their programme.</p>
+          <p><a href="/app/profile/privacy">Directory privacy</a></p>
+        </section>
       </main>`,
     );
   });

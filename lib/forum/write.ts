@@ -1,21 +1,27 @@
 import { randomUUID } from "node:crypto";
 import { track } from "@/lib/analytics/track";
 import { writeAudit } from "@/lib/audit/write";
-import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
 import { decryptPii } from "@/lib/crypto/pii";
 import { withRls } from "@/lib/db/rls";
+import {
+  ForumListingRequiredError,
+  requireForumParticipant,
+} from "@/lib/forum/access";
 import { notifyThreadSubscribers } from "@/lib/forum/notify";
 import { actorRole, isForumStaff, rlsContext } from "@/lib/forum/staff";
 import { consumeForumQuota } from "@/lib/forum/throttle";
 import {
   FORUM_EDIT_WINDOW_MS,
+  FORUM_LISTING_REQUIRED_MESSAGE,
+  FORUM_NAME_REQUIRED_MESSAGE,
   FORUM_RATE_LIMIT_MESSAGE,
   assertForumBody,
   assertForumReason,
   assertForumTitle,
   authorLabelFrom,
   forumErrorMessage,
+  hasDisplayableForumName,
   isPausedForumCategory,
 } from "@/lib/forum/validate";
 
@@ -33,6 +39,9 @@ async function authorLabel(
   });
   const first = user?.firstNameEncrypted ? decryptPii(user.firstNameEncrypted) : "";
   const last = user?.lastNameEncrypted ? decryptPii(user.lastNameEncrypted) : "";
+  if (!hasDisplayableForumName(first, last)) {
+    throw new Error(FORUM_NAME_REQUIRED_MESSAGE);
+  }
   return authorLabelFrom(first, last);
 }
 
@@ -40,11 +49,33 @@ function asError(error: unknown, fallback: string): ForumWriteResult {
   return { ok: false, error: error instanceof Error ? error.message : fallback };
 }
 
+async function writerClaims(
+  session: SessionClaims | null,
+): Promise<SessionClaims | ForumWriteResult> {
+  try {
+    return await requireForumParticipant(session);
+  } catch (error) {
+    if (error instanceof ForumListingRequiredError) {
+      return { ok: false, error: error.message };
+    }
+    throw error;
+  }
+}
+
+const WRITE_MESSAGES = [
+  FORUM_RATE_LIMIT_MESSAGE,
+  FORUM_LISTING_REQUIRED_MESSAGE,
+  FORUM_NAME_REQUIRED_MESSAGE,
+] as const;
+
 export async function createThread(
   session: SessionClaims | null,
   input: { categorySlug: string; title: string; body: string } & ForumWriteMeta,
 ): Promise<ForumWriteResult> {
-  const claims = requireRole(session);
+  const claims = await writerClaims(session);
+  if ("ok" in claims) {
+    return claims;
+  }
   let title: string;
   let body: string;
   try {
@@ -107,7 +138,7 @@ export async function createThread(
     return {
       ok: false,
       error: forumErrorMessage(error, "Could not start this thread.", [
-        FORUM_RATE_LIMIT_MESSAGE,
+        ...WRITE_MESSAGES,
         "That category is not available.",
       ]),
     };
@@ -126,7 +157,10 @@ export async function createPost(
   session: SessionClaims | null,
   input: { threadId: string; body: string } & ForumWriteMeta,
 ): Promise<ForumWriteResult> {
-  const claims = requireRole(session);
+  const claims = await writerClaims(session);
+  if ("ok" in claims) {
+    return claims;
+  }
   let body: string;
   try {
     body = assertForumBody(input.body);
@@ -176,7 +210,7 @@ export async function createPost(
     return {
       ok: false,
       error: forumErrorMessage(error, "Could not post this reply.", [
-        FORUM_RATE_LIMIT_MESSAGE,
+        ...WRITE_MESSAGES,
         "This thread is locked.",
       ]),
     };
@@ -196,7 +230,10 @@ export async function editPost(
   session: SessionClaims | null,
   input: { postId: string; body: string } & ForumWriteMeta,
 ): Promise<ForumWriteResult> {
-  const claims = requireRole(session);
+  const claims = await writerClaims(session);
+  if ("ok" in claims) {
+    return claims;
+  }
   let body: string;
   try {
     body = assertForumBody(input.body);
@@ -232,6 +269,7 @@ export async function editPost(
     return {
       ok: false,
       error: forumErrorMessage(error, "Could not save this edit.", [
+        FORUM_LISTING_REQUIRED_MESSAGE,
         "Edits are only allowed for 15 minutes.",
       ]),
     };
@@ -243,7 +281,10 @@ export async function flagPost(
   session: SessionClaims | null,
   input: { postId: string; reason: string } & ForumWriteMeta,
 ): Promise<ForumWriteResult> {
-  const claims = requireRole(session);
+  const claims = await writerClaims(session);
+  if ("ok" in claims) {
+    return claims;
+  }
   let reason: string;
   try {
     reason = assertForumReason(input.reason);
@@ -283,7 +324,9 @@ export async function flagPost(
   } catch (error) {
     return {
       ok: false,
-      error: forumErrorMessage(error, "Could not flag this post.", []),
+      error: forumErrorMessage(error, "Could not flag this post.", [
+        FORUM_LISTING_REQUIRED_MESSAGE,
+      ]),
     };
   }
   track("forum_post_flagged", {

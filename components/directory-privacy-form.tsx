@@ -77,6 +77,8 @@ export function DirectoryPrivacyForm({
         Your name and network are always shown while you are listed. DOC affiliation,
         title, and email stay hidden unless you turn each one on. Hiding a field
         hides it from every directory viewer, including staff — not only peers.
+        Listing is also required to use the forum; posts show your first name and
+        last initial, never an anonymous label.
       </p>
       {canAppear ? null : (
         <p className="text-sm text-muted-foreground">
@@ -87,6 +89,7 @@ export function DirectoryPrivacyForm({
       <div className="flex flex-col gap-3">
         <ToggleRow
           defaultChecked={listing}
+          hint="Required to read and post in programme forums. Posts show your name."
           label="Appear in the member directory"
           name="listing"
         />

@@ -1,7 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { afterEach, describe, expect, it } from "vitest";
+import { hashPassword } from "@/lib/auth/password";
+import { encryptPii, hmacEmailLookup } from "@/lib/crypto/pii";
 import { migrator } from "@/lib/db/migrator";
 import { withRls } from "@/lib/db/rls";
+import { env } from "@/lib/env";
 import { claimsFor } from "@/tests/helpers/prd-matrix";
 
 const MARKER = `forum-rls-${randomUUID()}`;
@@ -62,10 +65,13 @@ async function insertPost(threadId: string, authorId: string): Promise<string> {
   return id;
 }
 
-function ctx(role: "super_admin" | "pathways" | "lead" | "moderator" | "pending") {
+function ctx(
+  role: "super_admin" | "pathways" | "lead" | "moderator" | "pending",
+  userId?: string,
+) {
   const session = claimsFor(role)!;
   return {
-    userId: session.userId,
+    userId: userId ?? session.userId,
     programRole: session.programRole,
     adminRole: session.adminRole,
     status: session.status,
@@ -74,6 +80,27 @@ function ctx(role: "super_admin" | "pathways" | "lead" | "moderator" | "pending"
 
 describe("forum RLS", () => {
   const categoryIds: string[] = [];
+  const memberIds: string[] = [];
+
+  async function insertMember(directoryVisible: boolean): Promise<string> {
+    const id = randomUUID();
+    await migrator.user.create({
+      data: {
+        id,
+        emailLookup: hmacEmailLookup(`${MARKER}-${id}@example.com`),
+        emailEncrypted: encryptPii(`${MARKER}-${id}@example.com`),
+        passwordHash: await hashPassword(env().SEED_PASSWORD),
+        firstNameEncrypted: encryptPii("Ada"),
+        lastNameEncrypted: encryptPii("Lovelace"),
+        programRole: "pathways",
+        adminRole: "none",
+        status: "active",
+        directoryVisible,
+      },
+    });
+    memberIds.push(id);
+    return id;
+  }
 
   afterEach(async () => {
     for (const id of categoryIds.splice(0)) {
@@ -90,6 +117,9 @@ describe("forum RLS", () => {
       )`;
       await migrator.$executeRaw`DELETE FROM forum_threads WHERE category_id = ${id}::uuid`;
       await migrator.$executeRaw`DELETE FROM forum_categories WHERE id = ${id}::uuid`;
+    }
+    for (const id of memberIds.splice(0)) {
+      await migrator.user.delete({ where: { id } });
     }
   });
 
@@ -219,10 +249,10 @@ describe("forum RLS", () => {
   it("pathways can insert a post into a shared thread and cannot hide it", async () => {
     const categoryId = await insertCategory(["all_authenticated"]);
     categoryIds.push(categoryId);
-    const authorId = claimsFor("pathways")!.userId;
+    const authorId = await insertMember(true);
     const threadId = await insertThread(categoryId, authorId);
     const postId = randomUUID();
-    await withRls(ctx("pathways"), (tx) =>
+    await withRls(ctx("pathways", authorId), (tx) =>
       tx.forumPost.create({
         data: {
           id: postId,
@@ -234,10 +264,30 @@ describe("forum RLS", () => {
       }),
     );
     await expect(
-      withRls(ctx("pathways"), (tx) =>
+      withRls(ctx("pathways", authorId), (tx) =>
         tx.forumPost.update({
           where: { id: postId },
           data: { hiddenAt: new Date() },
+        }),
+      ),
+    ).rejects.toSatisfy(isRlsDenied);
+  });
+
+  it("unlisted pathways cannot insert a post into a shared thread", async () => {
+    const categoryId = await insertCategory(["all_authenticated"]);
+    categoryIds.push(categoryId);
+    const authorId = await insertMember(false);
+    const threadId = await insertThread(categoryId, authorId);
+    await expect(
+      withRls(ctx("pathways", authorId), (tx) =>
+        tx.forumPost.create({
+          data: {
+            id: randomUUID(),
+            threadId,
+            authorId,
+            authorLabel: "Ada L.",
+            body: "Anonymous post",
+          },
         }),
       ),
     ).rejects.toSatisfy(isRlsDenied);
@@ -262,12 +312,13 @@ describe("forum RLS", () => {
   it("pathways cannot insert into a lead-only category", async () => {
     const categoryId = await insertCategory(["lead"]);
     categoryIds.push(categoryId);
+    const authorId = await insertMember(true);
     await expect(
-      withRls(ctx("pathways"), (tx) =>
+      withRls(ctx("pathways", authorId), (tx) =>
         tx.forumThread.create({
           data: {
             categoryId,
-            authorId: claimsFor("pathways")!.userId,
+            authorId,
             authorLabel: "Ada L.",
             title: "Should not land",
             lastPostedAt: new Date(),

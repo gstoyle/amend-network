@@ -23,6 +23,7 @@ const PRESENTATION_FILES = [
   "components/member-initials.tsx",
   "components/directory-search-form.tsx",
   "components/directory-privacy-prompt.tsx",
+  "components/forum-directory-gate.tsx",
   "components/guide-search-form.tsx",
   "components/guide-article-body.tsx",
   "components/auth-split.tsx",

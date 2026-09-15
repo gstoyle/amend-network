@@ -1,16 +1,17 @@
 import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
 import { withRls } from "@/lib/db/rls";
-import { rlsContext } from "@/lib/forum/staff";
+import { requireForumParticipant } from "@/lib/forum/access";
 import {
   forumUnsubscribeTokenValid,
 } from "@/lib/forum/notify";
+import { rlsContext } from "@/lib/forum/staff";
 
 export async function subscribeToThread(
   session: SessionClaims | null,
   threadId: string,
 ): Promise<void> {
-  const claims = requireRole(session);
+  const claims = await requireForumParticipant(session);
   await withRls(rlsContext(claims), async (tx) => {
     await tx.forumSubscription.upsert({
       where: { userId_threadId: { userId: claims.userId, threadId } },

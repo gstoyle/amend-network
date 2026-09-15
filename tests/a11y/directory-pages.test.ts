@@ -23,7 +23,7 @@ const MEMBER_CHROME = `<header>
 </header>`;
 
 const PRIVACY_PROMPT = `<aside aria-label="Directory privacy">
-  <p>You are not in the member directory until you choose. If you opt in, same-program members and staff who can view the directory will see your name and network. DOC affiliation, title, and email stay hidden unless you turn them on. Those hides apply to every viewer, including staff.</p>
+  <p>You are not in the member directory until you choose. Forum rooms are named spaces: joining the directory is required to read and post, and posts show your first name and last initial. If you opt in, same-program members and staff who can view the directory will see your name and network. DOC affiliation, title, and email stay hidden unless you turn them on. Those hides apply to every viewer, including staff.</p>
   <p><a href="/app/profile/privacy">Set directory privacy</a></p>
 </aside>`;
 
@@ -107,7 +107,7 @@ describe("axe-core on directory pages (T035)", () => {
       <main>
         <h1>Directory privacy</h1>
         <form>
-          <p>If you appear in the directory, members in your same program can see you. Super Admin, Admin, and Moderator can see listed members of both programs. Your name and network are always shown while you are listed. DOC affiliation, title, and email stay hidden unless you turn each one on. Hiding a field hides it from every directory viewer, including staff — not only peers.</p>
+          <p>If you appear in the directory, members in your same program can see you. Super Admin, Admin, and Moderator can see listed members of both programs. Your name and network are always shown while you are listed. DOC affiliation, title, and email stay hidden unless you turn each one on. Hiding a field hides it from every directory viewer, including staff — not only peers. Listing is also required to use the forum; posts show your first name and last initial, never an anonymous label.</p>
           <label><input name="listing" type="checkbox" value="true" />Appear in the member directory</label>
           <fieldset>
             <legend>Optional fields (hidden unless turned on)</legend>

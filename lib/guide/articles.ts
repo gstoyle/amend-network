@@ -80,7 +80,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
           "Home — greetings, upcoming events, recent resources, recent forum activity, and announcements.",
           "Resources — the library of files and videos your role may open.",
           "Events — the training calendar and RSVP list.",
-          "Forum — discussion rooms your role may see.",
+          "Forum — discussion rooms your role may see, after you join the directory.",
           "Directory — members who chose to appear.",
           "Guide — this handbook.",
         ],
@@ -237,13 +237,13 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     blocks: [
       {
         type: "p",
-        text: "The forum is a professional space. You only see programme rooms that match your roles. The all-members room is paused until Amend has moderation capacity. Staff can still see paused rooms in Forum admin.",
+        text: "The forum is a professional space. You only see programme rooms that match your roles, and only after you join the member directory. Posts show your first name and last initial — there is no anonymous “Member” byline. The all-members room is paused until Amend has moderation capacity. Staff can still see paused rooms in Forum admin and can moderate without listing themselves.",
       },
       { type: "h2", id: "rooms", text: "Rooms and threads" },
       {
         type: "ul",
         items: [
-          "Open Forum to see programme rooms, then a room to see threads, then a thread to read posts. There is no all-members room at launch.",
+          "Join the directory from Directory privacy, then open Forum to see programme rooms, a room to see threads, and a thread to read posts. There is no all-members room at launch.",
           "Threads are two-level: the thread plus a flat list of posts. There are no nested replies and no @-mentions.",
           "Pinned threads stay at the top of a category. Locked threads cannot take new replies.",
         ],
@@ -267,7 +267,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
         type: "callout",
         tone: "warning",
         title: "Names in the forum",
-        text: "Authors show as first name plus last initial, or “Member” if a name is missing. Do not paste other people’s contact details into a post.",
+        text: "Authors show as first name plus last initial. Joining the directory is required to read or post. Turning listing off later removes forum access; older posts keep the name they were published with. Do not paste other people’s contact details into a post.",
       },
       {
         type: "links",
@@ -288,7 +288,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     blocks: [
       {
         type: "p",
-        text: "The directory is opt-in. You do not appear until you choose to. Name and network are visible on a listing; title, DOC affiliation, and email stay hidden unless you turn each one on.",
+        text: "The directory is opt-in. You do not appear until you choose to. Name and network are visible on a listing; title, DOC affiliation, and email stay hidden unless you turn each one on. Joining the directory is also how you get access to the forum.",
       },
       { type: "h2", id: "search", text: "Search" },
       {
@@ -300,7 +300,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
         type: "ol",
         items: [
           "Open Directory privacy from the account area.",
-          "Choose whether you appear at all.",
+          "Choose whether you appear at all. Appearing is required to use the forum.",
           "Turn on title, DOC affiliation, or email only if you want every allowed viewer — including staff in the directory — to see that field.",
         ],
       },

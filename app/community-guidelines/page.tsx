@@ -31,8 +31,12 @@ export default function CommunityGuidelinesPage() {
             at launch.
           </li>
           <li>
+            Join the member directory before you use the forum. Posts show your first name and last
+            initial. There are no anonymous posts.
+          </li>
+          <li>
             Use the formatting buttons for bold, italic, underline, and links. Do not add raw HTML,
-            images, or identifying details.
+            images, or other people’s contact details.
           </li>
           <li>You may edit your own post for 15 minutes. Staff can moderate it after that.</li>
           <li>

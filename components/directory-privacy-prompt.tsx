@@ -7,7 +7,9 @@ export function DirectoryPrivacyPrompt() {
   return (
     <aside aria-label="Directory privacy" className={cn(cardClassName, "flex flex-col gap-3 p-4")}>
       <p className="text-sm text-muted-foreground">
-        You are not in the member directory until you choose. If you opt in, same-program
+        You are not in the member directory until you choose. Forum rooms are
+        named spaces: joining the directory is required to read and post, and
+        posts show your first name and last initial. If you opt in, same-program
         members and staff who can view the directory will see your name and network.
         DOC affiliation, title, and email stay hidden unless you turn them on. Those
         hides apply to every viewer, including staff.

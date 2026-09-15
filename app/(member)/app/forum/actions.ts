@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { loadSession } from "@/lib/auth/session";
+import { ForumListingRequiredError } from "@/lib/forum/access";
 import { forumWriteMeta } from "@/lib/forum/request";
 import {
   subscribeToThread,
@@ -87,10 +88,17 @@ export async function flagPostAction(formData: FormData): Promise<void> {
 export async function subscribeAction(formData: FormData): Promise<void> {
   const threadId = String(formData.get("threadId") ?? "");
   const subscribed = formData.get("subscribed") === "true";
-  if (subscribed) {
-    await unsubscribeFromThread(await claims(), threadId);
-  } else {
-    await subscribeToThread(await claims(), threadId);
+  try {
+    if (subscribed) {
+      await unsubscribeFromThread(await claims(), threadId);
+    } else {
+      await subscribeToThread(await claims(), threadId);
+    }
+  } catch (error) {
+    if (error instanceof ForumListingRequiredError) {
+      fail(`/app/forum/t/${threadId}`, error.message);
+    }
+    throw error;
   }
   revalidatePath(`/app/forum/t/${threadId}`);
   redirect(`/app/forum/t/${threadId}`);

@@ -236,6 +236,13 @@ remain. Announcements, resources, and events may still use
 `all_authenticated`. **Confirmed by Amend.** Revisit when there is
 moderation capacity for a general room.
 
+**Forum access requires a directory listing (2026-09-15).** Members cannot
+read or post in programme rooms until they opt in to the directory.
+Posts show first name plus last initial; the product refuses an empty name
+rather than falling back to “Member”. Staff still moderate (and can post)
+without appearing in the directory. Opting out later removes forum access;
+existing `author_label` values are left as published. **Confirmed by Amend.**
+
 **Resource library collections and folders (2026-09-14).** The member
 library has two collections: **From Amend** (endorsed) and **Shared by
 members** (not an endorsement). Staff still publish both; members cannot
@@ -267,4 +274,4 @@ Q15 (budget ceiling).
 
 **Log maintained by:** solo developer, per constitution governance.
 
-**Last updated:** 2026-09-14 (resource collections and folders; all-members forum paused)
+**Last updated:** 2026-09-15 (forum requires directory listing; resource collections and folders; all-members forum paused)
