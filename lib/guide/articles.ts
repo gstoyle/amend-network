@@ -23,7 +23,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
           },
           {
             title: "Complete the form",
-            text: "Use a working email address. Choose your programme when asked. DOC affiliation is selected from the list Amend maintains — do not invent a value.",
+            text: "Use a working email address. Choose International Immersion Program or LEAD when asked. DOC affiliation is selected from the list Amend maintains — do not invent a value.",
           },
           {
             title: "Wait for review",
@@ -77,7 +77,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
       {
         type: "ul",
         items: [
-          "Home — greetings, upcoming events, recent resources, recent forum activity, and announcements.",
+          "Home — greetings, upcoming events, recent resources, recent forum activity (after you join the directory), and announcements.",
           "Resources — the library of files and videos your role may open.",
           "Events — the training calendar and RSVP list.",
           "Forum — discussion rooms your role may see, after you join the directory.",
@@ -152,23 +152,23 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   {
     slug: "resources",
     title: "Resources",
-    summary: "Search and filter the library, open a file or video, and understand why some items do not appear.",
+    summary: "Two collections, folders, search, and why some items do not appear.",
     category: "library",
     audience: "member",
-    keywords: ["pdf", "download", "video", "library", "filter", "tag"],
+    keywords: ["pdf", "download", "video", "library", "filter", "tag", "folder", "amend"],
     blocks: [
       {
         type: "p",
-        text: "Resources is the library. You only see items whose visibility includes at least one of your roles. Staff see a wider set because they hold administrative roles as well as, in some cases, a programme role.",
+        text: "Resources is the library. You only see items whose visibility includes at least one of your roles. The library has two collections: From Amend (materials Amend stands behind) and Shared by members (peer files, not an endorsement). Members cannot upload; staff publish both collections.",
       },
       { type: "h2", id: "find", text: "Find an item" },
       {
         type: "ul",
         items: [
-          "The library is split into From Amend (materials Amend stands behind) and Shared by members (peer files, not an endorsement).",
-          "Open a folder to browse, for example Policies and then a location.",
+          "The library is split into From Amend and Shared by members.",
+          "Folders nest one level, for example Policies and then a location.",
           "Search by words in the title or description.",
-          "Filter by collection and by topic tags.",
+          "Filter by collection, folder, and topic tags.",
           "Sort by newest or other offered sorts.",
           "Clear filters returns the full list you are allowed to see.",
         ],
@@ -230,10 +230,10 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   {
     slug: "forum",
     title: "Forum",
-    summary: "Rooms, posting, editing, flags, subscriptions, and the limits the product enforces.",
+    summary: "Named programme rooms, directory listing required, formatting, flags, and subscriptions.",
     category: "community",
     audience: "member",
-    keywords: ["thread", "post", "flag", "subscribe", "markdown", "lock"],
+    keywords: ["thread", "post", "flag", "subscribe", "markdown", "lock", "directory", "name"],
     blocks: [
       {
         type: "p",
@@ -246,6 +246,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
           "Join the directory from Directory privacy, then open Forum to see programme rooms, a room to see threads, and a thread to read posts. There is no all-members room at launch.",
           "Threads are two-level: the thread plus a flat list of posts. There are no nested replies and no @-mentions.",
           "Pinned threads stay at the top of a category. Locked threads cannot take new replies.",
+          "Staff comments use the same name style as members. There is no Amend badge, and the name is not a directory link.",
         ],
       },
       { type: "h2", id: "write", text: "Writing a post" },
@@ -281,19 +282,19 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   {
     slug: "directory",
     title: "Directory and privacy",
-    summary: "Who appears, which fields you control, and how search treats hidden fields.",
+    summary: "Opt-in listing, forum access, hidden fields, and who can see you.",
     category: "community",
     audience: "member",
-    keywords: ["privacy", "opt-in", "listing", "email", "doc", "title"],
+    keywords: ["privacy", "opt-in", "listing", "email", "doc", "title", "forum"],
     blocks: [
       {
         type: "p",
-        text: "The directory is opt-in. You do not appear until you choose to. Name and network are visible on a listing; title, DOC affiliation, and email stay hidden unless you turn each one on. Joining the directory is also how you get access to the forum.",
+        text: "The directory is opt-in. You do not appear until you choose to. Name and network are visible on a listing; title, DOC affiliation, and email stay hidden unless you turn each one on. Joining the directory is also how members get access to the forum. Staff-only Amend accounts (no Immersion or LEAD programme) cannot appear — the directory is for members, not an org chart.",
       },
       { type: "h2", id: "search", text: "Search" },
       {
         type: "p",
-        text: "Search uses name, and only the optional fields that person has shown. A hidden title or DOC affiliation cannot be used to find them. You see people in your programme who opted in. Staff who may view both programmes still do not see a field the member hid.",
+        text: "Search uses name, and only the optional fields that person has shown. A hidden title or DOC affiliation cannot be used to find them. You see people in your programme who opted in. If you belong to both Immersion and LEAD, you see listed people from both. Staff who may view both programmes still do not see a field the member hid.",
       },
       { type: "h2", id: "privacy", text: "Your privacy controls" },
       {
@@ -308,7 +309,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
         type: "callout",
         tone: "note",
         title: "First visit",
-        text: "If you have not set privacy yet, Home and Directory remind you. Setting it is not the same as appearing: you can save hidden defaults and still stay off the list.",
+        text: "If you have not set privacy yet, Home and Directory remind you. Setting it is not the same as appearing: you can save hidden defaults and still stay off the list — and off the forum until you appear.",
       },
       {
         type: "links",
@@ -325,7 +326,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     summary: "Roles, MFA for staff, sessions, and why the product never asks you to prove a role in the browser.",
     category: "account",
     audience: "member",
-    keywords: ["role", "pathways", "lead", "mfa", "admin", "session"],
+    keywords: ["role", "immersion", "pathways", "lead", "mfa", "admin", "session", "dual"],
     blocks: [
       {
         type: "p",
@@ -335,9 +336,10 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
       {
         type: "ul",
         items: [
-          "International Immersion Program members see Immersion-visible and all-authenticated content.",
-          "LEAD members see LEAD-visible and all-authenticated content.",
-          "Members of both programmes see Immersion-visible and LEAD-visible content.",
+          "International Immersion Program members see Immersion-only items and items published for all members.",
+          "LEAD members see LEAD-only items and items published for all members.",
+          "Members of both programmes see Immersion and LEAD items.",
+          "Forum rooms are programme-only at launch. Join the directory to use them.",
           "Staff with an administrative role also reach Admin from the account area. Authenticator setup is optional.",
         ],
       },
@@ -373,6 +375,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
         items: [
           "Holding page after sign-in — your request is still pending.",
           "Empty library or calendar — nothing is published to your roles yet, or filters are too narrow.",
+          "Forum asks you to join the directory — appear in the directory from Directory privacy, then return.",
           "Forum says to try again later — a rate limit. Wait a minute (or up to an hour if you posted heavily).",
           "A thread will not accept replies — it is locked, or you cannot see that category.",
         ],
@@ -395,7 +398,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     summary: "How the admin overlay works, who can open which tools, and that authenticator setup is optional.",
     category: "staff",
     audience: "staff",
-    keywords: ["admin", "moderator", "mfa", "overlay"],
+    keywords: ["admin", "moderator", "mfa", "overlay", "directory"],
     blocks: [
       {
         type: "p",
@@ -408,6 +411,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
           "Moderators reach Admin home and Forum moderation. They do not get analytics, audit log, resource publishing, announcements, or user invite/approval.",
           "Admins and Super Admins reach the content and user tools listed in the admin nav.",
           "Event publishing follows event staff roles, which may include moderators when that route allows it.",
+          "Staff-only accounts are not listed in the member directory. You can still moderate and post; comments show your first name and last initial, the same as members.",
         ],
       },
       {
@@ -428,7 +432,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     summary: "Visibility tokens, authenticated downloads, and keeping PII out of analytics.",
     category: "staff",
     audience: "content_admin",
-    keywords: ["publish", "visibility", "announcement", "resource", "event"],
+    keywords: ["publish", "visibility", "announcement", "resource", "event", "folder", "collection"],
     blocks: [
       {
         type: "p",
@@ -439,7 +443,10 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
         type: "ul",
         items: [
           "Publish from Admin → Resources or Admin → Events.",
-          "Files stay in the private bucket. Members download through the app, never a durable public URL.",
+          "Choose From Amend (endorsed) or Shared by members (not an endorsement). Members cannot upload; staff publish both.",
+          "Folders nest one level (for example Policies, then a location). Topic tags are optional.",
+          "Resources, events, and announcements may still be visible to all members. New forum rooms cannot — the all-members room is paused.",
+          "Files stay private. Members download through the app, never a lasting public file link.",
           "Events can carry capacity, location or virtual flags, and a join URL revealed only to people allowed to see the event.",
         ],
       },
@@ -462,11 +469,11 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     summary: "Flags, hide, delete, lock, pin, and who may create categories.",
     category: "staff",
     audience: "staff",
-    keywords: ["flag", "hide", "delete", "lock", "pin", "category"],
+    keywords: ["flag", "hide", "delete", "lock", "pin", "category", "directory", "paused"],
     blocks: [
       {
         type: "p",
-        text: "Moderators, Admins, and Super Admins can hide or delete posts and lock or pin threads. Category create is limited to Admin and Super Admin.",
+        text: "Moderators, Admins, and Super Admins can hide or delete posts and lock or pin threads. Category create is limited to Admin and Super Admin. New rooms are Immersion and/or LEAD only — the all-members room is paused. Members must join the directory to read or post. Staff can moderate and post without listing. Every byline is first name plus last initial; there is no anonymous label.",
       },
       { type: "h2", id: "queue", text: "Flag queue" },
       {
@@ -514,7 +521,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
         items: [
           "Pending users — approve or deny. Denied accounts cannot use the member app.",
           "Invite — send a link for a known person. Still do not put secrets in the invite body beyond what the product generates.",
-          "Assign programme and administrative roles on the server tools provided. Do not ask a user to “set themselves as admin”.",
+          "Assign International Immersion Program and/or LEAD, plus administrative roles, on the server tools provided. Do not ask a user to “set themselves as admin”. A person can belong to both programmes.",
         ],
       },
       {

@@ -11,12 +11,12 @@ export const GUIDE_CATEGORIES: GuideCategory[] = [
   {
     id: "library",
     title: "Library and calendar",
-    summary: "Resources you can open, and events you can attend.",
+    summary: "Two library collections and folders, plus events you can attend.",
   },
   {
     id: "community",
     title: "Community",
-    summary: "Forum rooms, directory listings, and the rules that apply there.",
+    summary: "Forum rooms (directory listing required), directory listings, and the rules that apply there.",
   },
   {
     id: "account",

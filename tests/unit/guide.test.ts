@@ -53,4 +53,30 @@ describe("guide catalog", () => {
       "account",
     ]);
   });
+
+  it("documents launch library collections, directory-gated forum, and Immersion naming", () => {
+    const member = claimsFor("pathways")!;
+    const resources = JSON.stringify(getVisibleGuideArticle(member, "resources"));
+    expect(resources).toMatch(/From Amend/);
+    expect(resources).toMatch(/Shared by members/);
+    expect(resources).toMatch(/cannot upload/);
+    expect(resources).toMatch(/Folders nest one level/);
+
+    const forum = JSON.stringify(getVisibleGuideArticle(member, "forum"));
+    expect(forum).toMatch(/join the member directory/);
+    expect(forum).toMatch(/no all-members room/);
+    expect(forum).toMatch(/underline/);
+
+    const directory = JSON.stringify(getVisibleGuideArticle(member, "directory"));
+    expect(directory).toMatch(/access to the forum/);
+    expect(directory).toMatch(/Staff-only Amend accounts/);
+
+    const account = JSON.stringify(getVisibleGuideArticle(member, "your-account"));
+    expect(account).toMatch(/International Immersion Program/);
+    expect(account).toMatch(/both programmes/);
+
+    const publishing = JSON.stringify(getVisibleGuideArticle(claimsFor("admin")!, "publishing"));
+    expect(publishing).toMatch(/Shared by members/);
+    expect(publishing).toMatch(/all-members room is paused/);
+  });
 });
