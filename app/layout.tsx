@@ -1,10 +1,39 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
+import { Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist-sans",
+const figtree = localFont({
+  src: [
+    {
+      path: "./fonts/Figtree-VariableFont_wght.ttf",
+      weight: "300 900",
+      style: "normal",
+    },
+    {
+      path: "./fonts/Figtree-Italic-VariableFont_wght.ttf",
+      weight: "300 900",
+      style: "italic",
+    },
+  ],
+  variable: "--font-figtree",
+  display: "swap",
+});
+
+const instrumentSans = localFont({
+  src: [
+    {
+      path: "./fonts/InstrumentSans-VariableFont_wdth,wght.ttf",
+      weight: "400 700",
+      style: "normal",
+    },
+    {
+      path: "./fonts/InstrumentSans-Italic-VariableFont_wdth,wght.ttf",
+      weight: "400 700",
+      style: "italic",
+    },
+  ],
+  variable: "--font-instrument-sans",
   display: "swap",
 });
 
@@ -27,7 +56,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html className={`${geistSans.variable} ${geistMono.variable}`} lang="en">
+    <html
+      className={`${figtree.variable} ${instrumentSans.variable} ${geistMono.variable}`}
+      lang="en"
+    >
       <body>{children}</body>
     </html>
   );

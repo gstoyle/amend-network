@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { formSurfaceClassName } from "@/components/ui/card";
 import { checkboxClassName } from "@/components/ui/input";
+import { PROGRAM_LABELS } from "@/lib/db/program-labels";
 import { cn } from "@/lib/utils";
 
 export type DirectoryPrivacyFormState = {
@@ -82,7 +83,7 @@ export function DirectoryPrivacyForm({
       </p>
       {canAppear ? null : (
         <p className="text-sm text-muted-foreground">
-          Only International Immersion Program and LEAD members can appear in the directory.
+          Only {PROGRAM_LABELS.pathways} and {PROGRAM_LABELS.lead} members can appear in the directory.
           Staff-only accounts are not listed.
         </p>
       )}

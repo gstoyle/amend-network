@@ -54,7 +54,7 @@ describe("guide catalog", () => {
     ]);
   });
 
-  it("documents launch library collections, directory-gated forum, and Immersion naming", () => {
+  it("documents launch library collections, directory-gated forum, and programme naming", () => {
     const member = claimsFor("pathways")!;
     const resources = JSON.stringify(getVisibleGuideArticle(member, "resources"));
     expect(resources).toMatch(/From Amend/);
@@ -72,7 +72,7 @@ describe("guide catalog", () => {
     expect(directory).toMatch(/Staff-only Amend accounts/);
 
     const account = JSON.stringify(getVisibleGuideArticle(member, "your-account"));
-    expect(account).toMatch(/International Immersion Program/);
+    expect(account).toMatch(/Global Learning Experiences/);
     expect(account).toMatch(/both programmes/);
 
     const publishing = JSON.stringify(getVisibleGuideArticle(claimsFor("admin")!, "publishing"));

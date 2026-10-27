@@ -338,10 +338,12 @@ describe("design tokens (008 T002)", () => {
     expect(light["--tap-target"]).toBe("2.75rem");
   });
 
-  it("(2) light --primary is evergreen-700 and --background is stone-100", () => {
+  it("(2) light --primary is Med Teal, headings are UCSF Navy, page background is teal tint", () => {
     const { light } = parseTokenFile(readFileSync(tokensPath, "utf8"));
-    expect(normalizeHex(resolveToken("--primary", light))).toBe("#1f4d3f");
-    expect(normalizeHex(resolveToken("--background", light))).toBe("#f4f1eb");
+    expect(normalizeHex(resolveToken("--primary", light))).toBe("#14828c");
+    expect(normalizeHex(resolveToken("--foreground", light))).toBe("#052049");
+    expect(normalizeHex(resolveToken("--background", light))).toBe("#f0f9fb");
+    expect(normalizeHex(resolveToken("--muted", light))).toBe("#f6f6f6");
   });
 
   it("(3) contrast pairs meet WCAG AA in light and dark", () => {

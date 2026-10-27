@@ -13,7 +13,7 @@ import {
 } from "@/lib/guide/catalog";
 
 const TEXT_LINK =
-  "inline-flex min-h-touch items-center text-sm font-medium text-foreground underline decoration-border-strong underline-offset-4";
+  "inline-flex min-h-touch items-center text-sm font-medium text-primary underline decoration-border-strong underline-offset-4";
 
 export default async function GuideArticlePage({
   params,

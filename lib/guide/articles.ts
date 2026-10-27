@@ -1,4 +1,7 @@
+import { PROGRAM_LABELS } from "@/lib/db/program-labels";
 import type { GuideArticle } from "@/lib/guide/types";
+
+const GLOBAL_LEARNING = PROGRAM_LABELS.pathways;
 
 export const GUIDE_ARTICLES: GuideArticle[] = [
   {
@@ -23,7 +26,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
           },
           {
             title: "Complete the form",
-            text: "Use a working email address. Choose International Immersion Program or LEAD when asked. DOC affiliation is selected from the list Amend maintains — do not invent a value.",
+            text: `Use a working email address. Choose ${GLOBAL_LEARNING} or LEAD when asked. DOC affiliation is selected from the list Amend maintains — do not invent a value.`,
           },
           {
             title: "Wait for review",
@@ -92,7 +95,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
       { type: "h2", id: "announcements", text: "Announcements" },
       {
         type: "p",
-        text: "Time-bounded banners can appear at the top of member pages. A banner you dismiss stays dismissed for you. Visibility still follows your roles — an Immersion-only announcement is not shown to a LEAD-only member.",
+        text: `Time-bounded banners can appear at the top of member pages. A banner you dismiss stays dismissed for you. Visibility still follows your roles — a ${GLOBAL_LEARNING}-only announcement is not shown to a LEAD-only member.`,
       },
       {
         type: "callout",
@@ -289,12 +292,12 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     blocks: [
       {
         type: "p",
-        text: "The directory is opt-in. You do not appear until you choose to. Name and network are visible on a listing; title, DOC affiliation, and email stay hidden unless you turn each one on. Joining the directory is also how members get access to the forum. Staff-only Amend accounts (no Immersion or LEAD programme) cannot appear — the directory is for members, not an org chart.",
+        text: `The directory is opt-in. You do not appear until you choose to. Name and network are visible on a listing; title, DOC affiliation, and email stay hidden unless you turn each one on. Joining the directory is also how members get access to the forum. Staff-only Amend accounts (no ${GLOBAL_LEARNING} or LEAD programme) cannot appear — the directory is for members, not an org chart.`,
       },
       { type: "h2", id: "search", text: "Search" },
       {
         type: "p",
-        text: "Search uses name, and only the optional fields that person has shown. A hidden title or DOC affiliation cannot be used to find them. You see people in your programme who opted in. If you belong to both Immersion and LEAD, you see listed people from both. Staff who may view both programmes still do not see a field the member hid.",
+        text: `Search uses name, and only the optional fields that person has shown. A hidden title or DOC affiliation cannot be used to find them. You see people in your programme who opted in. If you belong to both ${GLOBAL_LEARNING} and LEAD, you see listed people from both. Staff who may view both programmes still do not see a field the member hid.`,
       },
       { type: "h2", id: "privacy", text: "Your privacy controls" },
       {
@@ -326,19 +329,19 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     summary: "Roles, MFA for staff, sessions, and why the product never asks you to prove a role in the browser.",
     category: "account",
     audience: "member",
-    keywords: ["role", "immersion", "pathways", "lead", "mfa", "admin", "session", "dual"],
+    keywords: ["role", "global", "learning", "immersion", "pathways", "lead", "mfa", "admin", "session", "dual"],
     blocks: [
       {
         type: "p",
-        text: "Most members belong to one programme (International Immersion Program or LEAD). Some people are in both. You may also have zero or one administrative role. Role checks run on the server from the signed session. A value typed into the page cannot raise your access.",
+        text: `Most members belong to one programme (${GLOBAL_LEARNING} or LEAD). Some people are in both. You may also have zero or one administrative role. Role checks run on the server from the signed session. A value typed into the page cannot raise your access.`,
       },
       { type: "h2", id: "what-you-see", text: "What you can see" },
       {
         type: "ul",
         items: [
-          "International Immersion Program members see Immersion-only items and items published for all members.",
+          `${GLOBAL_LEARNING} members see ${GLOBAL_LEARNING}-only items and items published for all members.`,
           "LEAD members see LEAD-only items and items published for all members.",
-          "Members of both programmes see Immersion and LEAD items.",
+          `Members of both programmes see ${GLOBAL_LEARNING} and LEAD items.`,
           "Forum rooms are programme-only at launch. Join the directory to use them.",
           "Staff with an administrative role also reach Admin from the account area. Authenticator setup is optional.",
         ],
@@ -436,7 +439,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     blocks: [
       {
         type: "p",
-        text: "Content visibility is a list of tokens: all authenticated members, International Immersion Program, and/or LEAD. Do not invent a special-case role branch in a page. If someone cannot see an item, it is because their roles do not intersect that list.",
+        text: `Content visibility is a list of tokens: all authenticated members, ${GLOBAL_LEARNING}, and/or LEAD. Do not invent a special-case role branch in a page. If someone cannot see an item, it is because their roles do not intersect that list.`,
       },
       { type: "h2", id: "resources-events", text: "Resources and events" },
       {
@@ -473,7 +476,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     blocks: [
       {
         type: "p",
-        text: "Moderators, Admins, and Super Admins can hide or delete posts and lock or pin threads. Category create is limited to Admin and Super Admin. New rooms are Immersion and/or LEAD only — the all-members room is paused. Members must join the directory to read or post. Staff can moderate and post without listing. Every byline is first name plus last initial; there is no anonymous label.",
+        text: `Moderators, Admins, and Super Admins can hide or delete posts and lock or pin threads. Category create is limited to Admin and Super Admin. New rooms are ${GLOBAL_LEARNING} and/or LEAD only — the all-members room is paused. Members must join the directory to read or post. Staff can moderate and post without listing. Every byline is first name plus last initial; there is no anonymous label.`,
       },
       { type: "h2", id: "queue", text: "Flag queue" },
       {
@@ -521,7 +524,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
         items: [
           "Pending users — approve or deny. Denied accounts cannot use the member app.",
           "Invite — send a link for a known person. Still do not put secrets in the invite body beyond what the product generates.",
-          "Assign International Immersion Program and/or LEAD, plus administrative roles, on the server tools provided. Do not ask a user to “set themselves as admin”. A person can belong to both programmes.",
+          `Assign ${GLOBAL_LEARNING} and/or LEAD, plus administrative roles, on the server tools provided. Do not ask a user to “set themselves as admin”. A person can belong to both programmes.`,
         ],
       },
       {

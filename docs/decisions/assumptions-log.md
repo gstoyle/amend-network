@@ -24,21 +24,26 @@ throughout the PRD and ADR-0001.
 
 ## Q3 — Network Name list
 
-**Assumption (updated 2026-09-14):** Launch networks are **LEAD** and
-**International Immersion Program** trip groups. The first Immersion
-group is `Norway & Northern Ireland | Fall 2026`. Further Immersion
-trips are additional `networks` rows that share the Immersion program
-role. Pathways to Change is not a launch audience.
+**Assumption (updated 2026-10-27):** Launch networks are **LEAD** and
+**Global Learning Experiences** trip groups. The programme name covers
+domestic and international experiences. The first group is
+`Norway & Northern Ireland | Fall 2026`. Further trips are additional
+`networks` rows that share the Global Learning Experiences program role.
+The stored role id remains `pathways`. Pathways to Change and
+International Immersion Program are earlier names for that same role,
+not separate audiences.
 
-**Revisit:** When a second Immersion trip is added, confirm whether
-trip-specific resources/announcements must stay hidden from other
-Immersion trips (today, Immersion content is shared across all Immersion
-groups). Cross-program membership (one email in Immersion and LEAD) is
-stored on `user_networks`. `users.program_role` remains the primary
-programme for directory listing and registration. Dual membership is
-seeded for local/UAT testing; there is no admin UI to add it yet.
+**Revisit:** When a second trip is added, confirm whether trip-specific
+resources/announcements must stay hidden from other Global Learning
+Experiences trips (today, that content is shared across all groups in
+the programme). Cross-program membership (one email in Global Learning
+Experiences and LEAD) is stored on `user_networks`. `users.program_role`
+remains the primary programme for directory listing and registration.
+Dual membership is seeded for local/UAT testing; there is no admin UI
+to add it yet.
 
-**Previous assumption:** Pathways to Change and LEAD only for launch.
+**Previous assumption:** International Immersion Program and LEAD
+(2026-09-14). Before that, Pathways to Change and LEAD only for launch.
 
 ---
 
@@ -231,7 +236,7 @@ by Amend.** Revisit when Q5/Q16 is answered.
 **The all-members forum is paused at launch (2026-09-14).** Amend does
 not have bandwidth to moderate a cross-programme room. `all-members-general`
 is hidden from members (empty visibility, existing threads locked). New
-forum categories cannot use `all_authenticated`. Immersion and LEAD rooms
+forum categories cannot use `all_authenticated`. Global Learning Experiences and LEAD rooms
 remain. Announcements, resources, and events may still use
 `all_authenticated`. **Confirmed by Amend.** Revisit when there is
 moderation capacity for a general room.
@@ -274,4 +279,4 @@ Q15 (budget ceiling).
 
 **Log maintained by:** solo developer, per constitution governance.
 
-**Last updated:** 2026-09-15 (forum requires directory listing; resource collections and folders; all-members forum paused)
+**Last updated:** 2026-10-27 (Global Learning Experiences replaces International Immersion Program as the display name for the `pathways` role)

@@ -4,7 +4,7 @@ import type { GuideBlock } from "@/lib/guide/types";
 const LIST_CLASS = "flex list-disc flex-col gap-2 pl-5 text-foreground";
 const ORDERED_CLASS = "flex list-decimal flex-col gap-2 pl-5 text-foreground";
 const LINK_CLASS =
-  "inline-flex min-h-touch items-center text-sm font-medium text-foreground underline decoration-border-strong underline-offset-4";
+  "inline-flex min-h-touch items-center text-sm font-medium text-primary underline decoration-border-strong underline-offset-4";
 
 function GuideBlockView({ block }: { block: GuideBlock }) {
   switch (block.type) {

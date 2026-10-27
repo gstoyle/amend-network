@@ -28,6 +28,6 @@ describe("visibilityTokens extra programme memberships", () => {
       expect.arrayContaining(["pathways", "lead"]),
     );
     expect(memberProgramRoles("none")).toEqual([]);
-    expect(PROGRAM_LABELS.pathways).toBe("International Immersion Program");
+    expect(PROGRAM_LABELS.pathways).toBe("Global Learning Experiences");
   });
 });

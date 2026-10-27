@@ -20,7 +20,7 @@ export function AnnouncementBody({ source }: { source: string }) {
             return <em key={index}>{segment.value}</em>;
           case "link":
             return (
-              <a key={index} className="text-foreground underline" href={segment.href}>
+              <a key={index} className="text-primary underline" href={segment.href}>
                 {segment.label}
               </a>
             );

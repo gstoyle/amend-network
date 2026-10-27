@@ -46,7 +46,7 @@ describe("audienceLabel (012 T004)", () => {
   });
 
   it("does not surface Pathways as a member-facing programme name", () => {
-    expect(PROGRAM_LABELS.pathways).toBe("International Immersion Program");
-    expect(PROGRAM_LABELS.pathways).not.toMatch(/Pathways/i);
+    expect(PROGRAM_LABELS.pathways).toBe("Global Learning Experiences");
+    expect(PROGRAM_LABELS.pathways).not.toMatch(/Pathways|Immersion/i);
   });
 });

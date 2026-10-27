@@ -58,7 +58,7 @@ export default async function GuideIndexPage({
           </p>
           <p className="mt-4">
             <Link
-              className="inline-flex min-h-touch items-center text-sm font-medium text-foreground underline decoration-border-strong underline-offset-4"
+              className="inline-flex min-h-touch items-center text-sm font-medium text-primary underline decoration-border-strong underline-offset-4"
               href="/app/guide"
             >
               Clear search

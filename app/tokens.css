@@ -1,4 +1,4 @@
-/* Theme token manifest — "Quiet Institution". Swap this file to re-theme. */
+/* Theme token manifest. Swap this file to re-theme. */
 
 :root {
   /* Single light appearance (012 FR-028). Declared so native controls,
@@ -30,28 +30,34 @@
   --status-danger: #8f2f1e;
   --status-info: #2a4f6e;
   --white: #ffffff;
+  --navy: #052049;
+  --teal: #14828c;
+  --teal-hover: #0f6870;
+  --teal-tint: #f0f9fb;
+  --teal-subtle: #d7eef3;
+  --gray-tint: #f6f6f6;
   /* ---------- Layer 2: semantic — color ---------- */
-  --background: var(--stone-100);
-  --foreground: var(--stone-900);
+  --background: var(--teal-tint);
+  --foreground: var(--navy);
   --card: var(--white);
-  --card-foreground: var(--stone-900);
+  --card-foreground: var(--navy);
   --popover: var(--white);
-  --popover-foreground: var(--stone-900);
-  --primary: var(--evergreen-700);
-  --primary-hover: var(--evergreen-800);
-  --primary-foreground: var(--stone-50);
-  --primary-subtle: var(--evergreen-50);
-  --primary-subtle-foreground: var(--evergreen-800);
+  --popover-foreground: var(--navy);
+  --primary: var(--teal);
+  --primary-hover: var(--teal-hover);
+  --primary-foreground: var(--white);
+  --primary-subtle: var(--teal-subtle);
+  --primary-subtle-foreground: var(--navy);
   --support: var(--clay-700);
   --support-foreground: var(--stone-50);
   --support-subtle: var(--clay-50);
   --support-subtle-foreground: var(--clay-700);
-  --secondary: var(--stone-200);
-  --secondary-foreground: var(--stone-800);
-  --muted: var(--stone-100);
-  --muted-foreground: var(--stone-600);
-  --accent: var(--stone-100);
-  --accent-foreground: var(--stone-800);
+  --secondary: var(--gray-tint);
+  --secondary-foreground: var(--navy);
+  --muted: var(--gray-tint);
+  --muted-foreground: #595959;
+  --accent: var(--gray-tint);
+  --accent-foreground: var(--navy);
   --destructive: var(--status-danger);
   --destructive-foreground: var(--stone-50);
   --success: var(--status-success);
@@ -60,27 +66,27 @@
   --warning-subtle: #f7eedc;
   --info: var(--status-info);
   --info-subtle: #e6edf3;
-  --border: var(--stone-200);
-  --border-strong: var(--stone-500);
-  --input: var(--stone-400);
-  --field: var(--stone-50);
-  --ring: var(--evergreen-700);
-  --sidebar: var(--stone-50);
-  --sidebar-foreground: var(--stone-800);
-  --sidebar-primary: var(--evergreen-700);
-  --sidebar-primary-foreground: var(--stone-50);
-  --sidebar-accent: var(--stone-200);
-  --sidebar-accent-foreground: var(--stone-900);
-  --sidebar-border: var(--stone-200);
-  --sidebar-ring: var(--evergreen-700);
-  --chart-1: var(--evergreen-700);
+  --border: #d5e0e3;
+  --border-strong: #5e6a70;
+  --input: #8a969c;
+  --field: var(--white);
+  --ring: var(--teal);
+  --sidebar: var(--white);
+  --sidebar-foreground: var(--navy);
+  --sidebar-primary: var(--teal);
+  --sidebar-primary-foreground: var(--white);
+  --sidebar-accent: var(--teal-tint);
+  --sidebar-accent-foreground: var(--navy);
+  --sidebar-border: #d5e0e3;
+  --sidebar-ring: var(--teal);
+  --chart-1: var(--teal);
   --chart-2: var(--clay-600);
   --chart-3: var(--status-info);
   --chart-4: var(--stone-500);
   --chart-5: var(--status-warning);
   /* ---------- Layer 2: semantic — typography ---------- */
-  --font-body: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --text-eyebrow: 0.75rem;
   --leading-eyebrow: 1rem;
@@ -142,14 +148,14 @@
   --radius-full: 9999px;
   /* ---------- Layer 2: semantic — elevation ---------- */
   --shadow-none: none;
-  --shadow-xs: 0 1px 1px rgba(31, 29, 26, 0.04);
-  --shadow-sm: 0 1px 2px rgba(31, 29, 26, 0.06);
-  --shadow-md: 0 2px 6px rgba(31, 29, 26, 0.07);
-  --shadow-lg: 0 6px 20px rgba(31, 29, 26, 0.1);
+  --shadow-xs: 0 1px 1px rgba(5, 32, 73, 0.05);
+  --shadow-sm: 0 1px 2px rgba(5, 32, 73, 0.06);
+  --shadow-md: 0 2px 6px rgba(5, 32, 73, 0.08);
+  --shadow-lg: 0 6px 20px rgba(5, 32, 73, 0.12);
   --shadow-bar: 0 -1px 0 var(--border);
   /* Dialog backdrop. Baked-in alpha, like the shadow tokens above, since
      colour utilities here are bare vars and can't absorb a Tailwind /NN modifier. */
-  --overlay: rgba(31, 29, 26, 0.45);
+  --overlay: rgba(5, 32, 73, 0.45);
   /* ---------- Layer 2: semantic — focus ---------- */
   --focus-width: 2px;
   --focus-offset: 2px;

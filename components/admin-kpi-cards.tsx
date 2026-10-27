@@ -1,5 +1,6 @@
 import { cardClassName } from "@/components/ui/card";
 import type { AdminAnalyticsKpis } from "@/lib/admin-analytics/types";
+import { PROGRAM_LABELS } from "@/lib/db/program-labels";
 import { cn } from "@/lib/utils";
 
 export function AdminKpiCards({ kpis }: { kpis: AdminAnalyticsKpis }) {
@@ -13,7 +14,7 @@ export function AdminKpiCards({ kpis }: { kpis: AdminAnalyticsKpis }) {
         <h2 className="text-lg font-medium text-card-foreground">Monthly active members</h2>
         <p className="text-2xl font-medium text-foreground">{kpis.mam}</p>
         <p className="text-sm text-muted-foreground">
-          Immersion {kpis.mamPathways} · LEAD {kpis.mamLead}
+          {PROGRAM_LABELS.pathways} {kpis.mamPathways} · {PROGRAM_LABELS.lead} {kpis.mamLead}
         </p>
       </article>
       <article className={cn(cardClassName, "flex flex-col gap-2 p-4")}>

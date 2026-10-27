@@ -78,7 +78,7 @@ export default async function MemberResourcesPage({
         </p>
         {filtersActive ? (
           <Link
-            className="inline-flex min-h-touch items-center rounded-sm px-2 text-sm font-medium text-foreground underline decoration-border-strong underline-offset-4"
+            className="inline-flex min-h-touch items-center rounded-sm px-2 text-sm font-medium text-primary underline decoration-border-strong underline-offset-4"
             href="/app/resources"
           >
             Clear filters
@@ -90,7 +90,7 @@ export default async function MemberResourcesPage({
         <nav aria-label="Folder" className="text-sm text-muted-foreground">
           <ol className="flex flex-wrap items-center gap-2">
             <li>
-              <Link className="text-foreground underline decoration-border-strong underline-offset-4" href="/app/resources">
+              <Link className="text-primary underline decoration-border-strong underline-offset-4" href="/app/resources">
                 Resources
               </Link>
             </li>
@@ -98,7 +98,7 @@ export default async function MemberResourcesPage({
               <li>
                 <span aria-hidden="true">/</span>{" "}
                 <Link
-                  className="text-foreground underline decoration-border-strong underline-offset-4"
+                  className="text-primary underline decoration-border-strong underline-offset-4"
                   href={`/app/resources?folder=${view.parentFolder.slug}`}
                 >
                   {view.parentFolder.name}

@@ -22,7 +22,12 @@
   h3,
   h4 {
     font-family: var(--font-heading);
+    color: var(--foreground);
     text-wrap: balance;
+  }
+
+  a {
+    color: var(--primary);
   }
 
   /* One definition, so a component that omits a focus class still complies. */
