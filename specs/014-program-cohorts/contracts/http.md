@@ -18,6 +18,7 @@ All pages call `requireRole` from the signed session. Admin pages require `admin
 ## Changed surfaces
 
 - `/admin/resources/new|[id]`, `/admin/events/new|[id]`, `/admin/announcements/new|[id]`, `/admin/forum`: visibility fieldset with *Everyone signed in* (not on forum), programmes, and active cohorts grouped by programme. An item's existing archived cohorts show as checked and labelled "(archived)".
+- `/admin/resources`, `/admin/events`, `/admin/announcements`: `?group=<token>&targeted=1`. `group` is `pathways`, `lead`, or `cohort:<uuid>` and is Zod-parsed against known tokens; anything else means All. Filtering is in the query (`visibility && <group's audience tokens>`, or `visibility @> {token}` when `targeted=1`), on top of the existing role check and RLS. The filter is a labelled select plus a checkbox, submitted as GET so the URL can be shared between staff.
 - `/register`, `/admin/users/invite`, invite CSV: active cohorts only.
 - `/app/directory`: `?cohort=<uuid>` filter. Values outside the viewer's programmes are ignored (treated as no filter).
 - Admin nav: add **Cohorts** under Member administration.

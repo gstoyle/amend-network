@@ -1,6 +1,6 @@
-const VISIBILITY = ["all_authenticated", "pathways", "lead"] as const;
+import { parseVisibilityTokens, type VisibilityToken } from "@/lib/db/program-labels";
 
-export type VisibilityToken = (typeof VISIBILITY)[number];
+export type { VisibilityToken };
 
 export function isAllowedDestination(value: string): boolean {
   const trimmed = value.trim();
@@ -47,17 +47,8 @@ export function parseCtaPair(
   return { label: labelText, url: urlText };
 }
 
-export function parseVisibility(values: string[]): VisibilityToken[] {
-  const unique = [...new Set(values)];
-  if (unique.length < 1) {
-    throw new Error("Choose at least one visibility value.");
-  }
-  for (const value of unique) {
-    if (!(VISIBILITY as readonly string[]).includes(value)) {
-      throw new Error("Choose a valid visibility value.");
-    }
-  }
-  return unique as VisibilityToken[];
+export function parseVisibility(values: readonly string[]): VisibilityToken[] {
+  return parseVisibilityTokens(values);
 }
 
 export type BodySegment =

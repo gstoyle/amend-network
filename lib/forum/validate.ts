@@ -1,5 +1,10 @@
-import { parseVisibility } from "@/lib/announcements/validate";
-import { type AudienceMarker, audienceLabel, VISIBILITY_OPTIONS } from "@/lib/db/visibility";
+import { parseVisibility, type VisibilityToken } from "@/lib/announcements/validate";
+import {
+  type AudienceMarker,
+  type CohortNames,
+  audienceLabel,
+  VISIBILITY_OPTIONS,
+} from "@/lib/db/visibility";
 
 export { parseVisibility };
 
@@ -12,21 +17,27 @@ export function isPausedForumCategory(visibility: string[]): boolean {
   return visibility.length === 0;
 }
 
-export function forumCategoryAudience(visibility: string[]): AudienceMarker {
+export function forumCategoryAudience(
+  visibility: string[],
+  cohortNames?: CohortNames,
+): AudienceMarker {
   if (isPausedForumCategory(visibility)) {
     return { label: "Paused", restricted: true };
   }
-  return audienceLabel(visibility);
+  return audienceLabel(visibility, cohortNames);
 }
 
-export function parseForumCategoryVisibility(values: string[]): Array<"pathways" | "lead"> {
+export function parseForumCategoryVisibility(
+  values: string[],
+): Array<Exclude<VisibilityToken, "all_authenticated">> {
   const visibility = parseVisibility(values);
   if (visibility.includes("all_authenticated")) {
     throw new Error("Cross-programme rooms are paused.");
   }
-  return visibility.filter((token): token is "pathways" | "lead" => {
-    return token === "pathways" || token === "lead";
-  });
+  return visibility.filter(
+    (token): token is Exclude<VisibilityToken, "all_authenticated"> =>
+      token !== "all_authenticated",
+  );
 }
 
 export const FORUM_RATE_LIMIT_MESSAGE = "Try again later.";

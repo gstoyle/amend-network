@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
+import { cohortNameMap } from "@/lib/cohorts/list";
 import { audienceLabel } from "@/lib/db/visibility";
 import { listAdminFolders } from "@/lib/resources/folders";
 import { listAdminResources } from "@/lib/resources/publish";
@@ -30,11 +31,13 @@ export default async function AdminResourcesPage({
   const claims = await loadClaims();
   let items;
   let folders;
+  let cohortNames;
   try {
     requireRole(claims, { admin: ["admin", "super_admin"], mfa: true });
-    [items, folders] = await Promise.all([
+    [items, folders, cohortNames] = await Promise.all([
       listAdminResources(claims),
       listAdminFolders(claims),
+      cohortNameMap(),
     ]);
   } catch (error) {
     if (error instanceof AuthDeniedError) {
@@ -113,7 +116,7 @@ export default async function AdminResourcesPage({
       ) : (
         <ul className="grid gap-3">
           {items.map((item) => {
-            const audience = audienceLabel(item.visibility);
+            const audience = audienceLabel(item.visibility, cohortNames);
             return (
               <li key={item.id}>
                 <Link

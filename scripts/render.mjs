@@ -13,6 +13,7 @@ const RETRY_FAILED_MIGRATIONS = [
   "20260828033000_forum_definer_row_security",
   "20260914160000_pause_all_members_forum",
   "20260915140000_forum_requires_directory_listing",
+  "20261027120000_program_cohorts",
 ];
 
 function usage() {

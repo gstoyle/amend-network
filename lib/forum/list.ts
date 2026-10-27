@@ -2,7 +2,7 @@ import { track } from "@/lib/analytics/track";
 import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
 import { withRls } from "@/lib/db/rls";
-import { type AudienceMarker, audienceLabel } from "@/lib/db/visibility";
+import { type AudienceMarker, audienceLabel, cohortNamesFor } from "@/lib/db/visibility";
 import { isForumStaff, rlsContext } from "@/lib/forum/staff";
 import { isPausedForumCategory } from "@/lib/forum/validate";
 
@@ -67,12 +67,17 @@ export async function listForumCategories(
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
       include: { _count: { select: { threads: true } } },
     });
-    return rows.filter((row) => !isPausedForumCategory(row.visibility)).map((row) => ({
+    const open = rows.filter((row) => !isPausedForumCategory(row.visibility));
+    const cohortNames = await cohortNamesFor(
+      tx,
+      open.map((row) => row.visibility),
+    );
+    return open.map((row) => ({
       id: row.id,
       name: row.name,
       slug: row.slug,
       description: row.description,
-      audience: audienceLabel(row.visibility),
+      audience: audienceLabel(row.visibility, cohortNames),
       threadCount: row._count.threads,
     }));
   });

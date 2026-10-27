@@ -27,4 +27,5 @@ Expected: the RLS-COH-* rows in [contracts/rls.md](./contracts/rls.md) and the m
 4. On *Norway April 27* → Members, add the *Norway Sept 26* member by email. Reload as that member: the resource appears. Remove them: it disappears. Try removing their primary cohort: refused.
 5. Create forum room *Norway April 27* targeting that cohort. A listed member of the cohort can post; a listed *UK Spring 27* member can't see it.
 6. Open **Directory** as a GLE member. Cohort names show on each listing; filtering by *Norway April 27* narrows the list; LEAD cohorts aren't offered.
-7. Open **Admin → Audit log** and confirm the six cohort actions appear with no names or emails in the metadata.
+7. On **Admin → Resources**, choose *Norway April 27* in the group filter. The cohort-only resource, Global Learning Experiences items, and *Everyone signed in* items appear; LEAD-only items don't. Tick "targeted only": only the cohort-only resource remains. Repeat on Events and Announcements.
+8. Open **Admin → Audit log** and confirm the six cohort actions appear with no names or emails in the metadata.

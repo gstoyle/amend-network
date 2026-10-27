@@ -7,6 +7,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cardClassName } from "@/components/ui/card";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
+import { cohortNameMap } from "@/lib/cohorts/list";
 import { audienceLabel } from "@/lib/db/visibility";
 import { listAdminAnnouncements } from "@/lib/announcements/publish";
 import { cn } from "@/lib/utils";
@@ -39,9 +40,13 @@ export default async function AdminAnnouncementsPage({
       ? params.status
       : undefined;
   let items;
+  let cohortNames;
   try {
     requireRole(claims, { admin: ["admin", "super_admin"], mfa: true });
-    items = await listAdminAnnouncements(claims, statusFilter ? { status: statusFilter } : undefined);
+    [items, cohortNames] = await Promise.all([
+      listAdminAnnouncements(claims, statusFilter ? { status: statusFilter } : undefined),
+      cohortNameMap(),
+    ]);
   } catch (error) {
     if (error instanceof AuthDeniedError) {
       redirect("/login");
@@ -89,7 +94,7 @@ export default async function AdminAnnouncementsPage({
       ) : (
         <ul className="grid gap-3">
           {items.map((item) => {
-            const audience = audienceLabel(item.visibility);
+            const audience = audienceLabel(item.visibility, cohortNames);
             return (
               <li key={item.id}>
                 <Link

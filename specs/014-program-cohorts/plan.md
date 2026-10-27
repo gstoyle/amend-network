@@ -6,7 +6,7 @@
 
 ## Summary
 
-Turn today's `networks` rows into managed **cohorts** (name, programme, active/archived) and let content target them. A cohort adds one visibility token, `cohort:<uuid>`, to every member of that cohort. Content keeps the existing `visibility text[]` intersection; RLS keeps using `visibility && app_role_tokens()`. The only change in the database's access check is that `app_role_tokens()` also returns the caller's cohort tokens (all cohort tokens for Moderators; Admin and Super Admin already bypass). Staff get an Admin → Cohorts area for lifecycle and memberships. Forms gain cohort choices; audience markers name cohorts; the directory shows cohorts and filters by them.
+Turn today's `networks` rows into managed **cohorts** (name, programme, active/archived) and let content target them. A cohort adds one visibility token, `cohort:<uuid>`, to every member of that cohort. Content keeps the existing `visibility text[]` intersection; RLS keeps using `visibility && app_role_tokens()`. The only change in the database's access check is that `app_role_tokens()` also returns the caller's cohort tokens (all cohort tokens for Moderators; Admin and Super Admin already bypass). Staff get an Admin → Cohorts area for lifecycle and memberships. Forms gain cohort choices; audience markers name cohorts; the directory shows cohorts and filters by them. Admin Resources, Events, and Announcements stay single lists with a group filter (programme or cohort) that shows what that group will receive.
 
 ## Technical Context
 
@@ -79,12 +79,15 @@ lib/
 ├── resources/{publish,edit}.ts           # drop local VISIBILITY consts, use shared parser
 ├── events/publish.ts, forum/validate.ts  # same parser; forum still forbids all_authenticated
 ├── registration/*                        # network choices exclude archived
+├── resources/publish.ts, events/publish.ts,
+│   announcements/publish.ts              # listAdmin* accept { group, targeted }
 └── directory/list.ts                     # cohort labels + cohort filter
 
 app/(admin)/admin/cohorts/page.tsx        # list, add, rename, archive
 app/(admin)/admin/cohorts/[id]/page.tsx   # members, add by email, remove
 components/cohort-*.tsx                   # presentational forms/lists
 components/visibility-fieldset.tsx        # shared programme + cohort checkboxes for 4 forms
+components/admin-group-filter.tsx         # GET form: group select + "targeted only", used on 3 admin lists
 lib/guide/articles.ts                     # member + staff articles
 
 tests/unit, tests/integration, tests/rls, tests/a11y
@@ -95,6 +98,7 @@ tests/unit, tests/integration, tests/rls, tests/a11y
 - `lib/cohorts/manage.ts` and `lib/cohorts/list.ts`: no existing module owns network lifecycle. `lib/registration/doc-affiliations.ts` is the pattern to copy, but cohorts drive authorization, which doesn't belong in registration.
 - `components/visibility-fieldset.tsx`: four forms each render the same static `VISIBILITY_OPTIONS` list. Cohort choices are dynamic, so one shared fieldset replaces four copies instead of adding a fifth.
 - Admin cohort pages: there is no admin member list today, so membership management lives on the cohort page.
+- `components/admin-group-filter.tsx`: the three admin lists have no filter UI to extend. One shared component keeps them identical.
 
 ## Complexity Tracking
 

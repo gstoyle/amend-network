@@ -17,6 +17,8 @@ import { checkboxClassName, controlClassName, Input } from "@/components/ui/inpu
 import { Label } from "@/components/ui/label";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
+import { cohortNameMap } from "@/lib/cohorts/list";
+import type { CohortNames } from "@/lib/db/visibility";
 import { listAdminCategories } from "@/lib/forum/categories";
 import {
   FORUM_CATEGORY_ADMIN_ROLES,
@@ -38,11 +40,15 @@ export default async function AdminForumPage({
   const claims = session?.sessionId ? await loadSession(session.sessionId) : null;
   let canManageCategories = false;
   let categories: Awaited<ReturnType<typeof listAdminCategories>> = [];
+  let cohortNames: CohortNames = new Map();
   try {
     const authorized = requireRole(claims, { admin: [...FORUM_STAFF_ROLES], mfa: true });
     canManageCategories = FORUM_CATEGORY_ADMIN_ROLES.includes(authorized.adminRole);
     if (canManageCategories) {
-      categories = await listAdminCategories(authorized);
+      [categories, cohortNames] = await Promise.all([
+        listAdminCategories(authorized),
+        cohortNameMap(),
+      ]);
     }
   } catch (error) {
     if (error instanceof AuthDeniedError) {
@@ -136,7 +142,7 @@ export default async function AdminForumPage({
             ) : (
               <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {categories.map((category) => {
-                  const audience = forumCategoryAudience(category.visibility);
+                  const audience = forumCategoryAudience(category.visibility, cohortNames);
                   return (
                     <li className={cn(cardClassName, "p-4")} key={category.id}>
                       <div className="flex items-start justify-between gap-3">

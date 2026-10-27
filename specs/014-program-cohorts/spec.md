@@ -24,6 +24,7 @@ This slice delivers cohort management for staff, cohort-targeted visibility on e
 - Resources, events, announcements, and forum rooms can target one or more specific cohorts, alongside the existing *Everyone signed in* and programme options
 - The audience marker beside content names the cohort(s) when an item is cohort-only
 - Directory listings show each member's cohort(s); members can filter the directory by cohort
+- Admin Resources, Events, and Announcements lists gain a group filter (All, a programme, or a cohort) while staying one management view
 - Audit rows for cohort create, rename, archive, membership add, and membership remove
 - Permission proofs through the application and directly against Postgres for cohort-only content
 
@@ -45,6 +46,7 @@ This slice delivers cohort management for staff, cohort-targeted visibility on e
 - Q: Do past cohorts lose access when a trip ends? → A: No. Archiving only removes the cohort from registration and invite choices.
 - Q: Directory scope? → A: Programme-wide, with cohort shown on each listing and a cohort filter.
 - Q: Forum? → A: Cohort rooms only where an Admin creates one; programme rooms remain.
+- Q: Should admin Resources and Events be split into separate views per group, like forum rooms? → A: No. Keep one management view per content type with a group filter, because one item can target several groups.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -122,6 +124,25 @@ A member browsing the directory sees each listed person's cohort(s) beside their
 3. **Given** a viewer outside a programme, **When** they open the cohort filter, **Then** that programme's cohorts are not offered.
 4. **Given** a member hides optional fields, **When** others view the directory, **Then** cohort is shown like network today, and hidden fields stay hidden.
 
+---
+
+### User Story 5 - Filter admin content by group (Priority: P2)
+
+An Admin preparing the Norway April 27 trip opens Admin → Resources and chooses *Norway April 27* in the group filter. The list narrows to items that cohort's members can see. The same filter is on Admin → Events and Admin → Announcements. Each item still has exactly one edit page.
+
+**Why this priority**: Once several cohorts run at once, staff need to check what a group will receive without scanning every item. Separation itself doesn't depend on it.
+
+**Independent Test**: Publish items to *Everyone signed in*, Global Learning Experiences, *Norway April 27*, and LEAD. Filter each admin list by *Norway April 27*, by Global Learning Experiences, and by LEAD, and confirm the results.
+
+**Acceptance Scenarios**:
+
+1. **Given** the filter set to *Norway April 27*, **When** the list loads, **Then** it shows items that cohort's members can see: items targeting that cohort, its programme, or *Everyone signed in*. Each row's audience badge says why.
+2. **Given** a "targeted only" option, **When** it is turned on with a cohort selected, **Then** only items naming that cohort directly are shown.
+3. **Given** the filter set to Global Learning Experiences, **When** the list loads, **Then** it shows items any member of that programme could see, including items for any of its cohorts.
+4. **Given** an item targeting two cohorts, **When** either cohort is selected, **Then** the item appears once, with a single edit link.
+5. **Given** the filter set to All, **When** the list loads, **Then** it matches today's list.
+6. **Given** a Moderator on Admin → Events, **When** they use the filter, **Then** it works the same; Resources and Announcements stay Admin and Super Admin only, as today.
+
 ### Edge Cases
 
 - A member belongs to cohorts in both programmes: they see both programmes' shared items plus each of their cohorts' items.
@@ -153,6 +174,7 @@ A member browsing the directory sees each listed person's cohort(s) beside their
 - **FR-014**: Refusals MUST NOT reveal whether a cohort, cohort item, or cohort room exists.
 - **FR-015**: The in-app Guide MUST explain cohorts to members and cohort management and targeting to staff.
 - **FR-016**: Existing data MUST keep working without manual edits: the current *Norway & Northern Ireland | Fall 2026* group and LEAD become cohorts, and all existing programme-visible items keep their audience.
+- **FR-017**: Admin Resources, Events, and Announcements lists MUST offer a group filter: All, each programme, and each cohort (archived cohorts labelled). Selecting a group MUST show the items that group's members can see. A "targeted only" option MUST narrow results to items naming the group directly. Lists stay one view per content type, with one edit page per item. The filter is a staff convenience; it doesn't replace any authorization check.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -170,6 +192,7 @@ A member browsing the directory sees each listed person's cohort(s) beside their
 - **SC-003**: After archiving a cohort, 100% of its members retain access to items they could see before archiving.
 - **SC-004**: A member can find the members of their own cohort in the directory in 3 actions or fewer from Home.
 - **SC-005**: No existing item changes audience as a result of the migration (before/after visibility comparison for every fixture role shows zero differences).
+- **SC-006**: Staff can list everything a given cohort will receive, across Resources, Events, or Announcements, in 2 actions or fewer from that admin page.
 
 ## Assumptions
 

@@ -46,6 +46,12 @@ export const AUDIT_ACTIONS = [
   "bulk_invite_sent",
   "system_setting_changed",
   "retention_purged",
+  "cohort_created",
+  "cohort_renamed",
+  "cohort_archived",
+  "cohort_unarchived",
+  "cohort_member_added",
+  "cohort_member_removed",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];

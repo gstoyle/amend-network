@@ -2,6 +2,7 @@ import { z } from "zod";
 import { writeAudit } from "@/lib/audit/write";
 import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
+import { visibilityTokensSchema } from "@/lib/db/program-labels";
 import { withRls } from "@/lib/db/rls";
 import { parseOptionalFolderId, RESOURCE_SOURCES } from "@/lib/resources/labels";
 import {
@@ -12,7 +13,6 @@ import {
 
 const ADMIN_ROLES = ["admin", "super_admin"] as const;
 const SOURCES = RESOURCE_SOURCES;
-const VISIBILITY = ["all_authenticated", "pathways", "lead"] as const;
 const GENERIC_EDIT_ERROR = "Could not save this resource.";
 
 const metadataSchema = z.object({
@@ -28,9 +28,7 @@ const metadataSchema = z.object({
   tags: z
     .array(z.string().trim().min(1).max(40))
     .max(10, "Use 10 tags or fewer."),
-  visibility: z
-    .array(z.enum(VISIBILITY))
-    .min(1, "Choose at least one visibility value."),
+  visibility: visibilityTokensSchema,
 });
 
 export type { PublishResult, ReplaceInput };

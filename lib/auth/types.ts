@@ -8,6 +8,8 @@ export type SessionClaims = {
   programRole: ProgramRole;
   /** Extra programme tokens from `user_networks`. Omit in tests that only set `programRole`. */
   programRoles?: Array<"pathways" | "lead">;
+  /** Cohort (`networks.id`) memberships; every cohort for Moderator. Omit in tests without cohorts. */
+  cohortIds?: string[];
   adminRole: AdminRole;
   status: UserStatus;
   mfaEnabled: boolean;

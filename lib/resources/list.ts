@@ -3,7 +3,13 @@ import type { Prisma } from "@prisma/client";
 import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
 import { withRls } from "@/lib/db/rls";
-import { type AudienceMarker, audienceLabel, visibilityTokens } from "@/lib/db/visibility";
+import {
+  type AudienceMarker,
+  type CohortNames,
+  audienceLabel,
+  cohortNamesFor,
+  visibilityTokens,
+} from "@/lib/db/visibility";
 import type { ResourceFolderListItem } from "@/lib/resources/folders";
 import {
   RESOURCE_SOURCE_COPY,
@@ -172,7 +178,7 @@ function toMemberResource(row: {
   fileMimeType: string;
   fileSizeBytes: bigint;
   visibility: string[];
-}): MemberResource {
+}, cohortNames: CohortNames): MemberResource {
   const isVideo = row.fileMimeType === "video/mp4";
   return {
     id: row.id,
@@ -189,7 +195,7 @@ function toMemberResource(row: {
     playbackHref: isVideo ? `/app/resources/${row.id}/file` : null,
     formatLabel: resourceFormatLabel(row.fileMimeType),
     sizeLabel: resourceSizeLabel(row.fileSizeBytes),
-    audience: audienceLabel(row.visibility),
+    audience: audienceLabel(row.visibility, cohortNames),
   };
 }
 
@@ -200,7 +206,7 @@ async function loadLiveVisible(
 ) {
   const tokens = visibilityTokens(claims);
   if (tokens.length === 0) {
-    return [];
+    return { rows: [], cohortNames: new Map() as CohortNames };
   }
 
   const where: Prisma.ResourceWhereInput = {
@@ -247,8 +253,8 @@ async function loadLiveVisible(
       adminRole: claims.adminRole,
       status: claims.status,
     },
-    (tx) =>
-      tx.resource.findMany({
+    async (tx) => {
+      const rows = await tx.resource.findMany({
         where,
         orderBy: listOrderBy(sort),
         select: {
@@ -265,7 +271,13 @@ async function loadLiveVisible(
           fileSizeBytes: true,
           visibility: true,
         },
-      }),
+      });
+      const cohortNames = await cohortNamesFor(
+        tx,
+        rows.map((row) => row.visibility),
+      );
+      return { rows, cohortNames };
+    },
   );
 }
 
@@ -274,8 +286,8 @@ export async function listResources(
   options: ResourceListQuery = {},
 ): Promise<MemberResource[]> {
   const claims = authorizeMember(session, options);
-  const rows = await loadLiveVisible(claims, {}, options);
-  return rows.map(toMemberResource);
+  const { rows, cohortNames } = await loadLiveVisible(claims, {}, options);
+  return rows.map((row) => toMemberResource(row, cohortNames));
 }
 
 export async function getResource(
@@ -284,7 +296,7 @@ export async function getResource(
   options: { clientProgramRole?: unknown; clientAdminRole?: unknown } = {},
 ): Promise<MemberResource | null> {
   const claims = authorizeMember(session, options);
-  const rows = await loadLiveVisible(claims, { id });
+  const { rows, cohortNames } = await loadLiveVisible(claims, { id });
   const row = rows[0];
   if (!row) {
     return null;
@@ -294,7 +306,7 @@ export async function getResource(
     programRole: claims.programRole,
     adminRole: claims.adminRole,
   });
-  return toMemberResource(row);
+  return toMemberResource(row, cohortNames);
 }
 
 export async function grantThumbnail(
@@ -303,7 +315,7 @@ export async function grantThumbnail(
   options: { clientProgramRole?: unknown; clientAdminRole?: unknown } = {},
 ): Promise<string | null> {
   const claims = authorizeMember(session, options);
-  const rows = await loadLiveVisible(claims, { id });
+  const { rows } = await loadLiveVisible(claims, { id });
   const row = rows[0];
   if (!row) {
     return null;

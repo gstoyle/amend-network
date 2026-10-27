@@ -52,6 +52,14 @@
 
 **Alternatives**: Exposing `user_networks` SELECT to peers (leaks memberships of unlisted users); denormalised cohort array on `directory_listings` (sync trigger burden).
 
+## 8a. Admin group filter
+
+**Decision**: One list per content type, filtered by an *audience set* computed for the chosen group. A cohort's set is `{all_authenticated, <its programme>, cohort:<id>}`. A programme's set is `{all_authenticated, <programme>, every cohort:<id> in that programme}`. The query filter is `visibility && set`. "Targeted only" uses `visibility @> ARRAY[token]` (cohort) or `visibility && {programme, its cohorts}` (programme). Both forms use the existing GIN index.
+
+**Rationale**: "What will this group receive?" is the question staff are asking, and it matches the member-side rule exactly. Separate pages per group (the forum pattern) were rejected because one resource or event can target several groups, so it would appear in several places.
+
+**Alternatives**: Group tabs (same duplication problem); client-side filtering (sends every item to the browser and duplicates the visibility rule in the client).
+
 ## 9. Primary cohort protection
 
 **Decision**: App refuses removing `users.network_id`. A BEFORE DELETE trigger on `user_networks` raises if the row matches the user's `network_id`, unless it fires from the existing sync trigger (OLD network change).

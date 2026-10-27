@@ -11,6 +11,8 @@ Rows added to the PRD §3 capability matrix. Each runs through the app (integrat
 | Create cohort forum room | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | View own-cohort-only content | ✅ (all) | ✅ (all) | ✅ (all) | own cohorts | own cohorts | ❌ | ❌ |
 | View other-cohort-only content | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Filter admin Resources / Announcements by group | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Filter admin Events by group | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
 | See cohort labels / filter in directory | ✅ | ✅ | ✅ | GLE cohorts | LEAD cohorts | ❌ | ❌ |
 
 Every refusal is asserted in the same test as the allowed case (Constitution IV: reject, not only accept).

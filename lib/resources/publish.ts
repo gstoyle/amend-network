@@ -3,6 +3,7 @@ import { z } from "zod";
 import { writeAudit } from "@/lib/audit/write";
 import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
+import { visibilityTokensSchema } from "@/lib/db/program-labels";
 import { withRls } from "@/lib/db/rls";
 import { parseOptionalFolderId, RESOURCE_SOURCES } from "@/lib/resources/labels";
 import { scanBytes } from "@/lib/scan/clamav";
@@ -25,7 +26,6 @@ const FILE_MIMES = [
 ] as const;
 const THUMB_MIMES = ["image/jpeg", "image/png"] as const;
 const SOURCES = RESOURCE_SOURCES;
-const VISIBILITY = ["all_authenticated", "pathways", "lead"] as const;
 const MAX_FILE_BYTES = 262_144_000;
 const MAX_THUMB_BYTES = 5 * 1024 * 1024;
 const GENERIC_PUBLISH_ERROR = "Could not publish this file.";
@@ -43,9 +43,7 @@ const publishSchema = z.object({
   tags: z
     .array(z.string().trim().min(1).max(40))
     .max(10, "Use 10 tags or fewer."),
-  visibility: z
-    .array(z.enum(VISIBILITY))
-    .min(1, "Choose at least one visibility value."),
+  visibility: visibilityTokensSchema,
   fileMimeType: z.enum(FILE_MIMES, { message: "That file type is not allowed." }),
   fileSizeBytes: z
     .number()

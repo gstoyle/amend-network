@@ -45,19 +45,33 @@ function expiresAt(createdAt: Date, lastSeenAt: Date): Date {
   return sliding < absolute ? sliding : absolute;
 }
 
-async function programRolesForUser(
+async function membershipsForUser(
   tx: Prisma.TransactionClient,
   userId: string,
   primary: ProgramRole,
-): Promise<Array<"pathways" | "lead">> {
+  adminRole: AdminRole,
+): Promise<{ programRoles: Array<"pathways" | "lead">; cohortIds: string[] }> {
   const rows = await tx.userNetwork.findMany({
     where: { userId },
-    select: { network: { select: { programRole: true } } },
+    select: { networkId: true, network: { select: { programRole: true } } },
   });
-  return memberProgramRoles(
+  const programRoles = memberProgramRoles(
     primary,
     rows.map((row) => row.network.programRole),
   );
+  if (adminRole === "moderator") {
+    const all = await tx.network.findMany({
+      where: { programRole: { in: ["pathways", "lead"] } },
+      select: { id: true },
+    });
+    return { programRoles, cohortIds: all.map((row) => row.id) };
+  }
+  return {
+    programRoles,
+    cohortIds: rows
+      .filter((row) => row.network.programRole !== "none")
+      .map((row) => row.networkId),
+  };
 }
 
 export type CreateSessionInput = {
@@ -91,12 +105,18 @@ export async function insertSession(
     },
   });
 
-  const programRoles = await programRolesForUser(tx, input.userId, input.programRole);
+  const { programRoles, cohortIds } = await membershipsForUser(
+    tx,
+    input.userId,
+    input.programRole,
+    input.adminRole,
+  );
   const claims: SessionClaims = {
     sessionId: row.id,
     userId: input.userId,
     programRole: input.programRole,
     programRoles,
+    cohortIds,
     adminRole: input.adminRole,
     status: input.status,
     mfaEnabled: false,
@@ -132,11 +152,18 @@ export async function loadSession(sessionId: string): Promise<SessionClaims | nu
       where: { id: sessionRow.id, userId: sessionRow.userId, revokedAt: null },
       data: { lastSeenAt: now, expiresAt: exp },
     });
+    const { programRoles, cohortIds } = await membershipsForUser(
+      tx,
+      sessionRow.userId,
+      user.programRole,
+      user.adminRole,
+    );
     return {
       sessionId: sessionRow.id,
       userId: sessionRow.userId,
       programRole: user.programRole,
-      programRoles: await programRolesForUser(tx, sessionRow.userId, user.programRole),
+      programRoles,
+      cohortIds,
       adminRole: user.adminRole,
       status: user.status,
       mfaEnabled: user.mfaEnabled,

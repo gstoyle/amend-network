@@ -69,11 +69,12 @@ Three enforcement layers. All three, every time, no exceptions:
    enabled on every content table. RLS is native Postgres and does not depend on
    any managed-database vendor. It is the layer that holds when layer 2 is missed.
 
-Content entities have a `visibility` text[] of `all_authenticated | pathways | lead`.
-A user sees an entity if any of their roles intersects it. GIN-indexed.
+Content entities have a `visibility` text[] of `all_authenticated`, `pathways`, `lead`,
+and/or `cohort:<uuid>`. A user sees an entity if any of their tokens intersects it.
+Tokens come from the signed session and cohort memberships, never the client. GIN-indexed.
 
-Administrative role is a separate claim from program role. Exactly one program role,
-zero or one administrative role.
+Administrative role is a separate claim from program role. One primary program role,
+optional extra programme memberships through cohorts, zero or one administrative role.
 
 ## Non-negotiables
 

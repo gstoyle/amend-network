@@ -2,7 +2,13 @@ import { track } from "@/lib/analytics/track";
 import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
 import { withRls } from "@/lib/db/rls";
-import { type AudienceMarker, audienceLabel, visibilityTokens } from "@/lib/db/visibility";
+import {
+  type AudienceMarker,
+  type CohortNames,
+  audienceLabel,
+  cohortNamesFor,
+  visibilityTokens,
+} from "@/lib/db/visibility";
 import type { StoredRsvpStatus } from "@/lib/events/rsvp";
 
 const STORED_RSVP_STATUSES: readonly StoredRsvpStatus[] = ["yes", "no", "maybe", "waitlist"];
@@ -80,6 +86,7 @@ function toMemberEvent(
     rsvps: { status: string }[];
   },
   confirmedCount: number,
+  cohortNames: CohortNames,
 ): MemberEvent {
   return {
     id: row.id,
@@ -91,7 +98,7 @@ function toMemberEvent(
     location: row.location,
     isVirtual: row.isVirtual,
     capacity: row.capacity,
-    audience: audienceLabel(row.visibility),
+    audience: audienceLabel(row.visibility, cohortNames),
     viewerRsvpStatus: asStoredStatus(row.rsvps[0]?.status),
     confirmedCount,
   };
@@ -138,7 +145,11 @@ async function loadVisibleEvents(
         WHERE e.id = ANY(${rows.map((row) => row.id)}::uuid[])
       `;
       const countById = new Map(counts.map((row) => [row.id, Number(row.n)]));
-      return rows.map((row) => toMemberEvent(row, countById.get(row.id) ?? 0));
+      const cohortNames = await cohortNamesFor(
+        tx,
+        rows.map((row) => row.visibility),
+      );
+      return rows.map((row) => toMemberEvent(row, countById.get(row.id) ?? 0, cohortNames));
     },
   );
 }

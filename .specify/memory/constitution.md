@@ -1,5 +1,19 @@
 <!--
-Sync Impact Report
+Sync Impact Report (1.1.0, 2026-10-27)
+- Version change: 1.0.0 → 1.1.0 (MINOR: materially expanded guidance)
+- Modified principles:
+  - I. Defense-in-Depth Authorization: visibility vocabulary adds cohort
+    tokens `cohort:<uuid>`; program membership may include additional
+    programmes through cohorts (records dual membership, 2026-09-14).
+    Intersection semantics, server-derived tokens, GIN index, and RLS
+    backstop are unchanged.
+- Reason: specs/014-program-cohorts (per-cohort separation inside a programme).
+- Migration: existing `all_authenticated | pathways | lead` rows stay valid;
+  content CHECK constraints widen to accept cohort tokens.
+- Approved by: technical lead, 2026-10-27.
+- Follow-up: AGENTS.md and .cursor/rules/000-project.mdc updated to match.
+
+Sync Impact Report (1.0.0)
 - Version change: (unfilled template) → 1.0.0
 - Modified principles: all placeholders replaced with project-specific principles
   - [PRINCIPLE_1_NAME] → I. Defense-in-Depth Authorization (NON-NEGOTIABLE)
@@ -33,12 +47,16 @@ All three MUST run; missing any one is a defect, not a tradeoff.
    and MUST NOT depend on a managed-database vendor. It is the layer that
    holds when layer 2 is missed.
 
-Content entities MUST use a `visibility` text[] of
-`all_authenticated | pathways | lead`. A user sees an entity if and only
-if any of their roles intersects that set. The column MUST be GIN-indexed.
+Content entities MUST use a `visibility` text[] whose tokens are
+`all_authenticated`, a program token (`pathways | lead`), or a cohort
+token `cohort:<uuid>` naming an existing cohort. A user sees an entity
+if and only if any of their tokens intersects that set. A user's tokens
+are derived server-side from the signed session and cohort memberships,
+never from the client. The column MUST be GIN-indexed.
 
 Administrative role is a separate claim from program role. A user has
-exactly one program role and zero or one administrative role.
+one primary program role, may hold additional program memberships
+through cohorts, and has zero or one administrative role.
 
 Every `/admin` route MUST require `mfa_satisfied` on the session, not
 only an administrative role claim.
@@ -261,4 +279,4 @@ Compliance review:
 Guidance for day-to-day work lives in `AGENTS.md`. This constitution
 is the source of truth when guidance and governance conflict.
 
-**Version**: 1.0.0 | **Ratified**: 2026-08-12 | **Last Amended**: 2026-08-12
+**Version**: 1.1.0 | **Ratified**: 2026-08-12 | **Last Amended**: 2026-10-27
