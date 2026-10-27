@@ -265,6 +265,18 @@ admin pages without an authenticator, so `ADMIN_MFA_REQUIRED` is
 not redirect or deny on `mfa_satisfied`. Flip that flag to restore the
 PRD gate. **Unconfirmed by Amend.** Revisit before production launch.
 
+**Members submit resources; Admins publish (2026-10-27).** PRD §3
+*Upload / edit / delete resources* (Super Admin and Admin only) is read
+as *publish*. Spec `015-member-resource-submissions` adds a narrower
+*submit* capability: active members propose files or links, nothing is
+visible to other members until an Admin approves, and approved items
+appear under *Shared by members* attributed as first name plus last
+initial. Staff can also attribute a staff upload to a member. Members
+need a displayable name to submit but not a directory listing (the forum
+requires a listing). Launch is blocked on community guidelines text
+(Q5/Q16). **Recommendation accepted by Amend; the PRD §3 reading and the
+no-listing default are unconfirmed.**
+
 ---
 
 ## Still fully open, not yet assumed or addressed
@@ -279,4 +291,4 @@ Q15 (budget ceiling).
 
 **Log maintained by:** solo developer, per constitution governance.
 
-**Last updated:** 2026-10-27 (Global Learning Experiences replaces International Immersion Program as the display name for the `pathways` role)
+**Last updated:** 2026-10-27 (member resource submissions with Admin approval, spec 015)

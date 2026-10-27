@@ -5,6 +5,7 @@ import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
 import { visibilityTokensSchema } from "@/lib/db/program-labels";
 import { withRls } from "@/lib/db/rls";
+import { assertCohortTargets, isCohortTargetError } from "@/lib/db/visibility";
 import { parseOptionalFolderId, RESOURCE_SOURCES } from "@/lib/resources/labels";
 import { scanBytes } from "@/lib/scan/clamav";
 import {
@@ -291,6 +292,7 @@ export async function publishResource(
         status: claims.status,
       },
       async (tx) => {
+        await assertCohortTargets(tx, parsed.data.visibility);
         await tx.resource.create({
           data: {
             id,
@@ -320,9 +322,12 @@ export async function publishResource(
         });
       },
     );
-  } catch {
+  } catch (error) {
     await deleteKeys([liveFileKey, liveThumbKey]);
-    return { ok: false, error: GENERIC_PUBLISH_ERROR };
+    return {
+      ok: false,
+      error: isCohortTargetError(error) ? error.message : GENERIC_PUBLISH_ERROR,
+    };
   }
 
   return { ok: true, id };

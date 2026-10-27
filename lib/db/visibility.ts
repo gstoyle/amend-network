@@ -41,6 +41,10 @@ export async function assertCohortTargets(
   }
 }
 
+export function isCohortTargetError(error: unknown): error is Error {
+  return error instanceof Error && error.message === VISIBILITY_COHORT_UNAVAILABLE_MESSAGE;
+}
+
 export type CohortNames = ReadonlyMap<string, string>;
 
 /** Names for every cohort referenced by the given visibility arrays. */

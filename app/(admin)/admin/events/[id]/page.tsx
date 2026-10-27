@@ -11,6 +11,7 @@ import { formSurfaceClassName } from "@/components/ui/card";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
+import { listCohortOptions } from "@/lib/cohorts/list";
 import { cancelEvent } from "@/lib/events/cancel";
 import { updateEvent } from "@/lib/events/edit";
 import { EVENT_STAFF_ROLES, getAdminEvent } from "@/lib/events/publish";
@@ -106,6 +107,7 @@ export default async function EditEventPage({
   }
   const boundSave = saveAction.bind(null, id);
   const boundCancel = cancelAction.bind(null, id);
+  const cohorts = await listCohortOptions({ includeArchived: true });
   return (
     <div className="flex flex-col gap-6 lg:gap-8">
       <p>
@@ -124,6 +126,7 @@ export default async function EditEventPage({
       />
       <section className={formSurfaceClassName} aria-label="Event details">
         <EventForm
+          cohorts={cohorts}
           action={boundSave}
           capacityConfirm
           initial={{

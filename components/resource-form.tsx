@@ -2,15 +2,12 @@
 
 import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  formFieldClassName,
-  formGridClassName,
-  formInsetClassName,
-} from "@/components/ui/card";
-import { checkboxClassName, controlClassName, Input } from "@/components/ui/input";
+import { formFieldClassName, formGridClassName } from "@/components/ui/card";
+import { controlClassName, Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
-import { VISIBILITY_OPTIONS } from "@/lib/db/program-labels";
+import { VisibilityFieldset } from "@/components/visibility-fieldset";
+import type { CohortOption } from "@/lib/cohorts/list";
 import { RESOURCE_SOURCE_COPY, RESOURCE_SOURCES } from "@/lib/resources/labels";
 import { cn } from "@/lib/utils";
 
@@ -62,6 +59,7 @@ type ResourceFormProps = {
   initial?: ResourceFormInitial;
   folders: ResourceFolderOption[];
   topicSuggestions: string[];
+  cohorts: readonly CohortOption[];
 };
 
 const initialState: ResourceFormState = {};
@@ -73,6 +71,7 @@ export function ResourceForm({
   initial,
   folders,
   topicSuggestions,
+  cohorts,
 }: ResourceFormProps) {
   const [clientError, setClientError] = useState<string | undefined>();
   const isEdit = Boolean(initial);
@@ -206,23 +205,7 @@ export function ResourceForm({
           </datalist>
         ) : null}
       </div>
-      <fieldset className={cn(formInsetClassName, "lg:col-span-2")}>
-        <legend className="text-sm font-medium text-foreground">Visibility</legend>
-        <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1">
-          {VISIBILITY_OPTIONS.map((option) => (
-            <label className="flex min-h-touch items-center gap-2 text-sm text-foreground" key={option.value}>
-              <input
-                className={checkboxClassName}
-                defaultChecked={selected.has(option.value)}
-                name="visibility"
-                type="checkbox"
-                value={option.value}
-              />
-              {option.label}
-            </label>
-          ))}
-        </div>
-      </fieldset>
+      <VisibilityFieldset className="lg:col-span-2" cohorts={cohorts} selected={[...selected]} />
       <div className={formFieldClassName}>
         <Label htmlFor="file">{isEdit ? "Replacement file (optional)" : "File"}</Label>
         <Input

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, describe, expect, it } from "vitest";
 import { authorizeCredentials } from "@/lib/auth/credentials";
 import { isPendingSession, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
@@ -10,7 +10,16 @@ import { decryptPii, hmacEmailLookup } from "@/lib/crypto/pii";
 import { listVisibleRecords } from "@/lib/db/visibility";
 import { migrator } from "@/lib/db/migrator";
 import { env } from "@/lib/env";
-import { registrationVisitorCopy, registerSelf } from "@/lib/registration/register";
+import {
+  listLaunchNetworks,
+  registrationVisitorCopy,
+  registerSelf,
+} from "@/lib/registration/register";
+import {
+  cleanupCohortFixtures,
+  createCohort,
+  newCohortFixtures,
+} from "@/tests/helpers/cohort-fixtures";
 
 const IP = "127.0.0.1";
 const USER_AGENT = `vitest-register-${randomUUID()}`;
@@ -250,5 +259,36 @@ describe("self-registration (US2 / FR-001–FR-004)", () => {
         "We received your request",
       ),
     );
+  });
+});
+
+describe("archived cohorts at registration (014 FR-003)", () => {
+  const fixtures = newCohortFixtures("register-archived");
+
+  afterAll(async () => {
+    await cleanupCohortFixtures(fixtures);
+  });
+
+  it("does not offer or accept an archived cohort", async () => {
+    const archived = await createCohort(fixtures, {
+      label: "archived",
+      programRole: "pathways",
+      archived: true,
+    });
+    expect((await listLaunchNetworks()).map((row) => row.id)).not.toContain(archived);
+    const email = `archived-${randomUUID()}@example.com`;
+    const result = await registerSelf({
+      firstName: "Ada",
+      lastName: "Lovelace",
+      title: "Analyst",
+      email,
+      password: PASSWORD,
+      docAffiliationId: (await activeAffiliation()).id,
+      networkId: archived,
+      ip: IP,
+      userAgent: USER_AGENT,
+    });
+    expect(result.ok).toBe(false);
+    expect(await migrator.user.findUnique({ where: { emailLookup: hmacEmailLookup(email) } })).toBeNull();
   });
 });

@@ -4,6 +4,7 @@ import { writeAudit } from "@/lib/audit/write";
 import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
 import { withRls } from "@/lib/db/rls";
+import { assertCohortTargets, isCohortTargetError } from "@/lib/db/visibility";
 import {
   assertAnnouncementBody,
   parseCtaPair,
@@ -91,6 +92,23 @@ export async function createAnnouncement(
     return { ok: false, error: error instanceof Error ? error.message : "Could not save this announcement." };
   }
   const id = randomUUID();
+  try {
+    await insertAnnouncement(claims, id, fields, input);
+  } catch (error) {
+    if (isCohortTargetError(error)) {
+      return { ok: false, error: error.message };
+    }
+    throw error;
+  }
+  return { ok: true, id };
+}
+
+async function insertAnnouncement(
+  claims: SessionClaims,
+  id: string,
+  fields: ReturnType<typeof parsedFields>,
+  input: AnnouncementWriteInput,
+): Promise<void> {
   await withRls(
     {
       userId: claims.userId,
@@ -99,6 +117,7 @@ export async function createAnnouncement(
       status: claims.status,
     },
     async (tx) => {
+      await assertCohortTargets(tx, fields.visibility);
       await tx.announcement.create({
         data: {
           id,
@@ -128,7 +147,6 @@ export async function createAnnouncement(
       });
     },
   );
-  return { ok: true, id };
 }
 
 export type AdminAnnouncement = {

@@ -11,6 +11,7 @@ import { cardClassName, formSurfaceClassName } from "@/components/ui/card";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
+import { listCohortOptions } from "@/lib/cohorts/list";
 import { getAdminResource, replaceResource, updateResource, withdrawResource } from "@/lib/resources/edit";
 import { listAdminFolders } from "@/lib/resources/folders";
 import { RESOURCE_TOPIC_SUGGESTIONS } from "@/lib/resources/labels";
@@ -152,6 +153,7 @@ export default async function AdminResourceEditPage({
     notFound();
   }
 
+  const cohorts = await listCohortOptions({ includeArchived: true });
   return (
     <div className="flex flex-col gap-6 lg:gap-8">
       <p>
@@ -179,6 +181,7 @@ export default async function AdminResourceEditPage({
         <>
           <section className={formSurfaceClassName} aria-label="Resource details">
             <ResourceForm
+              cohorts={cohorts}
               folders={folders.map((folder) => ({
                 id: folder.id,
                 name: folder.name,

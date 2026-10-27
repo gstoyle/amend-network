@@ -266,7 +266,7 @@ export async function sendManualInvite(
         }),
         tx.network.findUnique({
           where: { id: parsed.data.networkId },
-          select: { id: true, name: true, programRole: true },
+          select: { id: true, name: true, programRole: true, archivedAt: true },
         }),
       ]);
       if (existingUser) {
@@ -311,7 +311,7 @@ export async function sendCsvInvites(
 
   await withRls(rlsSession(authorized), async (tx) => {
     const [networks, affiliations] = await Promise.all([
-      tx.network.findMany({ select: { id: true, name: true, programRole: true } }),
+      tx.network.findMany({ select: { id: true, name: true, programRole: true, archivedAt: true } }),
       tx.docAffiliation.findMany({ select: { id: true, label: true, active: true } }),
     ]);
 

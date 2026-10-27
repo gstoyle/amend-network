@@ -1,6 +1,7 @@
 import { writeAudit } from "@/lib/audit/write";
 import type { SessionClaims } from "@/lib/auth/types";
 import { withRls } from "@/lib/db/rls";
+import { assertCohortTargets, isCohortTargetError } from "@/lib/db/visibility";
 import { sendEventAudienceMail } from "@/lib/events/notify";
 import {
   authorizeEventStaff,
@@ -41,10 +42,25 @@ export async function updateEvent(
     async (tx) => {
       const existing = await tx.event.findUnique({
         where: { id: eventId },
-        select: { id: true, startsAt: true, endsAt: true, title: true, location: true },
+        select: {
+          id: true,
+          startsAt: true,
+          endsAt: true,
+          title: true,
+          location: true,
+          visibility: true,
+        },
       });
       if (!existing) {
         return { ok: false as const, error: "Could not save this event." };
+      }
+      try {
+        await assertCohortTargets(tx, fields.visibility, existing.visibility);
+      } catch (error) {
+        if (isCohortTargetError(error)) {
+          return { ok: false as const, error: error.message };
+        }
+        throw error;
       }
 
       const yesCount = await tx.eventRsvp.count({

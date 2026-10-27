@@ -1,11 +1,16 @@
 import { randomUUID } from "node:crypto";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, describe, expect, it } from "vitest";
 import { hmacEmailLookup } from "@/lib/crypto/pii";
 import { migrator } from "@/lib/db/migrator";
 import { env } from "@/lib/env";
 import { sendCsvInvites, sendManualInvite } from "@/lib/registration/invite";
+import {
+  cleanupCohortFixtures,
+  createCohort,
+  newCohortFixtures,
+} from "@/tests/helpers/cohort-fixtures";
 import { claimsFor } from "@/tests/helpers/prd-matrix";
 
 const IP = "127.0.0.1";
@@ -150,5 +155,44 @@ describe("invite send (US4 / FR-005 / FR-006)", () => {
         where: { emailLookup: hmacEmailLookup(email), status: "pending" },
       }),
     ).toBe(1);
+  });
+});
+
+describe("archived cohorts in invitations (014 FR-003)", () => {
+  const fixtures = newCohortFixtures("invite-archived");
+
+  afterAll(async () => {
+    await migrator.auditLog.deleteMany({ where: { userAgent: USER_AGENT } });
+    await cleanupCohortFixtures(fixtures);
+  });
+
+  it("refuses an archived cohort for manual and CSV invites", async () => {
+    await createCohort(fixtures, { label: "archived", programRole: "pathways", archived: true });
+    const archivedId = fixtures.networkIds[0]!;
+    const archivedName = `${fixtures.marker}-archived`;
+
+    const manual = await sendManualInvite(adminSession(), {
+      email: `archived-${randomUUID()}@example.com`,
+      firstName: "Ada",
+      lastName: "Lovelace",
+      networkId: archivedId,
+      ip: IP,
+      userAgent: USER_AGENT,
+    });
+    expect(manual.ok).toBe(false);
+
+    const csv = await sendCsvInvites(adminSession(), {
+      csvText: [
+        "email,first_name,last_name,network_name,title,doc_affiliation",
+        `archived-${randomUUID()}@example.com,Ada,Lovelace,${archivedName},Analyst,Test Agency A`,
+      ].join("\n"),
+      ip: IP,
+      userAgent: USER_AGENT,
+    });
+    expect(csv.ok).toBe(true);
+    if (csv.ok) {
+      expect(csv.sent).toHaveLength(0);
+      expect(csv.invalid.map((row) => row.reason)).toEqual(["unknown_network"]);
+    }
   });
 });

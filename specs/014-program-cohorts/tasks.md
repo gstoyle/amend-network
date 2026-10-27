@@ -16,7 +16,7 @@ description: "Task list for Programme Cohorts"
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
-- **[Story]**: US1剖S5 from spec.md
+- **[Story]**: US1?US5 from spec.md
 
 ---
 
@@ -56,7 +56,7 @@ description: "Task list for Programme Cohorts"
 - [x] T011 Point `parseVisibility` in `lib/announcements/validate.ts` at the shared parser, and remove the local `VISIBILITY` constants in `lib/resources/publish.ts` and `lib/resources/edit.ts`. `lib/events/validate.ts` and `lib/forum/validate.ts` re-export it unchanged.
 - [x] T012 Update every `audienceLabel` caller to pass `await cohortNameMap()`: `app/(admin)/admin/{resources,events,announcements}/page.tsx`, `lib/resources/list.ts`, `lib/events/list.ts`, `lib/announcements/list.ts`, `lib/forum/list.ts`
 - [x] T013 Add `20261027120000_program_cohorts` to `RETRY_FAILED_MIGRATIONS` in `scripts/render.mjs`
-- [ ] T014 Run `pnpm typecheck`, `pnpm test`, and `pnpm test:rls`. T003傍005 pass, and existing suites are unchanged (SC-005).
+- [x] T014 Run `pnpm typecheck`, `pnpm test`, and `pnpm test:rls`. T003?T005 pass, and existing suites are unchanged (SC-005).
 
 **Checkpoint**: Cohort tokens are enforced in the database and the app. Nothing in the UI targets them yet.
 
@@ -70,24 +70,24 @@ description: "Task list for Programme Cohorts"
 
 ### Tests first
 
-- [ ] T015 [P] [US1] RLS write rows RLS-COH-W-1..5 in new `tests/rls/cohort-writes.test.ts`
-- [ ] T016 [P] [US1] Integration test in new `tests/integration/cohort-manage.test.ts`. It covers:
+- [x] T015 [P] [US1] RLS write rows RLS-COH-W-1..5 in new `tests/rls/cohort-writes.test.ts`
+- [x] T016 [P] [US1] Integration test in new `tests/integration/cohort-manage.test.ts`. It covers:
   - create, duplicate name (case-insensitive), rename, archive, and unarchive, each writing its audit row with ids only
   - add a member by email, with the same generic refusal for an unknown email, a staff-only account, or an existing member
   - removing the primary cohort is refused
   - moderator and member callers are refused (the role check isn't mocked)
-- [ ] T017 [P] [US1] Integration tests: archived cohorts are excluded from registration and invite choices, and the invite CSV rejects an archived `network_name`. Add these to `tests/integration/register.test.ts` and `tests/integration/invite-send.test.ts`.
-- [ ] T018 [P] [US1] a11y test for `/admin/cohorts` and `/admin/cohorts/[id]` in new `tests/a11y/cohort-pages.test.ts`
+- [x] T017 [P] [US1] Integration tests: archived cohorts are excluded from registration and invite choices, and the invite CSV rejects an archived `network_name`. Add these to `tests/integration/register.test.ts` and `tests/integration/invite-send.test.ts`.
+- [x] T018 [P] [US1] a11y test for `/admin/cohorts` and `/admin/cohorts/[id]` in new `tests/a11y/cohort-pages.test.ts`
 
 ### Implementation
 
-- [ ] T019 [US1] Create `lib/cohorts/manage.ts`: `createCohort`, `renameCohort`, `setCohortArchived`, `listCohortsForAdmin` (with member counts), `listCohortMembers` (decrypted names, primary flag), `addCohortMember` (email lookup hash), `removeCohortMember`. Use `requireRole` admin/super_admin with `mfa: true`, Zod inputs, and audit in the same transaction. Mirror `lib/registration/doc-affiliations.ts`.
-- [ ] T020 [US1] Filter `archivedAt: null` in the network option loaders in `lib/registration/register.ts` and `lib/registration/invite.ts`, and in invite CSV name resolution
-- [ ] T021 [P] [US1] Create presentational `components/cohort-list.tsx` (grouped by programme, add, rename, and archive forms) and `components/cohort-members.tsx` (member list, add by email, remove), using tokens only
-- [ ] T022 [US1] Create `app/(admin)/admin/cohorts/page.tsx` with server actions following `app/(admin)/admin/users/affiliations/page.tsx`
-- [ ] T023 [US1] Create `app/(admin)/admin/cohorts/[id]/page.tsx` with add and remove member actions. An unknown id returns `notFound()`.
-- [ ] T024 [US1] Add the Cohorts destination to `lib/nav/destinations.ts` and its description to `app/(admin)/admin/page.tsx`
-- [ ] T025 [US1] Seed *Norway Sept 26* and *Norway April 27* (GLE), with a member in each and one archived example, in `prisma/seed.ts`
+- [x] T019 [US1] Create `lib/cohorts/manage.ts`: `createCohort`, `renameCohort`, `setCohortArchived`, `listCohortsForAdmin` (with member counts), `listCohortMembers` (decrypted names, primary flag), `addCohortMember` (email lookup hash), `removeCohortMember`. Use `requireRole` admin/super_admin with `mfa: true`, Zod inputs, and audit in the same transaction. Mirror `lib/registration/doc-affiliations.ts`.
+- [x] T020 [US1] Filter `archivedAt: null` in the network option loaders in `lib/registration/register.ts` and `lib/registration/invite.ts`, and in invite CSV name resolution
+- [x] T021 [P] [US1] Create presentational `components/cohort-list.tsx` (grouped by programme, add, rename, and archive forms) and `components/cohort-members.tsx` (member list, add by email, remove), using tokens only
+- [x] T022 [US1] Create `app/(admin)/admin/cohorts/page.tsx` with server actions following `app/(admin)/admin/users/affiliations/page.tsx`
+- [x] T023 [US1] Create `app/(admin)/admin/cohorts/[id]/page.tsx` with add and remove member actions. An unknown id returns `notFound()`.
+- [x] T024 [US1] Add the Cohorts destination to `lib/nav/destinations.ts` and its description to `app/(admin)/admin/page.tsx`
+- [x] T025 [US1] Seed *Norway Sept 26* and *Norway April 27* (GLE), with a member in each and one archived example, in `prisma/seed.ts`
 - [ ] T026 [US1] Run the gates (lint, typecheck, test, test:rls, test:a11y) and quickstart steps 1, 2, and 4 in the browser
 
 **Checkpoint**: Cohorts can be opened for registration and maintained. Content still targets programmes only.
@@ -102,17 +102,17 @@ description: "Task list for Programme Cohorts"
 
 ### Tests first
 
-- [ ] T027 [P] [US2] Integration tests for cohort-only resources (list, search, open, download, direct URL), events (list, ICS, RSVP, join-link reveal), and announcements (banner). Add these to `tests/integration/resource-visibility.test.ts`, `tests/integration/event-calendar.test.ts`, and `tests/integration/announcement-visibility.test.ts`.
-- [ ] T028 [P] [US2] Integration tests for publish and edit validation: an unknown cohort is refused, newly adding an archived cohort is refused, and keeping an already-present archived cohort is allowed. Add these to `tests/integration/resource-publish.test.ts`, `tests/integration/event-publish.test.ts`, and `tests/integration/announcement-publish.test.ts`.
-- [ ] T029 [P] [US2] Add RLS rows for a moderator seeing every cohort and a member seeing the union of their cohorts to `tests/rls/permission-matrix.test.ts`, per `contracts/permission-matrix.md`
+- [x] T027 [P] [US2] Integration tests for cohort-only resources (list, search, open, download, direct URL), events (list, ICS, RSVP, join-link reveal), and announcements (banner). Add these to `tests/integration/resource-visibility.test.ts`, `tests/integration/event-calendar.test.ts`, and `tests/integration/announcement-visibility.test.ts`.
+- [x] T028 [P] [US2] Integration tests for publish and edit validation: an unknown cohort is refused, newly adding an archived cohort is refused, and keeping an already-present archived cohort is allowed. Add these to `tests/integration/resource-publish.test.ts`, `tests/integration/event-publish.test.ts`, and `tests/integration/announcement-publish.test.ts`.
+- [x] T029 [P] [US2] Add RLS rows for a moderator seeing every cohort and a member seeing the union of their cohorts to `tests/rls/permission-matrix.test.ts`, per `contracts/permission-matrix.md`
 
 ### Implementation
 
-- [ ] T030 [US2] Call `assertCohortTargets` inside the write transaction in `lib/resources/publish.ts`, `lib/resources/edit.ts`, `lib/events/publish.ts`, `lib/announcements/publish.ts`, and `lib/announcements/edit.ts`
-- [ ] T031 [US2] Make sure member queries filter with the full `visibilityTokens(claims)`, including cohort tokens, in `lib/resources/list.ts`, `lib/resources/download.ts`, `lib/resources/folders.ts`, `lib/events/list.ts`, `lib/events/rsvp.ts`, and `lib/announcements/list.ts`
-- [ ] T032 [P] [US2] Create `components/visibility-fieldset.tsx`. It renders *Everyone signed in* (optional), the programmes, and the cohorts grouped by programme in fieldsets with legends, marking archived cohorts that are already selected as "(archived)".
-- [ ] T033 [US2] Replace the static `VISIBILITY_OPTIONS` rendering in `components/resource-form.tsx`, `components/event-form.tsx`, and `components/announcement-form.tsx` with `VisibilityFieldset`. Pass the options from the server pages: `app/(admin)/admin/{resources,events,announcements}/{new,[id]}/page.tsx`.
-- [ ] T034 [US2] Add a11y coverage for the updated forms to `tests/a11y/resource-pages.test.ts`, `tests/a11y/event-pages.test.ts`, and `tests/a11y/announcement-pages.test.ts`
+- [x] T030 [US2] Call `assertCohortTargets` inside the write transaction in `lib/resources/publish.ts`, `lib/resources/edit.ts`, `lib/events/publish.ts`, `lib/announcements/publish.ts`, and `lib/announcements/edit.ts`
+- [x] T031 [US2] Make sure member queries filter with the full `visibilityTokens(claims)`, including cohort tokens, in `lib/resources/list.ts`, `lib/resources/download.ts`, `lib/resources/folders.ts`, `lib/events/list.ts`, `lib/events/rsvp.ts`, and `lib/announcements/list.ts`
+- [x] T032 [P] [US2] Create `components/visibility-fieldset.tsx`. It renders *Everyone signed in* (optional), the programmes, and the cohorts grouped by programme in fieldsets with legends, marking archived cohorts that are already selected as "(archived)".
+- [x] T033 [US2] Replace the static `VISIBILITY_OPTIONS` rendering in `components/resource-form.tsx`, `components/event-form.tsx`, and `components/announcement-form.tsx` with `VisibilityFieldset`. Pass the options from the server pages: `app/(admin)/admin/{resources,events,announcements}/{new,[id]}/page.tsx`.
+- [x] T034 [US2] Add a11y coverage for the updated forms to `tests/a11y/resource-pages.test.ts`, `tests/a11y/event-pages.test.ts`, and `tests/a11y/announcement-pages.test.ts`
 - [ ] T035 [US2] Run the gates and quickstart steps 3 and 4 in the browser
 
 **Checkpoint**: Cohort separation works for every non-forum content type.
@@ -143,7 +143,7 @@ description: "Task list for Programme Cohorts"
 
 **Independent Test**: spec.md US5. Quickstart step 7.
 
-- [ ] T041 [P] [US5] Unit tests for `audienceTokensForGroup` (cohort, programme, unknown ? All) in new `tests/unit/cohort-groups.test.ts`
+- [x] T041 [P] [US5] Unit tests for `audienceTokensForGroup` (cohort, programme, unknown ? All) in new `tests/unit/cohort-groups.test.ts`
 - [ ] T042 [P] [US5] Add tests for the `{ group, targeted }` option to `tests/integration/resource-edit.test.ts`, `tests/integration/event-edit-cancel.test.ts`, and `tests/integration/announcement-admin.test.ts`. They cover reach mode, targeted mode, no duplicate rows for multi-cohort items, and a moderator on events.
 - [ ] T043 [US5] Accept `{ group?: string; targeted?: boolean }` in `listAdminResources` (`lib/resources/publish.ts`), `listAdminEvents` (`lib/events/publish.ts`), and `listAdminAnnouncements` (`lib/announcements/publish.ts`). Filter with `hasSome` / `has` in the query.
 - [ ] T044 [P] [US5] Create presentational `components/admin-group-filter.tsx`: a GET form with a labelled select (All, programmes, cohorts with archived labelled) and a "Targeted only" checkbox
@@ -181,13 +181,13 @@ description: "Task list for Programme Cohorts"
 
 ## Dependencies & Execution Order
 
-- **Setup (T001傍002)** ? **Foundational (T003傍014)**, which blocks every story
-- **US1 (T015傍026)**: after Foundational. MVP.
-- **US2 (T027傍035)**: after Foundational. It needs cohort rows to test with: use the US1 seed (T025) or fixtures created in tests.
-- **US3 (T036傍040)**: after US2, which provides `VisibilityFieldset` (T032)
-- **US5 (T041傍046)**: after Foundational. It uses `audienceTokensForGroup` (T010) and can run alongside US2 and US3.
-- **US4 (T047傍052)**: after Foundational. Independent of the others.
-- **Polish (T053傍056)**: after the chosen stories
+- **Setup (T001?T002)** ? **Foundational (T003?T014)**, which blocks every story
+- **US1 (T015?T026)**: after Foundational. MVP.
+- **US2 (T027?T035)**: after Foundational. It needs cohort rows to test with: use the US1 seed (T025) or fixtures created in tests.
+- **US3 (T036?T040)**: after US2, which provides `VisibilityFieldset` (T032)
+- **US5 (T041?T046)**: after Foundational. It uses `audienceTokensForGroup` (T010) and can run alongside US2 and US3.
+- **US4 (T047?T052)**: after Foundational. Independent of the others.
+- **Polish (T053?T056)**: after the chosen stories
 
 ### Parallel examples
 

@@ -4,6 +4,7 @@ import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
 import { visibilityTokensSchema } from "@/lib/db/program-labels";
 import { withRls } from "@/lib/db/rls";
+import { assertCohortTargets, isCohortTargetError } from "@/lib/db/visibility";
 import { parseOptionalFolderId, RESOURCE_SOURCES } from "@/lib/resources/labels";
 import {
   replaceResource as commitReplacement,
@@ -148,11 +149,12 @@ export async function updateResource(
       async (tx) => {
         const existing = await tx.resource.findUnique({
           where: { id: parsed.data.resourceId },
-          select: { id: true, deletedAt: true },
+          select: { id: true, deletedAt: true, visibility: true },
         });
         if (!existing || existing.deletedAt) {
           return null;
         }
+        await assertCohortTargets(tx, parsed.data.visibility, existing.visibility);
         await tx.resource.update({
           where: { id: existing.id },
           data: {
@@ -182,8 +184,11 @@ export async function updateResource(
       return { ok: false, error: GENERIC_EDIT_ERROR };
     }
     return { ok: true, id: updated };
-  } catch {
-    return { ok: false, error: GENERIC_EDIT_ERROR };
+  } catch (error) {
+    return {
+      ok: false,
+      error: isCohortTargetError(error) ? error.message : GENERIC_EDIT_ERROR,
+    };
   }
 }
 

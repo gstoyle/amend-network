@@ -53,8 +53,12 @@ export function registrationVisitorCopy(outcome?: RegistrationOutcome): string {
   return VISITOR_COPY;
 }
 
-export function isLaunchNetwork(network: { programRole: string }): boolean {
-  return isProgramNetworkRole(network.programRole);
+/** A cohort new members can join: programme-backed and not archived. */
+export function isLaunchNetwork(network: {
+  programRole: string;
+  archivedAt: Date | null;
+}): boolean {
+  return isProgramNetworkRole(network.programRole) && network.archivedAt === null;
 }
 
 function isUniqueViolation(error: unknown): boolean {
@@ -65,10 +69,15 @@ function isUniqueViolation(error: unknown): boolean {
   return /unique|23505/i.test(message);
 }
 
-export async function listLaunchNetworks(): Promise<{ id: string; name: string }[]> {
+export async function listLaunchNetworks(
+  options: { includeArchived?: boolean } = {},
+): Promise<{ id: string; name: string }[]> {
   return withRls({}, async (tx) => {
     const rows = await tx.network.findMany({
-      where: { programRole: { in: ["pathways", "lead"] } },
+      where: {
+        programRole: { in: ["pathways", "lead"] },
+        ...(options.includeArchived ? {} : { archivedAt: null }),
+      },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
     });
@@ -110,7 +119,7 @@ export async function registerSelf(input: RegisterInput): Promise<RegisterResult
       });
       const network = await tx.network.findFirst({
         where: { id: parsed.data.networkId },
-        select: { id: true, name: true, programRole: true },
+        select: { id: true, name: true, programRole: true, archivedAt: true },
       });
       if (!affiliation || !network || !isLaunchNetwork(network)) {
         throw new FormValidationError();

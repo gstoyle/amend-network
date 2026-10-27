@@ -13,9 +13,25 @@ type SeedUser = {
   adminRole: AdminRole;
   status: UserStatus;
   mfaEnabled: boolean;
-  networkName?: typeof IMMERSION_NETWORK_NAME | typeof LEAD_NETWORK_NAME;
-  extraNetworkNames?: Array<typeof IMMERSION_NETWORK_NAME | typeof LEAD_NETWORK_NAME>;
+  networkName?: SeedNetworkName;
+  extraNetworkNames?: SeedNetworkName[];
 };
+
+const NORWAY_SEPT_26 = "Norway Sept 26";
+const NORWAY_APRIL_27 = "Norway April 27";
+const ARCHIVED_COHORT = "Norway Spring 25";
+
+type SeedNetworkName =
+  | typeof IMMERSION_NETWORK_NAME
+  | typeof LEAD_NETWORK_NAME
+  | typeof NORWAY_SEPT_26
+  | typeof NORWAY_APRIL_27;
+
+const SEED_COHORTS: { name: string; archived: boolean }[] = [
+  { name: NORWAY_SEPT_26, archived: false },
+  { name: NORWAY_APRIL_27, archived: false },
+  { name: ARCHIVED_COHORT, archived: true },
+];
 
 const SEED_USERS: SeedUser[] = [
   {
@@ -71,6 +87,22 @@ const SEED_USERS: SeedUser[] = [
     mfaEnabled: false,
     networkName: IMMERSION_NETWORK_NAME,
     extraNetworkNames: [LEAD_NETWORK_NAME],
+  },
+  {
+    email: "norway-sept@local",
+    programRole: "pathways",
+    adminRole: "none",
+    status: "active",
+    mfaEnabled: false,
+    networkName: NORWAY_SEPT_26,
+  },
+  {
+    email: "norway-april@local",
+    programRole: "pathways",
+    adminRole: "none",
+    status: "active",
+    mfaEnabled: false,
+    networkName: NORWAY_APRIL_27,
   },
   {
     email: "pending@local",
@@ -575,9 +607,22 @@ async function seed(): Promise<void> {
     create: { id: randomUUID(), name: LEAD_NETWORK_NAME, programRole: "lead" },
   });
 
-  const networks = {
+  const cohortIds = new Map<string, string>();
+  for (const cohort of SEED_COHORTS) {
+    const archivedAt = cohort.archived ? new Date() : null;
+    const row = await migrator.network.upsert({
+      where: { name: cohort.name },
+      update: { archivedAt },
+      create: { id: randomUUID(), name: cohort.name, programRole: "pathways", archivedAt },
+    });
+    cohortIds.set(cohort.name, row.id);
+  }
+
+  const networks: Record<SeedNetworkName, string | undefined> = {
     [IMMERSION_NETWORK_NAME]: pathways.id,
     [LEAD_NETWORK_NAME]: lead.id,
+    [NORWAY_SEPT_26]: cohortIds.get(NORWAY_SEPT_26),
+    [NORWAY_APRIL_27]: cohortIds.get(NORWAY_APRIL_27),
   };
 
   for (const user of SEED_USERS) {

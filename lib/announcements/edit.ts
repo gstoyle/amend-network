@@ -2,6 +2,7 @@ import { writeAudit } from "@/lib/audit/write";
 import { requireRole } from "@/lib/auth/requireRole";
 import type { SessionClaims } from "@/lib/auth/types";
 import { withRls } from "@/lib/db/rls";
+import { assertCohortTargets, isCohortTargetError } from "@/lib/db/visibility";
 import {
   type AnnouncementWriteInput,
   type AnnouncementWriteResult,
@@ -50,47 +51,56 @@ export async function updateAnnouncement(
     return { ok: false, error: error instanceof Error ? error.message : "Could not save this announcement." };
   }
 
-  const updated = await withRls(
-    {
-      userId: claims.userId,
-      programRole: claims.programRole,
-      adminRole: claims.adminRole,
-      status: claims.status,
-    },
-    async (tx) => {
-      const existing = await tx.announcement.findUnique({ where: { id } });
-      if (!existing) {
-        return false;
-      }
-      await tx.announcement.update({
-        where: { id },
-        data: {
-          headline,
-          body,
-          visibility,
-          activatesAt,
-          expiresAt,
-          dismissible,
-          ctaPrimaryLabel: primary?.label ?? null,
-          ctaPrimaryUrl: primary?.url ?? null,
-          ctaSecondaryLabel: secondary?.label ?? null,
-          ctaSecondaryUrl: secondary?.url ?? null,
-        },
-      });
-      await writeAudit(tx, {
-        actorUserId: claims.userId,
-        actorRole: claims.adminRole,
-        action: "announcement_edited",
-        entityType: "announcement",
-        entityId: id,
-        ip: input.ip,
-        userAgent: input.userAgent,
-        metadata: { visibility },
-        severity: "info",
-      });
-      return true;
-    },
-  );
+  let updated: boolean;
+  try {
+    updated = await withRls(
+      {
+        userId: claims.userId,
+        programRole: claims.programRole,
+        adminRole: claims.adminRole,
+        status: claims.status,
+      },
+      async (tx) => {
+        const existing = await tx.announcement.findUnique({ where: { id } });
+        if (!existing) {
+          return false;
+        }
+        await assertCohortTargets(tx, visibility, existing.visibility);
+        await tx.announcement.update({
+          where: { id },
+          data: {
+            headline,
+            body,
+            visibility,
+            activatesAt,
+            expiresAt,
+            dismissible,
+            ctaPrimaryLabel: primary?.label ?? null,
+            ctaPrimaryUrl: primary?.url ?? null,
+            ctaSecondaryLabel: secondary?.label ?? null,
+            ctaSecondaryUrl: secondary?.url ?? null,
+          },
+        });
+        await writeAudit(tx, {
+          actorUserId: claims.userId,
+          actorRole: claims.adminRole,
+          action: "announcement_edited",
+          entityType: "announcement",
+          entityId: id,
+          ip: input.ip,
+          userAgent: input.userAgent,
+          metadata: { visibility },
+          severity: "info",
+        });
+        return true;
+      },
+    );
+  } catch (error) {
+    if (isCohortTargetError(error)) {
+      return { ok: false, error: error.message };
+    }
+    throw error;
+  }
   if (!updated) {
     return { ok: false, error: "Could not save this announcement." };
   }

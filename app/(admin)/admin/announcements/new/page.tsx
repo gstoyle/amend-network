@@ -14,6 +14,7 @@ import { createAnnouncement } from "@/lib/announcements/publish";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
+import { listCohortOptions } from "@/lib/cohorts/list";
 import { cn } from "@/lib/utils";
 
 async function loadClaims() {
@@ -67,6 +68,7 @@ export default async function NewAnnouncementPage() {
   } catch (error) {
     denyOrThrow(error);
   }
+  const cohorts = await listCohortOptions({ includeArchived: true });
   return (
     <div className="flex flex-col gap-6 lg:gap-8">
       <p>
@@ -83,7 +85,11 @@ export default async function NewAnnouncementPage() {
         title="New announcement"
       />
       <section className={formSurfaceClassName} aria-label="Announcement details">
-        <AnnouncementForm action={createAction} submitLabel="Publish announcement" />
+        <AnnouncementForm
+          action={createAction}
+          cohorts={cohorts}
+          submitLabel="Publish announcement"
+        />
       </section>
     </div>
   );

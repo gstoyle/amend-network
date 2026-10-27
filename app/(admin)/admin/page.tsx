@@ -24,6 +24,7 @@ const ADMIN_DESCRIPTIONS: Record<string, string> = {
   "/admin/users/pending": "Approve or deny access requests.",
   "/admin/users/invite": "Invite members individually or by CSV.",
   "/admin/users/affiliations": "Maintain the affiliation choices used at registration.",
+  "/admin/cohorts": "Group members into trip cohorts and manage who belongs.",
 };
 
 export default async function AdminPage() {

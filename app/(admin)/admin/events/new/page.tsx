@@ -10,6 +10,7 @@ import { formSurfaceClassName } from "@/components/ui/card";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
+import { listCohortOptions } from "@/lib/cohorts/list";
 import { EVENT_STAFF_ROLES, createEvent } from "@/lib/events/publish";
 import { cn } from "@/lib/utils";
 
@@ -63,6 +64,7 @@ export default async function NewEventPage() {
   } catch (error) {
     denyOrThrow(error);
   }
+  const cohorts = await listCohortOptions({ includeArchived: true });
   return (
     <div className="flex flex-col gap-6 lg:gap-8">
       <p>
@@ -79,7 +81,7 @@ export default async function NewEventPage() {
         title="New event"
       />
       <section className={formSurfaceClassName} aria-label="Event details">
-        <EventForm action={createAction} submitLabel="Publish event" />
+        <EventForm action={createAction} cohorts={cohorts} submitLabel="Publish event" />
       </section>
     </div>
   );

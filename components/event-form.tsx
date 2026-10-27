@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/card";
 import { checkboxClassName, controlClassName, Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { VISIBILITY_OPTIONS } from "@/lib/db/program-labels";
+import { VisibilityFieldset } from "@/components/visibility-fieldset";
+import type { CohortOption } from "@/lib/cohorts/list";
 import { cn } from "@/lib/utils";
 
 export type EventFormState = {
@@ -35,6 +36,7 @@ type EventFormProps = {
   submitLabel: string;
   notifyRsvps?: boolean;
   capacityConfirm?: boolean;
+  cohorts: readonly CohortOption[];
 };
 
 export function EventForm({
@@ -43,6 +45,7 @@ export function EventForm({
   submitLabel,
   notifyRsvps = false,
   capacityConfirm = false,
+  cohorts,
 }: EventFormProps) {
   const [state, formAction, pending] = useActionState(action, {});
   return (
@@ -68,23 +71,7 @@ export function EventForm({
           rows={5}
         />
       </div>
-      <fieldset className={cn(formInsetClassName, "lg:col-span-2")}>
-        <legend className="text-sm font-medium text-foreground">Visibility</legend>
-        <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1">
-          {VISIBILITY_OPTIONS.map((option) => (
-            <label className="flex min-h-touch items-center gap-2 text-sm text-foreground" key={option.value}>
-              <input
-                className={checkboxClassName}
-                defaultChecked={initial?.visibility.includes(option.value) ?? option.value === "all_authenticated"}
-                name="visibility"
-                type="checkbox"
-                value={option.value}
-              />
-              {option.label}
-            </label>
-          ))}
-        </div>
-      </fieldset>
+      <VisibilityFieldset className="lg:col-span-2" cohorts={cohorts} selected={initial?.visibility ?? ["all_authenticated"]} />
       <div className={formFieldClassName}>
         <Label htmlFor="startsAt">Starts</Label>
         <Input

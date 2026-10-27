@@ -26,6 +26,7 @@ const rows: Record<Table, Row[]> = {
 let memberA = "";
 let memberC = "";
 let leadMember = "";
+let memberBoth = "";
 
 function literal(visibility: string[]): string {
   return `{${visibility.join(",")}}`;
@@ -71,7 +72,10 @@ async function insertRow(table: Table, visibility: string[], createdBy: string):
     case "forum_categories":
       await migrator.$executeRaw`
         INSERT INTO forum_categories (id, name, slug, description, visibility, sort_order)
-        VALUES (${id}::uuid, ${title}, ${title}, ${"Description"}, ${tokens}::text[], 999)
+        VALUES (
+          ${id}::uuid, ${`cohort-vis ${id.slice(0, 8)}`}, ${`cohort-vis-${id.slice(0, 8)}`},
+          ${"Description"}, ${tokens}::text[], 999
+        )
       `;
       break;
     default: {
@@ -133,6 +137,12 @@ describe("cohort content visibility", () => {
       programRole: "lead",
       primaryCohortId: leadCohort,
     });
+    memberBoth = await createCohortMember(fixtures, {
+      label: "both",
+      programRole: "pathways",
+      primaryCohortId: cohortC,
+      extraCohortIds: [cohortA],
+    });
 
     const cases: Array<[string, string[]]> = [
       ["VIS-1", [`cohort:${cohortA}`]],
@@ -140,6 +150,7 @@ describe("cohort content visibility", () => {
       ["VIS-3", ["pathways"]],
       ["VIS-4", [`cohort:${archived}`]],
       ["VIS-5", [`cohort:${randomUUID()}`]],
+      ["VIS-6", [`cohort:${cohortC}`]],
     ];
     for (const table of TABLES) {
       for (const [label, visibility] of cases) {
@@ -185,7 +196,7 @@ describe("cohort content visibility", () => {
       ).toEqual(["VIS-1", "VIS-2", "VIS-3", "VIS-4"]);
     });
 
-    it("member of cohort C sees A+C and the programme only", async () => {
+    it("member of cohort C sees C, A+C, and the programme only", async () => {
       expect(
         await visibleLabels(table, {
           userId: memberC,
@@ -193,7 +204,18 @@ describe("cohort content visibility", () => {
           adminRole: "none",
           status: "active",
         }),
-      ).toEqual(["VIS-2", "VIS-3"]);
+      ).toEqual(["VIS-2", "VIS-3", "VIS-6"]);
+    });
+
+    it("member of cohorts A and C sees the union of both", async () => {
+      expect(
+        await visibleLabels(table, {
+          userId: memberBoth,
+          programRole: "pathways",
+          adminRole: "none",
+          status: "active",
+        }),
+      ).toEqual(["VIS-1", "VIS-2", "VIS-3", "VIS-6"]);
     });
 
     it("a LEAD member sees none of the GLE cohort rows", async () => {
@@ -217,8 +239,8 @@ describe("cohort content visibility", () => {
       // Event and forum SELECT already bypass for moderators, so the unknown cohort shows there too.
       const expected =
         table === "events" || table === "forum_categories"
-          ? ["VIS-1", "VIS-2", "VIS-3", "VIS-4", "VIS-5"]
-          : ["VIS-1", "VIS-2", "VIS-3", "VIS-4"];
+          ? ["VIS-1", "VIS-2", "VIS-3", "VIS-4", "VIS-5", "VIS-6"]
+          : ["VIS-1", "VIS-2", "VIS-3", "VIS-4", "VIS-6"];
       expect(labels).toEqual(expected);
     });
 
@@ -230,7 +252,7 @@ describe("cohort content visibility", () => {
           adminRole: "admin",
           status: "active",
         }),
-      ).toEqual(["VIS-1", "VIS-2", "VIS-3", "VIS-4", "VIS-5"]);
+      ).toEqual(["VIS-1", "VIS-2", "VIS-3", "VIS-4", "VIS-5", "VIS-6"]);
     });
   });
 

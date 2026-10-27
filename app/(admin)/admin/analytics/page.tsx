@@ -26,7 +26,7 @@ export default async function AdminAnalyticsPage({
     }
     throw error;
   }
-  const networks = await listLaunchNetworks();
+  const networks = await listLaunchNetworks({ includeArchived: true });
 
   return (
     <div className="flex flex-col gap-6 lg:gap-8">

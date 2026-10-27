@@ -10,6 +10,7 @@ import { formSurfaceClassName } from "@/components/ui/card";
 import { clientIpFromHeaders } from "@/lib/auth/credentials";
 import { AuthDeniedError, requireRole } from "@/lib/auth/requireRole";
 import { loadSession } from "@/lib/auth/session";
+import { listCohortOptions } from "@/lib/cohorts/list";
 import { listAdminFolders } from "@/lib/resources/folders";
 import { RESOURCE_TOPIC_SUGGESTIONS } from "@/lib/resources/labels";
 import { mintIngestSlots, publishResource } from "@/lib/resources/publish";
@@ -102,6 +103,7 @@ export default async function AdminResourceNewPage() {
     throw error;
   }
 
+  const cohorts = await listCohortOptions({ includeArchived: true });
   return (
     <div className="flex flex-col gap-6 lg:gap-8">
       <p>
@@ -119,6 +121,7 @@ export default async function AdminResourceNewPage() {
       />
       <section className={formSurfaceClassName} aria-label="Resource details">
         <ResourceForm
+          cohorts={cohorts}
           folders={folders.map((folder) => ({
             id: folder.id,
             name: folder.name,

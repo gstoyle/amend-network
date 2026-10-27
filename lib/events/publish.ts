@@ -4,6 +4,7 @@ import { writeAudit } from "@/lib/audit/write";
 import { requireRole } from "@/lib/auth/requireRole";
 import type { AdminRole, SessionClaims } from "@/lib/auth/types";
 import { withRls } from "@/lib/db/rls";
+import { assertCohortTargets, isCohortTargetError } from "@/lib/db/visibility";
 import {
   assertEventDescription,
   assertEventTitle,
@@ -111,6 +112,23 @@ export async function createEvent(
     return { ok: false, error: error instanceof Error ? error.message : "Could not save this event." };
   }
   const id = randomUUID();
+  try {
+    await insertEvent(claims, id, fields, input);
+  } catch (error) {
+    if (isCohortTargetError(error)) {
+      return { ok: false, error: error.message };
+    }
+    throw error;
+  }
+  return { ok: true, id };
+}
+
+async function insertEvent(
+  claims: SessionClaims,
+  id: string,
+  fields: ReturnType<typeof parseEventWriteFields>,
+  input: EventWriteInput,
+): Promise<void> {
   await withRls(
     {
       userId: claims.userId,
@@ -119,6 +137,7 @@ export async function createEvent(
       status: claims.status,
     },
     async (tx) => {
+      await assertCohortTargets(tx, fields.visibility);
       await tx.event.create({
         data: {
           id,
@@ -149,7 +168,6 @@ export async function createEvent(
       });
     },
   );
-  return { ok: true, id };
 }
 
 export type AdminEvent = {

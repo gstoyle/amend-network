@@ -112,6 +112,15 @@ const ADMIN_ENTRIES: { destination: Destination; allowed: AdminRole[] }[] = [
     },
     allowed: CONTENT_ADMIN_ROLES,
   },
+  {
+    destination: {
+      href: "/admin/cohorts",
+      label: "Cohorts",
+      iconKey: "account",
+      match: "prefix",
+    },
+    allowed: CONTENT_ADMIN_ROLES,
+  },
 ];
 
 /**
