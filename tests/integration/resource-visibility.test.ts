@@ -135,7 +135,7 @@ describe("member resource visibility (US2 / FR-006–FR-010)", () => {
   it("Independent Test: seeded visibilities; list/detail by role; guessed ids; RLS; moderator cannot publish", async () => {
     const seedTitles = {
       shared: "Seed shared PDF",
-      pathways: "Seed Pathways PDF",
+      pathways: "Seed Global Learning PDF",
       lead: "Seed LEAD PDF",
       both: "Seed both-program PDF",
       withdrawn: "Seed withdrawn PDF",

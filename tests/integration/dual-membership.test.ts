@@ -79,7 +79,7 @@ describe("dual programme membership session", () => {
 
     const resources = await listResources(claims as SessionClaims);
     const resourceTitles = resources.map((row) => row.title);
-    expect(resourceTitles).toContain("Seed Pathways PDF");
+    expect(resourceTitles).toContain("Seed Global Learning PDF");
     expect(resourceTitles).toContain("Seed LEAD PDF");
 
     const identity = await loadShellIdentity(claims);

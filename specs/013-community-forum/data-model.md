@@ -13,7 +13,7 @@
 | created_at | timestamptz |
 | created_by | uuid nullable |
 
-GIN on visibility. Seed: `pathways-welcome` (pathways), `lead-welcome` (lead), `all-members-general` (all_authenticated).
+GIN on visibility. Seed: `pathways-welcome` (pathways; renamed to `global-learning-welcome`, *Global Learning Experiences — Welcome*, in migration `20261028120000`), `lead-welcome` (lead), `all-members-general` (all_authenticated).
 
 ## ForumThread
 

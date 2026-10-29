@@ -152,7 +152,7 @@ async function seedResources(): Promise<void> {
     withdrawn: boolean;
   }[] = [
     { title: "Seed shared PDF", visibility: ["all_authenticated"], withdrawn: false },
-    { title: "Seed Pathways PDF", visibility: ["pathways"], withdrawn: false },
+    { title: "Seed Global Learning PDF", visibility: ["pathways"], withdrawn: false },
     { title: "Seed LEAD PDF", visibility: ["lead"], withdrawn: false },
     { title: "Seed both-program PDF", visibility: ["pathways", "lead"], withdrawn: false },
     { title: "Seed withdrawn PDF", visibility: ["all_authenticated"], withdrawn: true },
@@ -230,21 +230,21 @@ async function seedAnnouncements(): Promise<void> {
       deletedAt: null,
     },
     {
-      headline: "Seed Pathways banner A",
+      headline: "Seed Global Learning banner A",
       visibility: ["pathways"],
       activatesAt: new Date(now - 3 * 60_000),
       expiresAt: new Date(now + 7 * 24 * 60 * 60_000),
       deletedAt: null,
     },
     {
-      headline: "Seed Pathways banner B",
+      headline: "Seed Global Learning banner B",
       visibility: ["pathways"],
       activatesAt: new Date(now - 2 * 60_000),
       expiresAt: new Date(now + 7 * 24 * 60 * 60_000),
       deletedAt: null,
     },
     {
-      headline: "Seed Pathways banner C",
+      headline: "Seed Global Learning banner C",
       visibility: ["pathways"],
       activatesAt: new Date(now - 1 * 60_000),
       expiresAt: new Date(now + 7 * 24 * 60 * 60_000),
@@ -338,7 +338,7 @@ async function seedEvents(): Promise<void> {
       capacity: null,
     },
     {
-      title: "Seed Pathways event",
+      title: "Seed Global Learning event",
       visibility: ["pathways"],
       startsAt: new Date(now + 3 * 24 * 60 * 60_000),
       endsAt: new Date(now + 3 * 24 * 60 * 60_000 + 60 * 60_000),
@@ -584,6 +584,29 @@ async function seedDirectory(): Promise<void> {
   });
 }
 
+/** Seed content once said "Pathways"; rename in place so re-seeding does not duplicate it. */
+async function renameLegacySeedContent(): Promise<void> {
+  const rename = (title: string) => title.replace("Seed Pathways ", "Seed Global Learning ");
+  const oldTitles = ["Seed Pathways PDF", "Seed Pathways event"];
+  const oldHeadlines = ["Seed Pathways banner A", "Seed Pathways banner B", "Seed Pathways banner C"];
+  for (const title of oldTitles) {
+    await migrator.resource.updateMany({
+      where: { title },
+      data: { title: rename(title), previewText: `Preview for ${rename(title)}` },
+    });
+    await migrator.event.updateMany({
+      where: { title },
+      data: { title: rename(title), description: `Body for ${rename(title)}` },
+    });
+  }
+  for (const headline of oldHeadlines) {
+    await migrator.announcement.updateMany({
+      where: { headline },
+      data: { headline: rename(headline), body: `Body for ${rename(headline)}` },
+    });
+  }
+}
+
 async function seed(): Promise<void> {
   const passwordHash = await hashPassword(env().SEED_PASSWORD);
   const mfaSecret = env().SEED_MFA_SECRET
@@ -692,6 +715,7 @@ async function seed(): Promise<void> {
     });
   }
 
+  await renameLegacySeedContent();
   await seedResources();
   await seedAnnouncements();
   await seedEvents();
